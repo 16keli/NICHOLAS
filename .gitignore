@@ -1,3 +1,18 @@
+#eclipse
+.project
+.classpath
+.settings/
+.metadata
+*.launch
+org.*
+bin
+
+# Resource Files
+*.m4a
+*.mp3
+*.png
+*.wav
+
 *.class
 
 # Mobile Tools for Java (J2ME)
