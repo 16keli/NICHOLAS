@@ -18,6 +18,17 @@ public class ConnectionList {
 	 */
 	protected List<ConnectionNIO> connections = Collections.synchronizedList(new ArrayList<ConnectionNIO>());
 	
+	private Thread readThread;
+	
+	private Thread writeThread;
+	
+	public ConnectionList() {
+		this.readThread = new ThreadConnectionListRead(this);
+		this.writeThread = new ThreadConnectionListWrite(this);
+		this.readThread.start();
+		this.writeThread.start();
+	}
+	
 	/**
 	 * Adds the given {@code ConnectionNIO} to the list
 	 * 

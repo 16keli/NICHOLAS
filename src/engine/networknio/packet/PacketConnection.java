@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import engine.client.Client;
 import engine.server.Server;
 
-public class PacketConnection extends PacketNIOTCP {
+public class PacketConnection extends PacketTCP {
 	
 	public short pnum;
 	

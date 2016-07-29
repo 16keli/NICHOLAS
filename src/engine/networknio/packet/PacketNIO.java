@@ -16,7 +16,7 @@ import engine.server.Server;
  * works! For example, {@link engine.example.PacketPlayerInput#PacketPlayerInput()}
  * <p>
  * Thanks to the Java NIO API, (and me deciding to not be super lazy), TCP and UDP protocols are now united
- * into a single Superclass for both. The subclasses for {@link PacketNIOTCP TCP} and {@link PacketNIOUDP UDP}
+ * into a single Superclass for both. The subclasses for {@link PacketTCP TCP} and {@link PacketUDP UDP}
  * serve merely as identifiers, nothing more.
  * 
  * @author Kevin
@@ -45,6 +45,15 @@ public abstract class PacketNIO {
 	
 	// Registers the default game engine packets
 	static {
+		//Static-sized packets
+		registerPacket(PacketPing.class, 8);
+		registerPacket(PacketConnection.class, 4);
+		registerPacket(PacketEntityPosition.class, 20);
+		
+		//Dynamic-sized packets
+		registerDynamicSizePacket(PacketChat.class);
+		registerDynamicSizePacket(PacketGame.class);
+		registerDynamicSizePacket(PacketObject.class);
 	}
 	
 	/**

@@ -14,7 +14,8 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.VolatileImage;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Socket;
+import java.net.InetSocketAddress;
+import java.nio.channels.SocketChannel;
 
 import javax.swing.JFrame;
 
@@ -27,12 +28,10 @@ import engine.client.graphics.Screen;
 import engine.client.graphics.sprite.Sprite;
 import engine.client.menu.Menu;
 import engine.event.EventBus;
-import engine.event.game.ConnectionEstablishedEvent;
-import engine.network.Connection;
-import engine.network.packet.Packet;
-import engine.network.packet.PacketChat;
-import engine.network.packet.PacketPing;
-import engine.network.packet.udp.PacketUDP;
+import engine.networknio.ConnectionNIO;
+import engine.networknio.packet.PacketChat;
+import engine.networknio.packet.PacketNIO;
+import engine.networknio.packet.PacketPing;
 
 /**
  * Represents the game client, the component of gameplay that the player interacts with.
@@ -119,12 +118,12 @@ public abstract class Client extends Canvas {
 	/**
 	 * The {@code Connection} between the {@code Client} and {@code Server}
 	 */
-	protected Connection connection;
+	public ConnectionNIO connection;
 	
 	/**
 	 * The {@code Socket} between the {@code Client} and {@code Server}
 	 */
-	protected Socket socket;
+	protected SocketChannel socket;
 	
 	/**
 	 * The cursor
@@ -255,7 +254,7 @@ public abstract class Client extends Canvas {
 	 */
 	public boolean connect(String host, int port) {
 		try {
-			this.socket = new Socket(host, port);
+			this.socket = SocketChannel.open(new InetSocketAddress(host, port));
 			return connect();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -274,7 +273,7 @@ public abstract class Client extends Canvas {
 	 */
 	public boolean connect(InetAddress address, int port) {
 		try {
-			this.socket = new Socket(address, port);
+			this.socket = SocketChannel.open(new InetSocketAddress(address, port));
 			return connect();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -293,11 +292,12 @@ public abstract class Client extends Canvas {
 //		if (!this.socket.getInetAddress().isReachable(10000)) {
 //			return false;
 //		}
-		this.connection = new Connection(this.socket, "Client-Side");
+		this.connection = new ConnectionNIO(this.socket, "Client-Side", true);
 		this.player = this.game.getNewPlayerInstance();
 		this.player.name = desiredUsername;
-		this.sendPacket(new PacketChat(this.player));
-		Client.CLIENT_BUS.post(new ConnectionEstablishedEvent(this.game, this.connection));
+		this.connection.addToSendQueue(new PacketChat(this.player));
+		//TODO: Readd this
+//		Client.CLIENT_BUS.post(new ConnectionEstablishedEvent(this.game, this.connection));
 		return true;
 	}
 	
@@ -414,7 +414,7 @@ public abstract class Client extends Canvas {
 			if (this.connection != null) {
 				this.processReceivedPackets();
 				if (Engine.getGameTimeClient() % PacketPing.PING_PERIOD == 0) {
-					this.sendPacket(new PacketPing(System.currentTimeMillis()));
+					this.connection.addToSendQueue(new PacketPing(System.currentTimeMillis()));
 					System.out.println("Ping: " + this.connection.ping + " ms");
 				}
 			}
@@ -426,26 +426,6 @@ public abstract class Client extends Canvas {
 	}
 	
 	/**
-	 * Schedules a {@code Packet} for sending to the server
-	 * 
-	 * @param p
-	 *            The {@code Packet} to send
-	 */
-	public void sendPacket(Packet p) {
-		this.connection.addToSendQueue(p);
-	}
-	
-	/**
-	 * Schedules a {@code PacketUDP} for sending to the server
-	 * 
-	 * @param p
-	 *            The {@code PacketUDP} to send
-	 */
-	public void sendUDPPacket(PacketUDP p) {
-		this.connection.addUDPToSendQueue(p);
-	}
-	
-	/**
 	 * Process all {@code Packet}s received from the server.
 	 * <p>
 	 * May result in a bunch of code, depending on how many {@code Packet}s are flying around.
@@ -454,13 +434,9 @@ public abstract class Client extends Canvas {
 	 *            A {@code LinkedList} of {@code Packet}s to process
 	 */
 	protected void processReceivedPackets() {
-		Packet p;
+		PacketNIO p;
 		while ((p = this.connection.getReadPacket()) != null) {
 			p.processClient(this);
-		}
-		PacketUDP udp;
-		while ((udp = this.connection.getReadUDPPacket()) != null) {
-			udp.processClient(this);
 		}
 	}
 	

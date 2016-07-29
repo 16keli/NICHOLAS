@@ -1,8 +1,8 @@
 package engine.example;
 
 import engine.Game;
-import engine.network.Connection;
-import engine.network.synchro.PacketGame;
+import engine.networknio.ConnectionNIO;
+import engine.networknio.packet.PacketGame;
 import engine.server.Server;
 
 public class PongServer extends Server {
@@ -17,7 +17,7 @@ public class PongServer extends Server {
 	}
 
 	@Override
-	public void synchronizeClientGameData(Connection c) {
+	public void synchronizeClientGameData(ConnectionNIO c) {
 		c.addToSendQueue(new PacketGame(this.game));
 	}
 

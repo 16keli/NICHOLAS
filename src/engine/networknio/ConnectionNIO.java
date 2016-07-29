@@ -13,8 +13,8 @@ import java.util.logging.Logger;
 
 import engine.network.packet.Packet;
 import engine.networknio.packet.PacketNIO;
-import engine.networknio.packet.PacketNIOTCP;
-import engine.networknio.packet.PacketNIOUDP;
+import engine.networknio.packet.PacketTCP;
+import engine.networknio.packet.PacketUDP;
 
 /**
  * The Connection between the Client and Server sides
@@ -77,6 +77,8 @@ public class ConnectionNIO {
 	
 	public long ping;
 	
+	public boolean threadsActive;
+	
 	/**
 	 * Packets read and awaiting processing
 	 */
@@ -87,15 +89,23 @@ public class ConnectionNIO {
 	 */
 	private List<PacketNIO> sendQueue = Collections.synchronizedList(new LinkedList<PacketNIO>());
 	
+	public ConnectionNIO(SocketChannel s, String source) throws IOException {
+		this(s, source, false);
+	}
+	
 	/**
 	 * Creates a new {@code Connection} ready to send and receive data
 	 * 
 	 * @param s
 	 *            The {@code SocketChannel} to connect to
+	 * @param source
+	 *            The name for the source
+	 * @param threads
+	 *            Whether to start the own threads
 	 * @throws IOException
 	 *             If an I/O stream cannot be opened
 	 */
-	public ConnectionNIO(SocketChannel s, String source) throws IOException {
+	public ConnectionNIO(SocketChannel s, String source, boolean threads) throws IOException {
 		this.sendQueueLock = new Object();
 		this.sourceName = source;
 		this.legacySocket = s.socket();
@@ -106,15 +116,20 @@ public class ConnectionNIO {
 		this.udpChannel.bind(legacySocket.getLocalSocketAddress());
 		this.udpChannel.connect(this.sadd);
 		
-		this.readThread = new ThreadConnectionNIORead(this);
-		this.writeThread = new ThreadConnectionNIOWrite(this);
 		this.logger = Logger.getLogger("engine.connection." + this.sourceName);
 		this.logger.info("Local Address:\t" + legacySocket.getLocalSocketAddress());
 		this.logger.info("Remote Address:\t" + this.sadd);
-		this.logger.info("Packet Read Thread ID:\t" + this.readThread.getId());
-		this.logger.info("Packet Write Thread ID:\t" + this.writeThread.getId());
-		this.readThread.start();
-		this.writeThread.start();
+		
+		if (threads) {
+			this.readThread = new ThreadConnectionNIORead(this);
+			this.writeThread = new ThreadConnectionNIOWrite(this);
+			this.logger.info("Packet Read Thread ID:\t" + this.readThread.getId());
+			this.logger.info("Packet Write Thread ID:\t" + this.writeThread.getId());
+			this.readThread.start();
+			this.writeThread.start();
+		}
+		
+		this.threadsActive = threads;
 	}
 	
 	/**
@@ -299,9 +314,9 @@ public class ConnectionNIO {
 	 * @return
 	 */
 	public WritableByteChannel getAppropriateWriteChannel(PacketNIO p) {
-		if (p instanceof PacketNIOTCP) {
+		if (p instanceof PacketTCP) {
 			return this.tcpChannel;
-		} else if (p instanceof PacketNIOUDP) {
+		} else if (p instanceof PacketUDP) {
 			return this.udpChannel;
 		} else {
 			return null;

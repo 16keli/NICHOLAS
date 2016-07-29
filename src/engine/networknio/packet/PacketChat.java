@@ -9,7 +9,7 @@ import engine.event.game.ChatEvent;
 import engine.server.Server;
 
 
-public class PacketChat extends PacketNIOTCP {
+public class PacketChat extends PacketTCP {
 	
 	public short pnum;
 	

@@ -10,7 +10,7 @@ import engine.physics.entity.EventEntityPosition;
 import engine.server.Server;
 
 
-public class PacketEntityPosition extends PacketNIOUDP {
+public class PacketEntityPosition extends PacketUDP {
 	
 	public int id;
 	

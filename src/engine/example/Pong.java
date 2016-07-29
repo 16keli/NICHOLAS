@@ -5,7 +5,7 @@ import engine.Game;
 import engine.Player;
 import engine.client.Client;
 import engine.event.SubscribeEvent;
-import engine.network.packet.Packet;
+import engine.networknio.packet.PacketNIO;
 import engine.server.Server;
 
 /**
@@ -35,8 +35,8 @@ public class Pong extends Game {
 	}
 	
 	static {
-		Packet.registerPacket(PacketPlayerInput.class);
-		Packet.registerPacket(PacketPlayerScore.class);
+		PacketNIO.registerPacket(PacketPlayerInputNIO.class, 3);
+		PacketNIO.registerPacket(PacketPlayerScoreNIO.class, 6);
 	}
 	
 	public PongPlayer p1;
@@ -59,34 +59,34 @@ public class Pong extends Game {
 		if (!c.menuOpen()) {
 			if (c.input.up.down && !c.input.down.down) {
 				if (prev1 != -1) {
-					c.sendPacket(new PacketPlayerInput(c.player.number, -1));
+					c.connection.addToSendQueue(new PacketPlayerInputNIO(c.player.number, -1));
 					prev1 = -1;
 				}
 			} else if (c.input.down.down && !c.input.up.down) {
 				if (prev1 != 1) {
-					c.sendPacket(new PacketPlayerInput(c.player.number, 1));
+					c.connection.addToSendQueue(new PacketPlayerInputNIO(c.player.number, 1));
 					prev1 = 1;
 				}
 			} else {
 				if (prev1 != 0) {
-					c.sendPacket(new PacketPlayerInput(c.player.number, 0));
+					c.connection.addToSendQueue(new PacketPlayerInputNIO(c.player.number, 0));
 					prev1 = 0;
 				}
 			}
 			if (p2exists ) {
 				if (c.input.up2.down && !c.input.down2.down) {
 					if (prev2 != -1) {
-						c.sendPacket(new PacketPlayerInput((byte) 1, -1));
+						c.connection.addToSendQueue(new PacketPlayerInputNIO((short) 1, -1));
 						prev2 = -1;
 					}
 				} else if (c.input.down2.down && !c.input.up2.down) {
 					if (prev2 != 1) {
-						c.sendPacket(new PacketPlayerInput((byte) 1, 1));
+						c.connection.addToSendQueue(new PacketPlayerInputNIO((short) 1, 1));
 						prev2 = 1;
 					}
 				} else {
 					if (prev2 != 0) {
-						c.sendPacket(new PacketPlayerInput((byte) 1, 0));
+						c.connection.addToSendQueue(new PacketPlayerInputNIO((short) 1, 0));
 						prev2 = 0;
 					}
 				}
@@ -108,7 +108,7 @@ public class Pong extends Game {
 	
 	@SubscribeEvent
 	public void onScore(EventPlayerScore e) {
-		server.sendPacketAll(new PacketPlayerScore(e.pnum, e.score));
+		server.connections.sendPacketAll(new PacketPlayerScoreNIO(e.pnum, e.score));
 	}
 	
 	@Override

@@ -12,7 +12,7 @@ import engine.level.Level;
 import engine.server.Server;
 
 
-public class PacketGame extends PacketNIOTCP {
+public class PacketGame extends PacketTCP {
 	
 	public Level level;
 	

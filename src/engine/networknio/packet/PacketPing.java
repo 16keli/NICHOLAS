@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import engine.client.Client;
 import engine.server.Server;
 
-public class PacketPing extends PacketNIOTCP {
+public class PacketPing extends PacketTCP {
 	
 	/**
 	 * The Period in ticks between ping evaluations
