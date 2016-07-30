@@ -5,7 +5,6 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SocketChannel;
-import java.nio.channels.WritableByteChannel;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +13,9 @@ import java.util.logging.Logger;
 import engine.network.packet.Packet;
 import engine.networknio.packet.PacketNIO;
 import engine.networknio.packet.PacketTCP;
+import engine.networknio.packet.PacketTCP.TCPChannelWrapper;
 import engine.networknio.packet.PacketUDP;
+import engine.networknio.packet.PacketUDP.UDPChannelWrapper;
 
 /**
  * The Connection between the Client and Server sides
@@ -67,7 +68,7 @@ public class ConnectionNIO {
 	/**
 	 * The remote {@code SocketAddress}
 	 */
-	private SocketAddress sadd;
+	private SocketAddress remoteAddress;
 	
 	private boolean running = true;
 	
@@ -88,6 +89,16 @@ public class ConnectionNIO {
 	 * Packets awaiting sending
 	 */
 	private List<PacketNIO> sendQueue = Collections.synchronizedList(new LinkedList<PacketNIO>());
+
+	/**
+	 * ChannelWrapper around the TCP Channel
+	 */
+	private ChannelWrapper tcpChannelWrapper;
+
+	/**
+	 * ChannelWrapper around the UDP Channel
+	 */
+	private ChannelWrapper udpChannelWrapper;
 	
 	public ConnectionNIO(SocketChannel s, String source) throws IOException {
 		this(s, source, false);
@@ -109,16 +120,19 @@ public class ConnectionNIO {
 		this.sendQueueLock = new Object();
 		this.sourceName = source;
 		this.legacySocket = s.socket();
-		this.sadd = this.legacySocket.getRemoteSocketAddress();
+		this.remoteAddress = this.legacySocket.getRemoteSocketAddress();
 		
-		this.tcpChannel.bind(legacySocket.getLocalSocketAddress());
+		this.tcpChannel = s;
 		this.udpChannel = DatagramChannel.open();
 		this.udpChannel.bind(legacySocket.getLocalSocketAddress());
-		this.udpChannel.connect(this.sadd);
+		this.udpChannel.connect(this.remoteAddress);
+		
+		this.tcpChannelWrapper = new TCPChannelWrapper(this.tcpChannel);
+		this.udpChannelWrapper = new UDPChannelWrapper(this.udpChannel);
 		
 		this.logger = Logger.getLogger("engine.connection." + this.sourceName);
 		this.logger.info("Local Address:\t" + legacySocket.getLocalSocketAddress());
-		this.logger.info("Remote Address:\t" + this.sadd);
+		this.logger.info("Remote Address:\t" + this.remoteAddress);
 		
 		if (threads) {
 			this.readThread = new ThreadConnectionNIORead(this);
@@ -169,7 +183,7 @@ public class ConnectionNIO {
 		try {
 			PacketNIO p = getSendPacket();
 			if (p != null) {
-				PacketNIO.writePacket(this.getAppropriateWriteChannel(p), p);
+				PacketNIO.writePacket(this.getAppropriateWrapper(p), this.remoteAddress, p);
 				return true;
 			}
 		} catch (Exception e) {
@@ -230,12 +244,12 @@ public class ConnectionNIO {
 	 */
 	private boolean readPacket() {
 		try {
-			PacketNIO tcp = PacketNIO.readPacket(this.tcpChannel);
+			PacketNIO tcp = PacketNIO.readPacket(this.tcpChannelWrapper);
 			if (tcp != null) {
 				this.readPackets.add(tcp);
 				return true;
 			}
-			PacketNIO udp = PacketNIO.readPacket(this.udpChannel);
+			PacketNIO udp = PacketNIO.readPacket(this.udpChannelWrapper);
 			if (udp != null) {
 				this.readPackets.add(udp);
 				return true;
@@ -261,7 +275,7 @@ public class ConnectionNIO {
 				e.printStackTrace();
 			}
 			
-			this.sadd = null;
+			this.remoteAddress = null;
 			
 			this.wakeThreads();
 		}
@@ -308,16 +322,16 @@ public class ConnectionNIO {
 	}
 	
 	/**
-	 * Gets the appropriate Channel for the given {@code PacketNIO}
+	 * Gets the appropriate {@code ChannelWrapper} for the given {@code PacketNIO}
 	 * 
 	 * @param p
 	 * @return
 	 */
-	public WritableByteChannel getAppropriateWriteChannel(PacketNIO p) {
+	public ChannelWrapper getAppropriateWrapper(PacketNIO p) {
 		if (p instanceof PacketTCP) {
-			return this.tcpChannel;
+			return this.tcpChannelWrapper;
 		} else if (p instanceof PacketUDP) {
-			return this.udpChannel;
+			return this.udpChannelWrapper;
 		} else {
 			return null;
 		}
@@ -329,7 +343,7 @@ public class ConnectionNIO {
 	 * @return
 	 */
 	public SocketAddress getSocketAddress() {
-		return this.sadd;
+		return this.remoteAddress;
 	}
 	
 	/**
@@ -341,6 +355,17 @@ public class ConnectionNIO {
 	 */
 	public void setPing(long l) {
 		this.ping = l;
+	}
+
+	/**
+	 * Disconnects the connection by stopping the threads and closing the channels
+	 * @throws IOException
+	 */
+	public void disconnect() throws IOException {
+		this.wakeThreads();
+		this.tcpChannel.close();
+		this.udpChannel.close();
+		
 	}
 	
 }

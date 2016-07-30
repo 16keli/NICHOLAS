@@ -26,7 +26,7 @@ public abstract class Server {
 	/**
 	 * The connection listener thread
 	 */
-	private ServerListenThread listener;
+	private ServerNIOListenThread listener;
 	
 	/**
 	 * The Game instance
@@ -68,6 +68,7 @@ public abstract class Server {
 	public Server(Game g, int port, int minConnects) {
 		this.game = g;
 		this.minConnects = minConnects;
+		this.connections = new ConnectionList();
 		Server.SERVER_BUS.register(this);
 		this.startListenThread(port);
 	}
@@ -80,9 +81,8 @@ public abstract class Server {
 	 */
 	public void startListenThread(int port) {
 		try {
-			listener = new ServerListenThread(this, port);
+			listener = new ServerNIOListenThread(this, port);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		listener.start();
@@ -101,9 +101,6 @@ public abstract class Server {
 				p.processServer(i, this);
 			}
 		}
-//		for (Connection c : this.connections) {
-//			c.wakeThreads();
-//		}
 		if (minConnects > this.connections.getList().size()) {
 			// Not enough connections
 		} else {

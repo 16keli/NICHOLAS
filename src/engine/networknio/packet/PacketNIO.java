@@ -1,12 +1,12 @@
 package engine.networknio.packet;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.util.HashMap;
 
 import engine.client.Client;
+import engine.networknio.ChannelWrapper;
 import engine.server.Server;
 
 /**
@@ -16,8 +16,8 @@ import engine.server.Server;
  * works! For example, {@link engine.example.PacketPlayerInput#PacketPlayerInput()}
  * <p>
  * Thanks to the Java NIO API, (and me deciding to not be super lazy), TCP and UDP protocols are now united
- * into a single Superclass for both. The subclasses for {@link PacketTCP TCP} and {@link PacketUDP UDP}
- * serve merely as identifiers, nothing more.
+ * into a single Superclass for both. The subclasses for {@link PacketTCP TCP} and {@link PacketUDP UDP} serve
+ * merely as identifiers, nothing more.
  * 
  * @author Kevin
  */
@@ -45,12 +45,12 @@ public abstract class PacketNIO {
 	
 	// Registers the default game engine packets
 	static {
-		//Static-sized packets
+		// Static-sized packets
 		registerPacket(PacketPing.class, 8);
 		registerPacket(PacketConnection.class, 4);
 		registerPacket(PacketEntityPosition.class, 20);
 		
-		//Dynamic-sized packets
+		// Dynamic-sized packets
 		registerDynamicSizePacket(PacketChat.class);
 		registerDynamicSizePacket(PacketGame.class);
 		registerDynamicSizePacket(PacketObject.class);
@@ -107,9 +107,9 @@ public abstract class PacketNIO {
 	 * @param c
 	 *            The class of {@code PacketNIO} to register, for example {@code PacketNIO.class}
 	 * @param size
-	 *            The size of the Packet's data in bytes. For dynamic packet sizes, be sure to override
-	 *            {@link #getDataSize()} with the appropriate algorithms to determine the size. This
-	 *            parameter, then, does not matter.
+	 *            The size of the Packet's data in bytes. For packets with dynamic sizes, be sure to override
+	 *            {@link #getDataSize()} with the appropriate algorithms to determine the size. To simplify
+	 *            the process of registering, use {@link #registerDynamicSizePacket(Class)}
 	 * @return Whether the {@code Packet} registration was successful
 	 */
 	public static boolean registerPacket(Class<? extends PacketNIO> c, int size) {
@@ -151,10 +151,11 @@ public abstract class PacketNIO {
 	 * @throws IOException
 	 * @return A new instance of a {@code Packet}
 	 */
-	public static PacketNIO readPacket(ReadableByteChannel channel) throws IOException {
+	public static PacketNIO readPacket(ChannelWrapper channel) throws IOException {
 		PacketNIO p = null;
 		ByteBuffer idAndSize = ByteBuffer.allocate(8);
-		channel.read(idAndSize);
+		channel.readData(idAndSize);
+		idAndSize.flip();
 		int id = idAndSize.getInt();
 		int size = idAndSize.getInt();
 		if (id < 0) {
@@ -162,26 +163,28 @@ public abstract class PacketNIO {
 		}
 		p = getNewPacket(id);
 		ByteBuffer data = ByteBuffer.allocate(size);
-		channel.read(data);
+		channel.readData(data);
+		data.flip();
 		p.readPacketData(data);
-//		System.out.println("Trying to read Packet with ID " + id + " (" + p.getClass().getName() + ")");
 		return p;
 	}
 	
 	/**
-	 * Writes a {@code Packet} to the given {@code WritableByteChannel}
+	 * Writes a {@code Packet} to the given {@code ChannelWrapper}
 	 * 
-	 * @param os
+	 * @param channel
+	 * @param remote
 	 * @param p
 	 * @throws IOException
 	 */
-	public static void writePacket(WritableByteChannel channel, PacketNIO p) throws IOException {
+	public static void writePacket(ChannelWrapper channel, SocketAddress remote, PacketNIO p)
+			throws IOException {
 		ByteBuffer buffer = ByteBuffer.allocate(8 + p.getDataSize());
 		buffer.putInt(p.getID());
 		buffer.putInt(p.getDataSize());
 		p.writePacketData(buffer);
 		buffer.flip();
-		channel.write(buffer);
+		channel.sendData(buffer, remote);
 	}
 	
 	/**

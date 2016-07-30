@@ -15,6 +15,7 @@ import java.awt.image.VolatileImage;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
 
 import javax.swing.JFrame;
@@ -123,7 +124,12 @@ public abstract class Client extends Canvas {
 	/**
 	 * The {@code Socket} between the {@code Client} and {@code Server}
 	 */
-	protected SocketChannel socket;
+	protected SocketChannel socketChannel;
+	
+	/**
+	 * The remote address that this {@code Client} is connected to
+	 */
+	protected SocketAddress remoteAddress;
 	
 	/**
 	 * The cursor
@@ -254,7 +260,8 @@ public abstract class Client extends Canvas {
 	 */
 	public boolean connect(String host, int port) {
 		try {
-			this.socket = SocketChannel.open(new InetSocketAddress(host, port));
+			this.remoteAddress = new InetSocketAddress(host, port);
+			this.socketChannel = SocketChannel.open(this.remoteAddress);
 			return connect();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -273,7 +280,8 @@ public abstract class Client extends Canvas {
 	 */
 	public boolean connect(InetAddress address, int port) {
 		try {
-			this.socket = SocketChannel.open(new InetSocketAddress(address, port));
+			this.remoteAddress = new InetSocketAddress(address, port);
+			this.socketChannel = SocketChannel.open(this.remoteAddress);
 			return connect();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -289,14 +297,12 @@ public abstract class Client extends Canvas {
 	 *             If an I/O Stream cannot be opened
 	 */
 	private boolean connect() throws IOException {
-//		if (!this.socket.getInetAddress().isReachable(10000)) {
-//			return false;
-//		}
-		this.connection = new ConnectionNIO(this.socket, "Client-Side", true);
+		System.out.println("Client Attempting Connection to " + this.remoteAddress);
+		this.connection = new ConnectionNIO(this.socketChannel, "Client-Side", true);
 		this.player = this.game.getNewPlayerInstance();
 		this.player.name = desiredUsername;
 		this.connection.addToSendQueue(new PacketChat(this.player));
-		//TODO: Readd this
+		// TODO: Readd this
 //		Client.CLIENT_BUS.post(new ConnectionEstablishedEvent(this.game, this.connection));
 		return true;
 	}
@@ -306,8 +312,8 @@ public abstract class Client extends Canvas {
 	 */
 	public void disconnect() {
 		try {
-			this.connection.wakeThreads();
-			this.socket.close();
+			this.connection.disconnect();
+			this.socketChannel.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -429,9 +435,6 @@ public abstract class Client extends Canvas {
 	 * Process all {@code Packet}s received from the server.
 	 * <p>
 	 * May result in a bunch of code, depending on how many {@code Packet}s are flying around.
-	 * 
-	 * @param packets
-	 *            A {@code LinkedList} of {@code Packet}s to process
 	 */
 	protected void processReceivedPackets() {
 		PacketNIO p;

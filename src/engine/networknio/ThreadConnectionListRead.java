@@ -19,8 +19,8 @@ public class ThreadConnectionListRead extends Thread {
 							break;
 						}
 					}
-					sleep(2);
 				}
+				sleep(2);
 			}
 			
 		} catch (Exception e) {

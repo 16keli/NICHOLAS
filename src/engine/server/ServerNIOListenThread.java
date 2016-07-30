@@ -2,6 +2,7 @@ package engine.server;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
@@ -25,7 +26,7 @@ public class ServerNIOListenThread extends Thread {
 	/**
 	 * The server socket of this listener thread
 	 */
-	private ServerSocketChannel ss;
+	private ServerSocketChannel ssChannel;
 	
 	/**
 	 * The {@code InetAddress} of the socket
@@ -54,11 +55,12 @@ public class ServerNIOListenThread extends Thread {
 	 */
 	public ServerNIOListenThread(Server s, int port) throws IOException {
 		super("Server Connection Listening Thread");
-		this.ss = ServerSocketChannel.open();
+		this.ssChannel = ServerSocketChannel.open();
 		this.port = port;
-		this.ss.socket().setPerformancePreferences(0, 2, 1);
+		this.ssChannel.socket().setPerformancePreferences(0, 2, 1);
+		this.ssChannel.bind(new InetSocketAddress(port));
 		this.server = s;
-		this.ip = ss.socket().getInetAddress();
+		this.ip = ssChannel.socket().getInetAddress();
 	}
 	
 	@Override
@@ -66,12 +68,11 @@ public class ServerNIOListenThread extends Thread {
 		while (listening) {
 			try {// I don't believe we will run into concurrency issues because only a single thread will be
 					// created and accessing nextPlayerID at a time
-				SocketChannel s = ss.accept();
+				SocketChannel s = ssChannel.accept();
 				ConnectionNIO c = new ConnectionNIO(s, "Server-Side");
 				//TODO: Turn this on again
 //				Server.SERVER_BUS.post(new ConnectionEstablishedEvent(server.game, c));
 				Player p = server.game.getNewPlayerInstance();
-//				p.setPlayerNumber(++server.nextPlayerID);
 				server.connections.addToList(c);
 				server.game.players.add(p);
 				c.addToSendQueue(new PacketConnection(p.number));
@@ -108,7 +109,7 @@ public class ServerNIOListenThread extends Thread {
 	public void shutdown() {
 		this.listening = false;
 		try {
-			this.ss.close();
+			this.ssChannel.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
