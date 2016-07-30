@@ -3,6 +3,7 @@ package engine.networknio.packet;
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import engine.client.Client;
@@ -38,6 +39,11 @@ public abstract class PacketNIO {
 	 */
 	public static HashMap<Class<? extends PacketNIO>, Integer> sizes = new HashMap<Class<? extends PacketNIO>, Integer>();
 	
+	/**
+	 * The largest data size of a UDP packet
+	 */
+	public static int maxUDPSize;
+	
 	public PacketNIO() {
 	}
 	
@@ -68,7 +74,7 @@ public abstract class PacketNIO {
 	/**
 	 * Writes the {@code PacketNIO}'s data to the given {@code ByteBuffer}.
 	 * <p>
-	 * This {@code ByteBuffer} includes the ID and Size
+	 * This {@code ByteBuffer} includes the ID and Size for TCP, but not for UDP
 	 * 
 	 * @param buff
 	 *            The {@code ByteBuffer} to write to
@@ -140,6 +146,12 @@ public abstract class PacketNIO {
 			idtoclass.put(id, c);
 			classtoid.put(c, id);
 			sizes.put(c, size);
+			if (PacketUDP.class.isAssignableFrom(c)) {
+				if (size > maxUDPSize) {
+					maxUDPSize = size;
+				}
+			}
+			System.out.println("Registered Packet " + c.getName() + " with id " + id + " and size " + size);
 		}
 		return true;
 	}
@@ -152,21 +164,7 @@ public abstract class PacketNIO {
 	 * @return A new instance of a {@code Packet}
 	 */
 	public static PacketNIO readPacket(ChannelWrapper channel) throws IOException {
-		PacketNIO p = null;
-		ByteBuffer idAndSize = ByteBuffer.allocate(8);
-		channel.readData(idAndSize);
-		idAndSize.flip();
-		int id = idAndSize.getInt();
-		int size = idAndSize.getInt();
-		if (id < 0) {
-			return null;
-		}
-		p = getNewPacket(id);
-		ByteBuffer data = ByteBuffer.allocate(size);
-		channel.readData(data);
-		data.flip();
-		p.readPacketData(data);
-		return p;
+		return channel.readPacket();
 	}
 	
 	/**
@@ -179,12 +177,7 @@ public abstract class PacketNIO {
 	 */
 	public static void writePacket(ChannelWrapper channel, SocketAddress remote, PacketNIO p)
 			throws IOException {
-		ByteBuffer buffer = ByteBuffer.allocate(8 + p.getDataSize());
-		buffer.putInt(p.getID());
-		buffer.putInt(p.getDataSize());
-		p.writePacketData(buffer);
-		buffer.flip();
-		channel.sendData(buffer, remote);
+		channel.writePacket(remote, p);
 	}
 	
 	/**
@@ -194,7 +187,7 @@ public abstract class PacketNIO {
 	 *            The ID of the packet that it was registered with
 	 * @return A new instance of a {@code Packet}
 	 */
-	private static PacketNIO getNewPacket(int id) {
+	protected static PacketNIO getNewPacket(int id) {
 		try {
 			Class<? extends PacketNIO> c = idtoclass.get(id);
 			return (c == null ? null : c.newInstance());
@@ -262,6 +255,30 @@ public abstract class PacketNIO {
 		for (char c : s.toCharArray()) {
 			buff.putChar(c);
 		}
+	}
+	
+	public static void getPacketDataFromBuffer(ByteBuffer buffer) {
+		byte[] allData = buffer.array();
+		getPacketDataFromArrays(Arrays.copyOfRange(allData, 0, 8),
+				Arrays.copyOfRange(allData, 8, allData.length));
+	}
+	
+	public static void getPacketDataFromBuffer(ByteBuffer idAndSizeBuff, ByteBuffer dataBuff) {
+		byte[] isd = idAndSizeBuff.array();
+		byte[] data = dataBuff.array();
+		getPacketDataFromArrays(isd, data);
+		
+	}
+	
+	public static void getPacketDataFromArrays(byte[] isd, byte[] data) {
+		int id = ((isd[0] << 24) + (isd[1] << 16) + (isd[2] << 8) + (isd[3] << 0));
+		int size = ((isd[4] << 24) + (isd[5] << 16) + (isd[6] << 8) + (isd[7] << 0));
+		System.out.println("Packet Data from Buffer:");
+		System.out.print("ID:\t" + id + "\tSize:\t" + size + "\tData:\t");
+		for (byte b : data) {
+			System.out.print(String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0') + " ");
+		}
+		System.out.println();
 	}
 	
 }

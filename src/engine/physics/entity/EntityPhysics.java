@@ -88,7 +88,6 @@ public abstract class EntityPhysics extends Entity {
 	public void entPos(EventEntityPosition e) {
 		if (e.id == this.id) {
 			this.pos = Vector2.of(e.x, e.y);
-//			System.out.println(this.pos);
 		}
 	}
 	

@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import engine.network.packet.Packet;
 import engine.networknio.packet.PacketNIO;
 import engine.networknio.packet.PacketTCP;
 import engine.networknio.packet.PacketTCP.TCPChannelWrapper;
@@ -89,12 +88,12 @@ public class ConnectionNIO {
 	 * Packets awaiting sending
 	 */
 	private List<PacketNIO> sendQueue = Collections.synchronizedList(new LinkedList<PacketNIO>());
-
+	
 	/**
 	 * ChannelWrapper around the TCP Channel
 	 */
 	private ChannelWrapper tcpChannelWrapper;
-
+	
 	/**
 	 * ChannelWrapper around the UDP Channel
 	 */
@@ -127,6 +126,12 @@ public class ConnectionNIO {
 		this.udpChannel.bind(legacySocket.getLocalSocketAddress());
 		this.udpChannel.connect(this.remoteAddress);
 		
+		this.tcpChannel.configureBlocking(false);
+		this.udpChannel.configureBlocking(false);
+		
+		System.out.println(source + " UDP is bound to " + udpChannel.getLocalAddress() + " and connected to "
+				+ udpChannel.getRemoteAddress());
+				
 		this.tcpChannelWrapper = new TCPChannelWrapper(this.tcpChannel);
 		this.udpChannelWrapper = new UDPChannelWrapper(this.udpChannel);
 		
@@ -165,9 +170,9 @@ public class ConnectionNIO {
 		if (!this.terminating) {
 			synchronized (sendQueueLock) {
 				this.sendQueue.add(p);
-				if (!Packet.idtoclass.containsKey(p.getID())) {
-					System.err.println("An unregistered type of PacketNIO was added to the send queue! ID is "
-							+ p.getID() + ", class is " + p.getClass().getName());
+				if (!PacketNIO.idtoclass.containsKey(p.getID())) {
+					System.err.println("An unregistered type of PacketNIO was added to " + this.sourceName
+							+ "'s send queue! ID is " + p.getID() + ", class is " + p.getClass().getName());
 				}
 			}
 		}
@@ -213,14 +218,12 @@ public class ConnectionNIO {
 	 * @return A {@code Packet} that needs to be processed
 	 */
 	public PacketNIO getReadPacket() {
-//		synchronized (readQueueLock) {
 		try {
 			return this.readPackets.remove(0);
 		} catch (Exception e) {
 //			e.printStackTrace();
 			return null;
 		}
-//		}
 	}
 	
 	/**
@@ -356,9 +359,10 @@ public class ConnectionNIO {
 	public void setPing(long l) {
 		this.ping = l;
 	}
-
+	
 	/**
 	 * Disconnects the connection by stopping the threads and closing the channels
+	 * 
 	 * @throws IOException
 	 */
 	public void disconnect() throws IOException {

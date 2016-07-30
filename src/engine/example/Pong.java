@@ -28,6 +28,11 @@ public class Pong extends Game {
 	
 	private byte prev2 = 0;
 	
+	/**
+	 * Most recent player score event
+	 */
+	private EventPlayerScore recent = null;
+	
 	public static void main(String[] args) {
 		cInst = new Pong();
 		client = new PongClient(cInst, 320, 180);
@@ -96,7 +101,10 @@ public class Pong extends Game {
 	
 	@Override
 	public void tickServer(Server s) {
-	
+		if (recent != null) {
+			s.connections.sendPacketAll(new PacketPlayerScoreNIO(recent.pnum, recent.score));
+			recent = null;
+		}
 	}
 	
 	@Override
@@ -108,7 +116,7 @@ public class Pong extends Game {
 	
 	@SubscribeEvent
 	public void onScore(EventPlayerScore e) {
-		server.connections.sendPacketAll(new PacketPlayerScoreNIO(e.pnum, e.score));
+		recent = e;
 	}
 	
 	@Override
