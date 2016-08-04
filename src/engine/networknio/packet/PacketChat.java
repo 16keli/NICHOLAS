@@ -8,14 +8,11 @@ import engine.client.Client;
 import engine.event.game.ChatEvent;
 import engine.server.Server;
 
-
 public class PacketChat extends PacketTCP {
 	
 	public short pnum;
 	
 	public String msg;
-	
-	public int msgSize;
 	
 	/**
 	 * {@code true} if for chat, {@code false} if for naming
@@ -30,22 +27,20 @@ public class PacketChat extends PacketTCP {
 	public PacketChat(short number, String msg) {
 		this.pnum = number;
 		this.msg = msg;
-		this.msgSize = msg.getBytes().length;
 	}
 	
 	public PacketChat() {
-		// TODO Auto-generated constructor stub
 	}
 	
 	@Override
-	protected void writePacketData(ByteBuffer buff) throws IOException {
+	public void writePacketData(ByteBuffer buff) throws IOException {
 		buff.put((this.chat ? Byte.MAX_VALUE : Byte.MIN_VALUE));
 		buff.putShort(this.pnum);
 		PacketNIO.writeString(buff, this.msg);
 	}
 	
 	@Override
-	protected void readPacketData(ByteBuffer buff) throws IOException {
+	public void readPacketData(ByteBuffer buff) throws IOException {
 		this.chat = buff.get() == Byte.MAX_VALUE;
 		this.pnum = buff.getShort();
 		this.msg = PacketNIO.readString(buff);
@@ -53,9 +48,7 @@ public class PacketChat extends PacketTCP {
 	
 	@Override
 	public void processClient(Client c) {
-		if (!this.chat && !c.game.players.get(this.pnum).hasName()) {
-			c.game.players.get(this.pnum).setName(this.msg);
-		} else {
+		if (chat) {
 			c.game.events.post(new ChatEvent(this.pnum, this.msg));
 		}
 	}
@@ -69,11 +62,6 @@ public class PacketChat extends PacketTCP {
 		} else {
 			s.game.events.post(new ChatEvent(this.pnum, this.msg));
 		}
-	}
-	
-	@Override
-	public int getDataSize() {
-		return 3 + this.msgSize;
 	}
 	
 }

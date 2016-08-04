@@ -24,13 +24,13 @@ public class PacketPlayerInputNIO extends PacketTCP {
 	}
 	
 	@Override
-	protected void writePacketData(ByteBuffer buff) throws IOException {
+	public void writePacketData(ByteBuffer buff) throws IOException {
 		buff.putShort(this.pnum);
 		buff.put(this.dir);
 	}
 	
 	@Override
-	protected void readPacketData(ByteBuffer buff) throws IOException {
+	public void readPacketData(ByteBuffer buff) throws IOException {
 		this.pnum = buff.getShort();
 		this.dir = buff.get();
 	}

@@ -14,7 +14,7 @@ public class ThreadConnectionNIORead extends Thread {
 		try {
 			while (connect.isRunning() && !connect.isTerminating()) {
 				while (true) {
-					if (!ConnectionNIO.readPacket(this.connect)) {
+					if (!ConnectionNIO.readPackets(this.connect)) {
 						sleep(2);
 					}
 				}

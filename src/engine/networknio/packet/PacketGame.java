@@ -2,7 +2,6 @@ package engine.networknio.packet;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.List;
 
 import engine.Game;
@@ -11,44 +10,38 @@ import engine.client.Client;
 import engine.level.Level;
 import engine.server.Server;
 
-
 public class PacketGame extends PacketTCP {
 	
 	public Level level;
 	
-	public byte[] levelAsBytes;
-	
 	public List<Player> players;
 	
-	public byte[] playersAsBytes;
+	public byte[] levelBytes;
+	
+	public byte[] playerBytes;
 	
 	public PacketGame() {
-		
+	
 	}
 	
 	public PacketGame(Game g) {
 		this.level = g.level;
 		this.players = g.players;
-		this.levelAsBytes = PacketObject.objectToBytes(level);
-		this.playersAsBytes = PacketObject.objectToBytes(this.players);
+		this.levelBytes = PacketObject.objectToBytes(this.level);
+		this.playerBytes = PacketObject.objectToBytes(this.players);
 	}
 	
 	@Override
-	protected void writePacketData(ByteBuffer buff) throws IOException {
-		buff.putInt(levelAsBytes.length);
-		buff.put(levelAsBytes);
-		buff.put(playersAsBytes);
+	public void writePacketData(ByteBuffer buff) throws IOException {
+		PacketNIO.writeObject(buff, this.levelBytes);
+		PacketNIO.writeObject(buff, this.playerBytes);
 	}
 	
 	@SuppressWarnings ("unchecked")
 	@Override
-	protected void readPacketData(ByteBuffer buff) throws IOException {
-		int levelSize = buff.getInt();
-		byte[] data = buff.array();
-		this.levelAsBytes = Arrays.copyOfRange(data, 4, 4 + levelSize);
-		this.playersAsBytes = Arrays.copyOfRange(data, 4 + levelSize, data.length);
-		this.level = (Level) PacketObject.bytesToObject(levelAsBytes);
-		this.players = (List<Player>) PacketObject.bytesToObject(playersAsBytes);
+	public void readPacketData(ByteBuffer buff) throws IOException {
+		this.level = (Level) PacketNIO.readObject(buff);
+		this.players = (List<Player>) PacketNIO.readObject(buff);
 	}
 	
 	@Override
@@ -65,11 +58,6 @@ public class PacketGame extends PacketTCP {
 	public void processServer(short player, Server s) {
 		// TODO Auto-generated method stub
 		
-	}
-	
-	@Override
-	public int getDataSize() {
-		return 4 + levelAsBytes.length + playersAsBytes.length;
 	}
 	
 }

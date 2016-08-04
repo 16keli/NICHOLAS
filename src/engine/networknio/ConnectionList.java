@@ -20,13 +20,18 @@ public class ConnectionList {
 	
 	private Thread readThread;
 	
-	private Thread writeThread;
-	
 	public ConnectionList() {
 		this.readThread = new ThreadConnectionListRead(this);
-		this.writeThread = new ThreadConnectionListWrite(this);
 		this.readThread.start();
-		this.writeThread.start();
+	}
+	
+	/**
+	 * Sends all the {@code PacketNIO} data in the sending queue
+	 */
+	public void sendPackets() {
+		for (ConnectionNIO connect : this.connections) {
+			connect.sendPackets();
+		}
 	}
 	
 	/**

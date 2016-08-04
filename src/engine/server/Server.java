@@ -106,7 +106,10 @@ public abstract class Server {
 		} else {
 			this.game.start = true;
 		}
+		
 		this.tickServer();
+		
+		this.connections.sendPackets();
 	}
 	
 	/**

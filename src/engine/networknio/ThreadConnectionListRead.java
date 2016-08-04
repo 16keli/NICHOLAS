@@ -15,7 +15,7 @@ public class ThreadConnectionListRead extends Thread {
 			while (true) {
 				for (ConnectionNIO connect : connects.connections) {
 					while (connect.isRunning() && !connect.isTerminating()) {
-						if (!ConnectionNIO.readPacket(connect)) {
+						if (!ConnectionNIO.readPackets(connect)) {
 							break;
 						}
 					}

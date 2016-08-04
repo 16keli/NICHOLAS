@@ -36,12 +36,12 @@ public class PacketPing extends PacketTCP {
 	}
 	
 	@Override
-	protected void writePacketData(ByteBuffer buff) throws IOException {
+	public void writePacketData(ByteBuffer buff) throws IOException {
 		buff.putLong(System.currentTimeMillis());
 	}
 	
 	@Override
-	protected void readPacketData(ByteBuffer buff) throws IOException {
+	public void readPacketData(ByteBuffer buff) throws IOException {
 		this.millisTime = buff.getLong();
 	}
 }

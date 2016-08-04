@@ -1,5 +1,6 @@
 package engine.example;
 
+import engine.Engine;
 import engine.Game;
 import engine.networknio.ConnectionNIO;
 import engine.networknio.packet.PacketGame;
@@ -18,6 +19,7 @@ public class PongServer extends Server {
 
 	@Override
 	public void synchronizeClientGameData(ConnectionNIO c) {
+		System.out.println("Synchronizing on Tick " + Engine.getGameTimeServer());
 		c.addToSendQueue(new PacketGame(this.game));
 	}
 

@@ -1,8 +1,14 @@
 package engine.networknio;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.StandardSocketOptions;
+import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Collections;
@@ -21,8 +27,7 @@ import engine.networknio.packet.PacketUDP.UDPChannelWrapper;
  * <p>
  * Used to send {@link engine.engine.networknio.packet.PacketNIO Packets} back and forth between the two sides
  * <p>
- * Also features the standard Java IO for legacy features, as well as simplifying transfer of {@code Object}s
- * between sides.
+ * Packets are sent at the end of every tick, but have a separate thread to read them.
  * 
  * @author Kevin
  */
@@ -34,20 +39,9 @@ public class ConnectionNIO {
 	public Logger logger;
 	
 	/**
-	 * A synchronization lock used to synchronize sending of {@code Packet}s to avoid the issues that come
-	 * with {@code Thread}s GRR I'm mad
-	 */
-	private Object sendQueueLock;
-	
-	/**
 	 * The {@code Thread} that reads incoming {@code Packet} data
 	 */
 	private Thread readThread;
-	
-	/**
-	 * The {@code Thread} that writes pending {@code Packet} data
-	 */
-	private Thread writeThread;
 	
 	/**
 	 * The Legacy IO feature kept around for convenience
@@ -63,6 +57,26 @@ public class ConnectionNIO {
 	 * The Channel used for UDP IO
 	 */
 	private DatagramChannel udpChannel;
+	
+	/**
+	 * The {@code ByteBuffer} that the TCP Channel sends
+	 */
+	private ByteBuffer tcpBuffer;
+	
+	/**
+	 * The {@code ByteBuffer that the UDP Channel sends}
+	 */
+	private ByteBuffer udpBuffer;
+	
+	/**
+	 * The {@code ByteBuffer} that TCP data is read into
+	 */
+	private ByteBuffer tcpIn;
+	
+	/**
+	 * The {@code ByteBuffer} that UDP data is read into
+	 */
+	private ByteBuffer udpIn;
 	
 	/**
 	 * The remote {@code SocketAddress}
@@ -85,22 +99,25 @@ public class ConnectionNIO {
 	private List<PacketNIO> readPackets = Collections.synchronizedList(new LinkedList<PacketNIO>());
 	
 	/**
-	 * Packets awaiting sending
-	 */
-	private List<PacketNIO> sendQueue = Collections.synchronizedList(new LinkedList<PacketNIO>());
-	
-	/**
 	 * ChannelWrapper around the TCP Channel
 	 */
-	private ChannelWrapper tcpChannelWrapper;
+	private ProtocolWrapper tcpWrapper;
 	
 	/**
 	 * ChannelWrapper around the UDP Channel
 	 */
-	private ChannelWrapper udpChannelWrapper;
+	private ProtocolWrapper udpWrapper;
 	
-	public ConnectionNIO(SocketChannel s, String source) throws IOException {
-		this(s, source, false);
+	public static File outputFile;
+	
+	public static PrintStream outputStream;
+	
+	public static File inputFile;
+	
+	public static PrintStream inputStream;
+	
+	public ConnectionNIO(SocketChannel s, String source, int tcpSize, int udpSize) throws IOException {
+		this(s, source, tcpSize, udpSize, false);
 	}
 	
 	/**
@@ -110,13 +127,17 @@ public class ConnectionNIO {
 	 *            The {@code SocketChannel} to connect to
 	 * @param source
 	 *            The name for the source
+	 * @param tcpSize
+	 *            The size of the TCP Write buffer
+	 * @param udpSize
+	 *            The size of the UDP Write buffer
 	 * @param threads
 	 *            Whether to start the own threads
 	 * @throws IOException
 	 *             If an I/O stream cannot be opened
 	 */
-	public ConnectionNIO(SocketChannel s, String source, boolean threads) throws IOException {
-		this.sendQueueLock = new Object();
+	public ConnectionNIO(SocketChannel s, String source, int tcpSize, int udpSize, boolean threads)
+			throws IOException {
 		this.sourceName = source;
 		this.legacySocket = s.socket();
 		this.remoteAddress = this.legacySocket.getRemoteSocketAddress();
@@ -127,13 +148,20 @@ public class ConnectionNIO {
 		this.udpChannel.connect(this.remoteAddress);
 		
 		this.tcpChannel.configureBlocking(false);
+		// The Nagle algorithm is not necessary as we are doing it manually
+		this.tcpChannel.setOption(StandardSocketOptions.TCP_NODELAY, true);
 		this.udpChannel.configureBlocking(false);
+		
+		this.tcpBuffer = ByteBuffer.allocate(tcpSize);
+		this.udpBuffer = ByteBuffer.allocate(udpSize);
+		this.tcpIn = ByteBuffer.allocate(tcpSize);
+		this.udpIn = ByteBuffer.allocate(udpSize);
 		
 		System.out.println(source + " UDP is bound to " + udpChannel.getLocalAddress() + " and connected to "
 				+ udpChannel.getRemoteAddress());
 				
-		this.tcpChannelWrapper = new TCPChannelWrapper(this.tcpChannel);
-		this.udpChannelWrapper = new UDPChannelWrapper(this.udpChannel);
+		this.tcpWrapper = new TCPChannelWrapper(this.tcpChannel, tcpIn, tcpBuffer, this);
+		this.udpWrapper = new UDPChannelWrapper(this.udpChannel, udpIn, udpBuffer, this);
 		
 		this.logger = Logger.getLogger("engine.connection." + this.sourceName);
 		this.logger.info("Local Address:\t" + legacySocket.getLocalSocketAddress());
@@ -141,14 +169,26 @@ public class ConnectionNIO {
 		
 		if (threads) {
 			this.readThread = new ThreadConnectionNIORead(this);
-			this.writeThread = new ThreadConnectionNIOWrite(this);
 			this.logger.info("Packet Read Thread ID:\t" + this.readThread.getId());
-			this.logger.info("Packet Write Thread ID:\t" + this.writeThread.getId());
 			this.readThread.start();
-			this.writeThread.start();
 		}
 		
 		this.threadsActive = threads;
+		
+		try {
+			outputFile = new File("output.txt");
+			if (!outputFile.exists()) {
+				outputFile.createNewFile();
+			}
+			inputFile = new File("input.txt");
+			if (!inputFile.exists()) {
+				inputFile.createNewFile();
+			}
+			outputStream = new PrintStream(new BufferedOutputStream(new FileOutputStream(outputFile)));
+			inputStream = new PrintStream(new BufferedOutputStream(new FileOutputStream(inputFile)));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -161,6 +201,22 @@ public class ConnectionNIO {
 	}
 	
 	/**
+	 * Sends all the {@code PacketNIO} data in the sending queue
+	 */
+	public void sendPackets() {
+		try {
+			// End delimiters
+			this.tcpBuffer.putInt(Integer.MIN_VALUE);
+			this.udpBuffer.putInt(Integer.MIN_VALUE);
+			
+			this.tcpWrapper.sendData(this.remoteAddress);
+			this.udpWrapper.sendData(this.remoteAddress);
+		} catch (Exception e) {
+			// Swallow because it's gonna happen a lot
+		}
+	}
+	
+	/**
 	 * Adds a {@code Packet} to the send queue of the connection
 	 * 
 	 * @param p
@@ -168,47 +224,18 @@ public class ConnectionNIO {
 	 */
 	public void addToSendQueue(PacketNIO p) {
 		if (!this.terminating) {
-			synchronized (sendQueueLock) {
-				this.sendQueue.add(p);
+			try {
+				getAppropriateWrapper(p).writePacket(p);
+				if (this.sourceName.equals("Server-Side")) {
+					outputStream.println("Writing Packet with ID " + p.getID());
+				}
 				if (!PacketNIO.idtoclass.containsKey(p.getID())) {
 					System.err.println("An unregistered type of PacketNIO was added to " + this.sourceName
 							+ "'s send queue! ID is " + p.getID() + ", class is " + p.getClass().getName());
 				}
+			} catch (Exception e) {
+				// Swallow the exception because it's gonna happen a lot
 			}
-		}
-	}
-	
-	/**
-	 * Sends the first {@code Packet} available. Called multiple times by the writer thread, there is no need
-	 * to call this method
-	 * 
-	 * @return Whether a {@code Packet} was successfully sent
-	 */
-	private boolean sendPacket() {
-		try {
-			PacketNIO p = getSendPacket();
-			if (p != null) {
-				PacketNIO.writePacket(this.getAppropriateWrapper(p), this.remoteAddress, p);
-				return true;
-			}
-		} catch (Exception e) {
-//			e.printStackTrace();
-		}
-		return false;
-	}
-	
-	/**
-	 * Retrieves a {@code Packet} to be sent in the future
-	 * 
-	 * @return The first {@code Packet} in the send queue
-	 */
-	private PacketNIO getSendPacket() {
-		PacketNIO p = null;
-		synchronized (sendQueueLock) {
-			while (!this.sendQueue.isEmpty() && p == null) {
-				p = this.sendQueue.remove(0);
-			}
-			return p;
 		}
 	}
 	
@@ -227,15 +254,11 @@ public class ConnectionNIO {
 	}
 	
 	/**
-	 * Interrupts the reading and writing {@code Threads}
+	 * Interrupts the reading <strike>and writing</strike> {@code Threads}
 	 */
 	public void wakeThreads() {
 		if (this.readThread != null) {
 			this.readThread.interrupt();
-		}
-		
-		if (this.writeThread != null) {
-			this.writeThread.interrupt();
 		}
 	}
 	
@@ -245,16 +268,22 @@ public class ConnectionNIO {
 	 * 
 	 * @return Whether a {@code PacketNIO} was successfully read
 	 */
-	private boolean readPacket() {
+	private boolean readPackets() {
 		try {
-			PacketNIO tcp = PacketNIO.readPacket(this.tcpChannelWrapper);
-			if (tcp != null) {
-				this.readPackets.add(tcp);
+			if (this.sourceName.equals("Client-Side")) {
+				if (inputStream != null) {
+					inputStream.println("Attempting read");
+				}
+			}
+			if (this.tcpWrapper.readData()) {
+				if (this.sourceName.equals("Client-Side")) {
+					PacketNIO.getPacketDataToLimit(this.tcpIn.array(), this.tcpIn.limit(), inputStream);
+				}
+				this.readPackets.addAll(this.tcpWrapper.readFully());
 				return true;
 			}
-			PacketNIO udp = PacketNIO.readPacket(this.udpChannelWrapper);
-			if (udp != null) {
-				this.readPackets.add(udp);
+			if (this.udpWrapper.readData()) {
+				this.readPackets.addAll(this.udpWrapper.readFully());
 				return true;
 			}
 		} catch (IOException e) {
@@ -291,19 +320,8 @@ public class ConnectionNIO {
 	 *            The {@code ConnectionNIO} to use
 	 * @return Whether a {@code PacketNIO} was successfully read
 	 */
-	public static boolean readPacket(ConnectionNIO c) {
-		return c.readPacket();
-	}
-	
-	/**
-	 * Gets the {@code ConnectionNIO} to write the first {@code PacketNIO} available
-	 * 
-	 * @param c
-	 *            The {@code ConnectionNIO} to use
-	 * @return Whether a {@code PacketNIO} was successfully sent
-	 */
-	public static boolean sendPacket(ConnectionNIO c) {
-		return c.sendPacket();
+	public static boolean readPackets(ConnectionNIO c) {
+		return c.readPackets();
 	}
 	
 	/**
@@ -330,11 +348,11 @@ public class ConnectionNIO {
 	 * @param p
 	 * @return
 	 */
-	public ChannelWrapper getAppropriateWrapper(PacketNIO p) {
+	public ProtocolWrapper getAppropriateWrapper(PacketNIO p) {
 		if (p instanceof PacketTCP) {
-			return this.tcpChannelWrapper;
+			return this.tcpWrapper;
 		} else if (p instanceof PacketUDP) {
-			return this.udpChannelWrapper;
+			return this.udpWrapper;
 		} else {
 			return null;
 		}

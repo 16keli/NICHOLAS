@@ -40,8 +40,8 @@ public class Pong extends Game {
 	}
 	
 	static {
-		PacketNIO.registerPacket(PacketPlayerInputNIO.class, 3);
-		PacketNIO.registerPacket(PacketPlayerScoreNIO.class, 6);
+		PacketNIO.registerPacket(PacketPlayerInputNIO.class);
+		PacketNIO.registerPacket(PacketPlayerScoreNIO.class);
 	}
 	
 	public PongPlayer p1;
