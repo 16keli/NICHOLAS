@@ -143,7 +143,7 @@ public class MenuComponent {
 	 */
 	public void update(String s) {
 		this.text = s;
-		update = true;
+		this.update = true;
 	}
 	
 	/**

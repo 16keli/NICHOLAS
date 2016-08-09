@@ -65,9 +65,6 @@ public abstract class ProtocolWrapper {
 	 */
 	public void writePacket(PacketNIO p) throws IOException {
 		this.outputBuffer.putInt(p.getID());
-		if (connect.sourceName.equals("Server-Side")) {
-			ConnectionNIO.outputStream.println("After ID (" + p.getID() + "), Position is " + this.outputBuffer.position());
-		}
 		p.writePacketData(this.outputBuffer);
 		
 //		System.out.println("Write packet " + p.getClass().getSimpleName());
@@ -84,9 +81,6 @@ public abstract class ProtocolWrapper {
 		int id = this.inputBuffer.getInt();
 		if (id == Integer.MIN_VALUE) {// This signifies the end of the stream
 			return null;
-		}
-		if (connect.sourceName.equals("Client-Side")) {
-			ConnectionNIO.inputStream.println("Reading Packet with ID " + id + ". Position is " + this.inputBuffer.position());
 		}
 		PacketNIO p = PacketNIO.getNewPacket(id);
 		p.readPacketData(this.inputBuffer);
@@ -105,7 +99,7 @@ public abstract class ProtocolWrapper {
 	public List<PacketNIO> readFully() throws IOException {
 		List<PacketNIO> packs = new LinkedList<PacketNIO>();
 		PacketNIO toAdd = null;
-		while ((toAdd = readPacket()) != null) {
+		while ((toAdd = this.readPacket()) != null) {
 			packs.add(toAdd);
 		}
 		return packs;

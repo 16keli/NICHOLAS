@@ -28,17 +28,17 @@ public class PongMenu extends Menu {
 	
 	@Override
 	public void tickMenu() {
-		if (input.enter.clicked) {
+		if (this.input.enter.clicked) {
 			InetAddress inet = InetAddress.getLoopbackAddress(); // Default
 			int port = 25565;// Default
-			if (selected == solo) {
+			if (this.selected == solo) {
 				Pong.prepareServer(port, 1);
-			} else if (selected == local) {
+			} else if (this.selected == local) {
 				Pong.prepareServer(port, 1);
 				((Pong) this.client.game).p2exists = true;
-			} else if (selected == host) {
+			} else if (this.selected == host) {
 				Pong.prepareServer(port, 2);
-			} else if (selected == join) {
+			} else if (this.selected == join) {
 				try {
 					inet = InetAddress.getByName(JOptionPane.showInputDialog(this.client, "Connect"));
 					port = Integer.parseInt(JOptionPane.showInputDialog(this.client, "Port"));

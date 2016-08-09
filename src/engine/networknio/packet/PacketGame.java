@@ -47,7 +47,7 @@ public class PacketGame extends PacketTCP {
 	@Override
 	public void processClient(Client c) {
 		this.level.rebuild(c.game);
-		for (Player p : players) {
+		for (Player p : this.players) {
 			p.rebuild(c.game);
 		}
 		c.game.level = this.level;

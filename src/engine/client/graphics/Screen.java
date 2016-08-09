@@ -69,7 +69,7 @@ public class Screen {
 	 *            The ARGB color code to set every pixel to
 	 */
 	public void clear(int color) {
-		clearRegion(color, 0, 0, client.vImg.getWidth(), client.vImg.getHeight());
+		this.clearRegion(color, 0, 0, this.client.vImg.getWidth(), this.client.vImg.getHeight());
 	}
 	
 	/**
@@ -88,7 +88,7 @@ public class Screen {
 	 *            The height of the region
 	 */
 	public void clearArea(int color, int x, int y, int w, int h) {
-		clearRegion(color, x, y, x + w, y + h);
+		this.clearRegion(color, x, y, x + w, y + h);
 	}
 	
 	/**
@@ -107,7 +107,7 @@ public class Screen {
 	 *            The Y Coordinate of the lower-right corner
 	 */
 	public void clearRegion(int color, int x1, int y1, int x2, int y2) {
-		Graphics2D g = client.vImg.createGraphics();
+		Graphics2D g = this.client.vImg.createGraphics();
 		g.fillRect(x1, y1, x2 - x1 + 1, y2 - y1 + 1);
 	}
 	
@@ -118,7 +118,7 @@ public class Screen {
 	 *            The {@code ISpriteProvider} to render
 	 */
 	public void render(ISpriteProvider sp) {
-		render(sp, false, false, 0);
+		this.render(sp, false, false, 0);
 	}
 	
 	/**
@@ -134,7 +134,7 @@ public class Screen {
 	 *            How many quadrants to rotate the image clockwise
 	 */
 	public void render(ISpriteProvider sp, boolean mirrorX, boolean mirrorY, int quads) {
-		render(sp.getSprite(), sp.getSpritePosition(), mirrorX, mirrorY, quads);
+		this.render(sp.getSprite(), sp.getSpritePosition(), mirrorX, mirrorY, quads);
 	}
 	
 	/**
@@ -146,7 +146,7 @@ public class Screen {
 	 *            The {@code Vector2} of this image's relative upper-left position
 	 */
 	public void render(Sprite src, Vector2 pos) {
-		render(src, pos, false, false, 0);
+		this.render(src, pos, false, false, 0);
 	}
 	
 	/**
@@ -164,7 +164,7 @@ public class Screen {
 	 *            How many quadrants to rotate the image clockwise
 	 */
 	public void render(Sprite src, Vector2 pos, boolean mirrorX, boolean mirrorY, int quads) {
-		renderAbsolute(src, pos.minus(offset), mirrorX, mirrorY, quads);
+		this.renderAbsolute(src, pos.minus(this.offset), mirrorX, mirrorY, quads);
 	}
 	
 	/**
@@ -176,7 +176,7 @@ public class Screen {
 	 *            The {@code Vector2} of this image's absolute upper-left position
 	 */
 	public void renderAbsolute(Sprite src, Vector2 pos) {
-		renderAbsolute(src, pos, false, false, 0);
+		this.renderAbsolute(src, pos, false, false, 0);
 	}
 	
 	/**
@@ -195,7 +195,7 @@ public class Screen {
 	 */
 	public void renderAbsolute(Sprite src, Vector2 pos, boolean mirrorX, boolean mirrorY, int quads) {
 //		src = adjustImage(src, 1, mirrorX, mirrorY);
-		Graphics2D g = client.vImg.createGraphics();
+		Graphics2D g = this.client.vImg.createGraphics();
 		g.drawImage(src.getAdjustedImage(1, mirrorX, mirrorY, quads), (int) pos.x, (int) pos.y, null);
 		g.dispose();
 	}
@@ -209,7 +209,7 @@ public class Screen {
 	 *            The y component of the offset
 	 */
 	public void setOffset(double x, double y) {
-		setOffset(Vector2.of(x, y));
+		this.setOffset(Vector2.of(x, y));
 	}
 	
 	/**

@@ -35,14 +35,14 @@ public abstract class PacketUDP extends PacketNIO {
 		@Override
 		public void sendData(SocketAddress remote) throws IOException {
 			this.outputBuffer.flip();
-			udp.send(this.outputBuffer, remote);
+			this.udp.send(this.outputBuffer, remote);
 			this.outputBuffer.clear();
 		}
 		
 		@Override
 		public boolean readData() throws IOException {
 			this.inputBuffer.clear();
-			boolean flag = udp.receive(this.inputBuffer) != null;
+			boolean flag = this.udp.receive(this.inputBuffer) != null;
 			this.inputBuffer.flip();
 			return flag;
 		}

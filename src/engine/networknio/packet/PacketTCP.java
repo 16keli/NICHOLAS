@@ -5,7 +5,6 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-import engine.Engine;
 import engine.networknio.ConnectionNIO;
 import engine.networknio.ProtocolWrapper;
 
@@ -36,30 +35,14 @@ public abstract class PacketTCP extends PacketNIO {
 		@Override
 		public void sendData(SocketAddress remote) throws IOException {
 			this.outputBuffer.flip();
-			if (connect.sourceName.equals("Server-Side")) {
-				PacketNIO.getPacketDataToLimit(outputBuffer.array(), outputBuffer.limit(),
-						ConnectionNIO.outputStream);
-			}
-			int tcpCount = tcp.write(this.outputBuffer);
-			if (connect.sourceName.equals("Server-Side")) {
-				if (tcpCount > 0) {
-					ConnectionNIO.outputStream.println(
-							"Wrote " + tcpCount + " bytes at Server Tick " + Engine.getGameTimeServer());
-				}
-			}
+			this.tcp.write(this.outputBuffer);
 			this.outputBuffer.clear();
 		}
 		
 		@Override
 		public boolean readData() throws IOException {
 			this.inputBuffer.clear();
-			int tcpCount = tcp.read(this.inputBuffer);
-			if (connect.sourceName.equals("Client-Side")) {
-				if (tcpCount > 0) {
-					ConnectionNIO.inputStream.println(
-							"Read " + tcpCount + " bytes at Client Tick " + Engine.getGameTimeClient());
-				}
-			}
+			int tcpCount = this.tcp.read(this.inputBuffer);
 			boolean flag = tcpCount > 0;
 			this.inputBuffer.flip();
 			return flag;

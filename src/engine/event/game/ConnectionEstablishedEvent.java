@@ -2,7 +2,7 @@ package engine.event.game;
 
 import engine.Game;
 import engine.Player;
-import engine.network.Connection;
+import engine.networknio.ConnectionNIO;
 
 /**
  * Posted whenever a {@code Connection} is established
@@ -11,12 +11,13 @@ import engine.network.Connection;
  */
 public class ConnectionEstablishedEvent extends GameEvent {
 	
-	public Connection connect;
+	public ConnectionNIO connect;
 	
 	public Player player;
 	
-	public ConnectionEstablishedEvent(Game game, Connection c) {
+	public ConnectionEstablishedEvent(Game game, ConnectionNIO c, Player p) {
 		super(game);
 		this.connect = c;
+		this.player = p;
 	}
 }

@@ -142,8 +142,11 @@ public class LaunchWrapper {
 	
 	/**
 	 * Gets a list of all the subclasses of the given superclass within the given Jar file
-	 * @param file The .jar file
-	 * @param superClass The superclass
+	 * 
+	 * @param file
+	 *            The .jar file
+	 * @param superClass
+	 *            The superclass
 	 * @return
 	 */
 	@SuppressWarnings ("unchecked")

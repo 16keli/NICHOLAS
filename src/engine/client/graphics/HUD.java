@@ -13,17 +13,17 @@ import engine.client.InputHandler;
  * @author Kevin
  */
 public abstract class HUD {
-
+	
 	/**
 	 * The {@code Client} this hud is on
 	 */
 	protected Client client;
-
+	
 	/**
 	 * The InputHander
 	 */
 	protected InputHandler input;
-
+	
 	/**
 	 * Renders the HUD
 	 * 
@@ -31,7 +31,7 @@ public abstract class HUD {
 	 *            The {@code Screen}
 	 */
 	public abstract void render(Screen s);
-
+	
 	/**
 	 * Initializes the {@code HUD} by providing it with the appropriate {@code Client} and
 	 * {@code InputHandler}
@@ -45,5 +45,5 @@ public abstract class HUD {
 		this.input = input;
 		this.client = client;
 	}
-
+	
 }

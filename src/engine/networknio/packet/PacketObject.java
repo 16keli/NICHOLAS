@@ -45,7 +45,7 @@ public class PacketObject<T> extends PacketTCP {
 	
 	@Override
 	public void writePacketData(ByteBuffer buff) throws IOException {
-		buff.put(objectAsBytes);
+		buff.put(this.objectAsBytes);
 	}
 	
 	@SuppressWarnings ("unchecked")

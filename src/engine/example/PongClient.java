@@ -27,7 +27,7 @@ public class PongClient extends Client {
 	
 	@Override
 	protected void tickClient() {
-		
+	
 	}
 	
 	@Override
@@ -38,10 +38,10 @@ public class PongClient extends Client {
 	
 	@Override
 	protected void initClient() {
-		cursorSheet = SpriteSheet.of(new File("C:/Users/Kevin/Desktop/Java/CATWGame/res/catw/cursor.png"), 32,
-				32);
+		this.cursorSheet = SpriteSheet
+				.of(new File("C:/Users/Kevin/Desktop/Java/CATWGame/res/catw/cursor.png"), 32, 32);
 //		cursor = cursorSheet.getSprite(0, 0);
-		cursor = cursorSheet.getAnimated(5, 0, 0, 14, 1).scale(2);
+		this.cursor = this.cursorSheet.getAnimated(5, 0, 0, 14, 1).scale(2);
 		new NewSound(new File("res/engine/sound/boop.wav")).play();
 	}
 	
@@ -50,6 +50,7 @@ public class PongClient extends Client {
 		this.setMenu(new PongMenu());
 	}
 	
+	@Override
 	public boolean hasPlayerNumber() {
 		return this.player.number != -1;
 	}

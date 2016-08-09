@@ -1,6 +1,6 @@
 package engine;
 
-import engine.network.synchro.Rebuildable;
+import engine.networknio.Rebuildable;
 
 /**
  * A Player of the Game.
@@ -141,7 +141,7 @@ public abstract class Player implements Rebuildable {
 	}
 	
 	public boolean hasName() {
-		return hasName;
+		return this.hasName;
 	}
 	
 	public void setName(String name) {

@@ -6,7 +6,7 @@ import java.util.List;
 import engine.Engine;
 import engine.Game;
 import engine.client.graphics.Screen;
-import engine.network.synchro.Rebuildable;
+import engine.networknio.Rebuildable;
 
 /**
  * The most general implementation of a level possible, while still allowing for many possibilities.
@@ -81,7 +81,7 @@ public abstract class Level implements Rebuildable {
 	public void rebuild(Game g) {
 		this.game = g;
 		this.game.events.register(this);
-		for (Entity e : entList) {
+		for (Entity e : this.entList) {
 			e.rebuild(g);
 		}
 	}
@@ -99,7 +99,7 @@ public abstract class Level implements Rebuildable {
 	 * @return The next available entity ID
 	 */
 	public int getNextAvailableID() {
-		return nextEntityID++;
+		return this.nextEntityID++;
 	}
 	
 	/**
@@ -128,7 +128,7 @@ public abstract class Level implements Rebuildable {
 	 * @return The {@code Entity}'s ID
 	 */
 	public int addEntity(Entity e) {
-		entList.add(e);
+		this.entList.add(e);
 		return e.id;
 	}
 	
@@ -140,7 +140,7 @@ public abstract class Level implements Rebuildable {
 	 * @return The {@code Entity}
 	 */
 	public Entity getEntity(int id) {
-		return entList.get(id);
+		return this.entList.get(id);
 	}
 	
 }

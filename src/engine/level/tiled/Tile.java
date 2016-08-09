@@ -50,10 +50,12 @@ public abstract class Tile implements ISpriteProvider, Serializable {
 		this.moveCost = moveCost;
 	}
 	
+	@Override
 	public Sprite getSprite() {
 		return this.sprite;
 	}
 	
+	@Override
 	public Vector2 getSpritePosition() {
 		return this.position;
 	}
@@ -75,12 +77,12 @@ public abstract class Tile implements ISpriteProvider, Serializable {
 	 */
 	public int getMovementCost(Class<?> c) {
 		while (c != EntityTiled.class) {
-			if (c != null && moveCosts.containsKey(c)) {
-				return moveCosts.get(c);
+			if (c != null && this.moveCosts.containsKey(c)) {
+				return this.moveCosts.get(c);
 			}
 			c = c.getSuperclass();
 		}
-		return moveCost;
+		return this.moveCost;
 	}
 	
 	/**
@@ -91,7 +93,7 @@ public abstract class Tile implements ISpriteProvider, Serializable {
 	 * @return Whether it can move to this {@code Tile}
 	 */
 	public boolean canMoveToHere(Class<?> c) {
-		return getMovementCost(c) != -1;
+		return this.getMovementCost(c) != -1;
 	}
 	
 	public boolean equals(Tile t) {
@@ -114,6 +116,7 @@ public abstract class Tile implements ISpriteProvider, Serializable {
 	
 	/**
 	 * Checks whether the given {@code Tile} is adjacent to this one
+	 * 
 	 * @param tile
 	 * @return
 	 */
@@ -125,11 +128,12 @@ public abstract class Tile implements ISpriteProvider, Serializable {
 	 * Returns the direction of the given {@code Tile} compared to this one
 	 * <p>
 	 * For example, if {@code tile} is above {@code this}, this method will return {@code Direction.NORTH}
+	 * 
 	 * @param tile
 	 * @return
 	 */
 	public Direction getDirectionOf(Tile tile) {
-		if (!isAdjacentTo(tile)) {
+		if (!this.isAdjacentTo(tile)) {
 			return Direction.NONE;
 		}
 		for (Direction d : Direction.values()) {
@@ -163,7 +167,7 @@ public abstract class Tile implements ISpriteProvider, Serializable {
 	}
 	
 	public static enum Direction {
-		NORTH(0, -1), EAST(1, 0), SOUTH(0, 1), WEST(-1, 0), NONE(0, 0);
+		NORTH (0, -1), EAST (1, 0), SOUTH (0, 1), WEST (-1, 0), NONE (0, 0);
 		
 		Direction(int x, int y) {
 			this.x = x;
@@ -175,7 +179,7 @@ public abstract class Tile implements ISpriteProvider, Serializable {
 		public int y;
 		
 		public TileCoords of() {
-			return TileCoords.of(x, y);
+			return TileCoords.of(this.x, this.y);
 		}
 	}
 	

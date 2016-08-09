@@ -11,22 +11,22 @@ import java.lang.reflect.Method;
  * @author Kevin
  */
 public class EventListenerImpl implements IEventListener, Serializable {
-
+	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
+	
 	/**
 	 * The listener instance
 	 */
 	private Object listener;
-
+	
 	/**
 	 * The method
 	 */
 	private Method method;
-
+	
 	/**
 	 * Creates a new implementation of an {@code IEventListener}
 	 * 
@@ -40,15 +40,15 @@ public class EventListenerImpl implements IEventListener, Serializable {
 		this.listener = listener;
 		this.method = method;
 	}
-
+	
 	@Override
 	public void invoke(Event event) {
 		try {
-			method.invoke(listener, event);
+			this.method.invoke(this.listener, event);
 		} catch (Exception e) {
 //			System.err.println("Trying to invoke " + method + " for object " + listener + " and args " + event);
 			e.printStackTrace();
 		}
 	}
-
+	
 }

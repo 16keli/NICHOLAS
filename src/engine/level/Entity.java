@@ -4,7 +4,7 @@ import engine.Game;
 import engine.client.graphics.Screen;
 import engine.client.graphics.sprite.ISpriteProvider;
 import engine.client.graphics.sprite.Sprite;
-import engine.network.synchro.Rebuildable;
+import engine.networknio.Rebuildable;
 import engine.physics.entity.EntityPhysics;
 
 /**
@@ -16,22 +16,22 @@ import engine.physics.entity.EntityPhysics;
  * @author Kevin
  */
 public abstract class Entity implements ISpriteProvider, Rebuildable {
-
+	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
+	
 	/**
 	 * The {@code Level}
 	 */
 	public Level level;
-
+	
 	/**
 	 * The upper-left Position of this {@code Entity}
 	 */
 	public Vector2 pos;
-
+	
 	/**
 	 * The {@code Sprite}
 	 */
@@ -41,7 +41,7 @@ public abstract class Entity implements ISpriteProvider, Rebuildable {
 	 * The {@code Entity} ID
 	 */
 	public int id;
-
+	
 	public Entity(Level l, double x, double y, Sprite sprite) {
 		this.level = l;
 		this.id = l.getNextAvailableID();
@@ -55,20 +55,22 @@ public abstract class Entity implements ISpriteProvider, Rebuildable {
 	public void rebuild(Game g) {
 		g.events.register(this);
 	}
-
+	
+	@Override
 	public Sprite getSprite() {
 		return this.sprite;
 	}
-
+	
+	@Override
 	public Vector2 getSpritePosition() {
 		return this.pos;
 	}
-
+	
 	/**
 	 * Any actions that may want to be executed every tick, such as AI decisions
 	 */
 	public abstract void tick();
-
+	
 	/**
 	 * Renders the given {@code Entity}
 	 * 

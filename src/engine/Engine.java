@@ -142,9 +142,9 @@ public class Engine {
 			int ticks = 0;
 			long lastTimer1 = System.currentTimeMillis();
 			
-			init();
+			this.init();
 			
-			while (running) {
+			while (this.running) {
 				long now = System.nanoTime();
 				uTick += (now - lastTime) / nsPerTick;
 				uFrame += (now - lastTime) / nsPerFrame;
@@ -152,7 +152,7 @@ public class Engine {
 				boolean shouldRender = !VSYNC;
 				while (uTick >= 1) {
 					ticks++;
-					tick();
+					this.tick();
 					uTick -= 1;
 				}
 				
@@ -169,7 +169,7 @@ public class Engine {
 				
 				if (shouldRender) {
 					frames++;
-					render();
+					this.render();
 				}
 				
 				if (System.currentTimeMillis() - lastTimer1 > 1000) {
@@ -183,18 +183,18 @@ public class Engine {
 		
 		@Override
 		public void tick() {
-			gameTime++;
-			c.tick();
+			this.gameTime++;
+			this.c.tick();
 		}
 		
 		@Override
 		public void init() {
-			c.game.init();
-			c.init();
+			this.c.game.init();
+			this.c.init();
 		}
 		
 		public void render() {
-			c.render();
+			this.c.render();
 		}
 		
 	}
@@ -220,15 +220,15 @@ public class Engine {
 			int ticks = 0;
 			long lastTimer1 = System.currentTimeMillis();
 			
-			init();
+			this.init();
 			
-			while (running) {
+			while (this.running) {
 				long now = System.nanoTime();
 				unprocessed += (now - lastTime) / nsPerTick;
 				lastTime = now;
 				while (unprocessed >= 1) {
 					ticks++;
-					tick();
+					this.tick();
 					unprocessed -= 1;
 				}
 				
@@ -248,13 +248,13 @@ public class Engine {
 		
 		@Override
 		public void tick() {
-			gameTime++;
-			s.tick();
+			this.gameTime++;
+			this.s.tick();
 		}
 		
 		@Override
 		public void init() {
-			s.game.init();
+			this.s.game.init();
 		}
 		
 	}

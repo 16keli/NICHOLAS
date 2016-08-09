@@ -28,12 +28,12 @@ public class PacketConnection extends PacketTCP {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 	@Override
 	public void writePacketData(ByteBuffer buff) throws IOException {
 		buff.putShort(this.pnum);
 	}
-
+	
 	@Override
 	public void readPacketData(ByteBuffer buff) throws IOException {
 		this.pnum = buff.getShort();

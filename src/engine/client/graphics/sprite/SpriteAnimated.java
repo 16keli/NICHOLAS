@@ -89,23 +89,23 @@ public class SpriteAnimated extends Sprite {
 	
 	@Override
 	public BufferedImage getImage() {
-		current = ((Engine.getGameTimeClient() - offset) % pertotal) / period;
-		return imgs[current];
+		this.current = ((Engine.getGameTimeClient() - this.offset) % this.pertotal) / this.period;
+		return this.imgs[this.current];
 	}
 	
 	@Override
 	public BufferedImage getAdjustedImage(int scale, boolean flipX, boolean flipY, int quads) {
-		current = ((Engine.getGameTimeClient() - offset) % pertotal) / period;
-		if ((scale == this.scales[current]) && (flipX == this.flipXs[current])
-				&& (flipY == this.flipYs[current]) && (quads == this.quadss[current])) {
-			return caches[current];
+		this.current = ((Engine.getGameTimeClient() - this.offset) % this.pertotal) / this.period;
+		if ((scale == this.scales[this.current]) && (flipX == this.flipXs[this.current])
+				&& (flipY == this.flipYs[this.current]) && (quads == this.quadss[this.current])) {
+			return this.caches[this.current];
 		}
-		caches[current] = Screen.adjustImage(this.imgs[current], scale, flipX, flipY, quads);
-		this.scales[current] = scale;
-		this.flipXs[current] = flipX;
-		this.flipYs[current] = flipY;
-		this.quadss[current] = quads;
-		return caches[current];
+		this.caches[this.current] = Screen.adjustImage(this.imgs[this.current], scale, flipX, flipY, quads);
+		this.scales[this.current] = scale;
+		this.flipXs[this.current] = flipX;
+		this.flipYs[this.current] = flipY;
+		this.quadss[this.current] = quads;
+		return this.caches[this.current];
 	}
 	
 	/**
@@ -128,8 +128,8 @@ public class SpriteAnimated extends Sprite {
 	}
 	
 	/**
-	 * Creates a new {@code SpriteAnimated} with the source {@code SpriteAnimated}'s images transformed by the given
-	 * parameters
+	 * Creates a new {@code SpriteAnimated} with the source {@code SpriteAnimated}'s images transformed by the
+	 * given parameters
 	 * 
 	 * @param src
 	 *            The source {@code SpriteAnimated}
@@ -143,7 +143,8 @@ public class SpriteAnimated extends Sprite {
 	 *            The number of quadrants to rotate
 	 * @return
 	 */
-	public static SpriteAnimated transform(SpriteAnimated src, int scale, boolean flipX, boolean flipY, int quads) {
+	public static SpriteAnimated transform(SpriteAnimated src, int scale, boolean flipX, boolean flipY,
+			int quads) {
 		BufferedImage[] imgs = new BufferedImage[src.imgs.length];
 		for (int i = 0; i < imgs.length; i++) {
 			imgs[i] = Screen.adjustImage(src.imgs[i], scale, flipX, flipY, quads);

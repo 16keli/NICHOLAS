@@ -24,7 +24,7 @@ import engine.level.Vector2;
  * @author Kevin
  */
 public class InputHandler implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener {
-
+	
 	// private Game g;
 	private File cfg;
 	
@@ -41,7 +41,7 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 //			e.printStackTrace();
 //		}
 //	}
-
+	
 	public InputHandler(Client client) {
 		System.setProperty("sun.awt.enableExtraMouseButtons", "true");
 		client.addKeyListener(this);
@@ -50,67 +50,67 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 		client.addMouseWheelListener(this);
 		this.scale = client.SCALE;
 		// this.g = game;
-		cfg = new File(Engine.instance.filePath + "keycfg.txt");
-		if (!cfg.exists()) {
+		this.cfg = new File(Engine.instance.filePath + "keycfg.txt");
+		if (!this.cfg.exists()) {
 			try {
-				cfg.createNewFile();
+				this.cfg.createNewFile();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 //		this.readBinds();
 	}
-
+	
 	/**
 	 * Represents an input. Be sure to define your own {@code Key}s somewhere in your game. At the moment,
 	 * keys are limited to a single binding.
 	 */
 	public class Input {
-
+		
 		public int presses = 0, absorbs = 0;
-
+		
 		public boolean down = false, clicked = false;
-
+		
 		/**
 		 * The {@code KeyEvent} or {@code MouseEvent} that this key is bound to by default
 		 */
 		public int def;
-
+		
 		/**
 		 * Toggles the {@code Input}
 		 * 
 		 * @param pressed
 		 */
 		public void toggle(boolean pressed) {
-			if (pressed != down) {
-				down = pressed;
+			if (pressed != this.down) {
+				this.down = pressed;
 			}
 			if (pressed) {
-				presses++;
+				this.presses++;
 			}
 		}
-
+		
 		/**
 		 * Ticks
 		 */
 		public void tick() {
-			if (absorbs < presses) {
-				absorbs++;
-				clicked = true;
+			if (this.absorbs < this.presses) {
+				this.absorbs++;
+				this.clicked = true;
 			} else {
-				clicked = false;
+				this.clicked = false;
 			}
 		}
 	}
-
+	
 	public List<Input> inputs = new ArrayList<Input>();
-
+	
 	/**
 	 * Represents a key. Be sure to define your own {@code Key}s somewhere in your game. At the moment, keys
 	 * are limited to a single binding.
 	 */
 	public class Key extends Input {
-
+		
 		/**
 		 * The {@code KeyCode} that this key is bound to.
 		 * <p>
@@ -118,7 +118,7 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 		 * one.
 		 */
 		public List<Integer> binds = new LinkedList<Integer>();
-
+		
 		/**
 		 * Used if the default Binding and the current Binding are the same
 		 * 
@@ -128,7 +128,7 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 		public Key(int def) {
 			this(def, def);
 		}
-
+		
 		/**
 		 * Used if the default Binding differs from the current Binding
 		 * 
@@ -136,12 +136,12 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 		 * @param bind
 		 */
 		public Key(int def, int bind) {
-			keys.add(this);
-			inputs.add(this);
+			InputHandler.this.keys.add(this);
+			InputHandler.this.inputs.add(this);
 			this.def = def;
 			this.binds.add(bind);
 		}
-
+		
 		/**
 		 * Changes the binding of the key from old to new
 		 * 
@@ -155,9 +155,9 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 			if ((ind = this.binds.indexOf(oldb)) != -1) {
 				this.binds.set(ind, newb);
 			}
-			writeBinds();
+			this.writeBinds();
 		}
-
+		
 		/**
 		 * Adds a new binding to the list of binds
 		 * 
@@ -170,9 +170,9 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 				bl.set(i, bind[i]);
 			}
 			this.binds.addAll(bl);
-			writeBinds();
+			this.writeBinds();
 		}
-
+		
 		/**
 		 * Removes bindings from the list of binds
 		 * 
@@ -185,26 +185,26 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 				bl.set(i, bind[i]);
 			}
 			this.binds.removeAll(bl);
-			writeBinds();
+			this.writeBinds();
 		}
-
+		
 		public void write(PrintStream out) {
 			out.println(this.def);
 			for (Integer i : this.binds) {
 				out.println("," + i);
 			}
 		}
-
+		
 		public void readBinds() {
-			try (Scanner s = new Scanner(cfg)) {
+			try (Scanner s = new Scanner(InputHandler.this.cfg)) {
 				while (s.hasNext()) {
 					String l = s.nextLine();
 					String bs[] = l.split(",");
 					int def = Integer.parseInt(bs[0]);
-					for (int i = 0; i < keys.size(); i++) {
-						if (keys.get(i).def == def) {
+					for (int i = 0; i < InputHandler.this.keys.size(); i++) {
+						if (InputHandler.this.keys.get(i).def == def) {
 							for (int j = 1; j < bs.length; j++) {
-								keys.get(i).addBinding(Integer.parseInt(bs[j]));
+								InputHandler.this.keys.get(i).addBinding(Integer.parseInt(bs[j]));
 							}
 						}
 					}
@@ -213,10 +213,10 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 				e.printStackTrace();
 			}
 		}
-
+		
 		public void writeBinds() {
-			try (PrintStream out = new PrintStream(cfg)) {
-				for (Key k : keys) {
+			try (PrintStream out = new PrintStream(InputHandler.this.cfg)) {
+				for (Key k : InputHandler.this.keys) {
 					k.write(out);
 				}
 			} catch (Exception e) {
@@ -224,134 +224,136 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 			}
 		}
 	}
-
+	
 	public List<Key> keys = new ArrayList<Key>();
-
+	
 	public Key escape = new Key(KeyEvent.VK_ESCAPE);
-
+	
 	public Key up = new Key(KeyEvent.VK_UP, KeyEvent.VK_W);
-
+	
 	public Key down = new Key(KeyEvent.VK_DOWN, KeyEvent.VK_S);
-
+	
 	public Key up2 = new Key(KeyEvent.VK_I);
-
+	
 	public Key down2 = new Key(KeyEvent.VK_K);
-
+	
 	public Key left = new Key(KeyEvent.VK_LEFT, KeyEvent.VK_A);
-
+	
 	public Key right = new Key(KeyEvent.VK_RIGHT, KeyEvent.VK_D);
 	
 	public Key left2 = new Key(KeyEvent.VK_J);
 	
 	public Key right2 = new Key(KeyEvent.VK_L);
-
+	
 	public Key enter = new Key(KeyEvent.VK_ENTER);
-
+	
 	public Key space = new Key(KeyEvent.VK_SPACE);
 	
 	public Key tab = new Key(KeyEvent.VK_TAB);
-
+	
 //	public Key up = new Key();
 //	public Key down = new Key();
 //	public Key left = new Key();
 //	public Key right = new Key();
 //	public Key attack = new Key();
 //	public Key menu = new Key();
-
+	
 	public void releaseAll() {
-		releaseAllKeys();
-		releaseAllMice();
+		this.releaseAllKeys();
+		this.releaseAllMice();
 	}
-
+	
 	public void releaseAllKeys() {
-		for (int i = 0; i < keys.size(); i++) {
-			keys.get(i).down = false;
+		for (int i = 0; i < this.keys.size(); i++) {
+			this.keys.get(i).down = false;
 		}
 	}
-
+	
 	public void releaseAllMice() {
-		for (int i = 0; i < mice.size(); i++) {
-			mice.get(i).down = false;
+		for (int i = 0; i < this.mice.size(); i++) {
+			this.mice.get(i).down = false;
 		}
 	}
-
+	
 	public void tick() {
-		for (int i = 0; i < inputs.size(); i++) {
-			inputs.get(i).tick();
+		for (int i = 0; i < this.inputs.size(); i++) {
+			this.inputs.get(i).tick();
 		}
-		mouseWheel.tick();
+		this.mouseWheel.tick();
 	}
-
+	
+	@Override
 	public void keyPressed(KeyEvent ke) {
-		toggleKey(ke, true);
+		this.toggleKey(ke, true);
 	}
-
+	
+	@Override
 	public void keyReleased(KeyEvent ke) {
-		toggleKey(ke, false);
+		this.toggleKey(ke, false);
 	}
-
+	
 	private void toggleKey(KeyEvent ke, boolean pressed) {
-		for (int i = 0; i < keys.size(); i++) {
-			for (Integer b : keys.get(i).binds) {
+		for (int i = 0; i < this.keys.size(); i++) {
+			for (Integer b : this.keys.get(i).binds) {
 				if (ke.getKeyCode() == b.intValue()) {
-					keys.get(i).toggle(pressed);
+					this.keys.get(i).toggle(pressed);
 				}
 			}
 		}
 	}
-
+	
 	/**
 	 * Represents a MouseButton. There is no real need to implement more
 	 */
 	public class Mouse extends Input {
-
+		
 		public int bind;
-
+		
 		public int x, y;
-
+		
 		public Mouse(int bind) {
-			mice.add(this);
-			inputs.add(this);
+			InputHandler.this.mice.add(this);
+			InputHandler.this.inputs.add(this);
 			this.bind = bind;
 		}
 	}
-
+	
 	public List<Mouse> mice = new ArrayList<Mouse>();
-
+	
 	public Mouse mouseLeft = new Mouse(MouseEvent.BUTTON1);
-
+	
 	public Mouse mouseRight = new Mouse(MouseEvent.BUTTON3);
-
+	
 	public Mouse mouseMiddle = new Mouse(MouseEvent.BUTTON2);
-
+	
 	public Mouse mouseLeftSide = new Mouse(4);
-
+	
 	public Mouse mouseRightSide = new Mouse(5);
-
+	
 	@Override
 	public void mousePressed(MouseEvent e) {
-		toggleMouse(e, true);
+		this.toggleMouse(e, true);
 	}
-
+	
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		toggleMouse(e, false);
+		this.toggleMouse(e, false);
 	}
-
+	
 	private void toggleMouse(MouseEvent e, boolean b) {
-		for (int i = 0; i < mice.size(); i++) {
-			mice.get(i).x = e.getX();
-			mice.get(i).y = e.getY();
-			if (e.getButton() == mice.get(i).bind) {
-				mice.get(i).toggle(b);
+		for (int i = 0; i < this.mice.size(); i++) {
+			this.mice.get(i).x = e.getX();
+			this.mice.get(i).y = e.getY();
+			if (e.getButton() == this.mice.get(i).bind) {
+				this.mice.get(i).toggle(b);
 			}
 		}
 	}
-
+	
 	private int mouseX;
-
+	
 	private int mouseY;
-
+	
 	@Override
 	public void mouseMoved(MouseEvent e) {
 		this.mouseX = e.getX();
@@ -359,7 +361,7 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 	}
 	
 	public Vector2 getMousePos() {
-		return Vector2.of(getMouseX(), getMouseY());
+		return Vector2.of(this.getMouseX(), this.getMouseY());
 	}
 	
 	public double getMouseX() {
@@ -381,18 +383,19 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 	}
 	
 	public class MouseWheel {
+		
 		public int rotations;
-
+		
 		public void tick() {
 			this.rotations = 0;
 		}
 		
 		public boolean scrollUp() {
-			return rotations > 0;
+			return this.rotations > 0;
 		}
 		
 		public boolean scrollDown() {
-			return rotations < 0;
+			return this.rotations < 0;
 		}
 	}
 	
@@ -402,26 +405,26 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		this.mouseWheel.rotations = e.getWheelRotation();
 	}
-
+	
 	// Don't need these
 	@Override
 	public void keyTyped(KeyEvent ke) {
 	}
-
+	
 	@Override
 	public void mouseEntered(MouseEvent e) {
 	}
-
+	
 	@Override
 	public void mouseExited(MouseEvent e) {
 	}
-
+	
 	@Override
 	public void mouseClicked(MouseEvent e) {
 	}
-
+	
 	@Override
 	public void mouseDragged(MouseEvent arg0) {
 	}
-
+	
 }

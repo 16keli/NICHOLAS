@@ -9,7 +9,6 @@ import engine.physics.entity.EntityPhysics;
 import engine.physics.entity.EventEntityPosition;
 import engine.server.Server;
 
-
 public class PacketEntityPosition extends PacketUDP {
 	
 	public int id;
@@ -17,7 +16,7 @@ public class PacketEntityPosition extends PacketUDP {
 	public double x, y;
 	
 	public PacketEntityPosition() {
-		
+	
 	}
 	
 	public PacketEntityPosition(EntityPhysics e) {

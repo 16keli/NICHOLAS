@@ -41,7 +41,7 @@ public class ConnectionList {
 	 *            The {@code ConnectionNIO}
 	 */
 	public void addToList(ConnectionNIO connect) {
-		connections.add(connect);
+		this.connections.add(connect);
 	}
 	
 	/**
@@ -50,7 +50,7 @@ public class ConnectionList {
 	 * @return
 	 */
 	public List<ConnectionNIO> getList() {
-		return connections;
+		return this.connections;
 	}
 	
 	/**
@@ -74,7 +74,7 @@ public class ConnectionList {
 	 *            The player number to send the {@code PacketNIO} to
 	 */
 	public void sendPacket(PacketNIO p, int ind) {
-		sendPacket(p, connections.get(ind));
+		this.sendPacket(p, this.connections.get(ind));
 	}
 	
 	/**
@@ -84,7 +84,7 @@ public class ConnectionList {
 	 *            The {@code PacketNIO} to send
 	 */
 	public void sendPacketAll(PacketNIO p) {
-		for (ConnectionNIO conn : connections) {
+		for (ConnectionNIO conn : this.connections) {
 			conn.addToSendQueue(p);
 		}
 	}
@@ -98,9 +98,9 @@ public class ConnectionList {
 	 *            The player number to NOT send the {@code PacketNIO} to
 	 */
 	public void sentPacketAllExcept(PacketNIO p, int id) {
-		for (int i = 0; i < connections.size(); i++) {
+		for (int i = 0; i < this.connections.size(); i++) {
 			if (i != id) {
-				connections.get(i).addToSendQueue(p);
+				this.connections.get(i).addToSendQueue(p);
 			}
 		}
 	}

@@ -79,8 +79,9 @@ public class ColorWrapper {
 	 * <p>
 	 * <b>7:</b> 240 (Quite White)
 	 */
-	public static final int[] DEFAULT_EIGHT = { COL_16, COL_48, COL_80, COL_112, COL_144, COL_176, COL_208, COL_240 };
-	
+	public static final int[] DEFAULT_EIGHT = { COL_16, COL_48, COL_80, COL_112, COL_144, COL_176, COL_208,
+			COL_240 };
+			
 	/**
 	 * The default array of colors that will be replaced. Can be set with
 	 */
@@ -192,7 +193,8 @@ public class ColorWrapper {
 		if (img.getType() == BufferedImage.TYPE_INT_ARGB) {
 			return img;
 		} else {
-			BufferedImage bi = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			BufferedImage bi = new BufferedImage(img.getWidth(), img.getHeight(),
+					BufferedImage.TYPE_INT_ARGB);
 			Graphics2D g = bi.createGraphics();
 			g.drawImage(img, 0, 0, null);
 			g.dispose();

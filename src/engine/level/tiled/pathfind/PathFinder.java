@@ -18,8 +18,8 @@ import engine.level.tiled.Tile;
  * <ul>
  * <li>A*: {@link #AStar(EntityTiled, Tile)}</li>
  * </ul>
+ * 
  * @author Kevin
- *
  */
 public class PathFinder {
 	
@@ -29,7 +29,7 @@ public class PathFinder {
 	 */
 	public static UnitPath cache;
 	
-	//A* algorithm
+	// A* algorithm
 	
 	/**
 	 * Gets the shortest path for the given {@code EntityTiled} from its {@code currentTile} to the
@@ -127,7 +127,8 @@ public class PathFinder {
 	 *            The cost of moving along this path
 	 * @return A fresh UnitPath reconstructed for your health
 	 */
-	private static UnitPath AStarReconstructPath(EntityTiled ent, Map<Tile, Tile> cameFrom, Tile current, int cost) {
+	private static UnitPath AStarReconstructPath(EntityTiled ent, Map<Tile, Tile> cameFrom, Tile current,
+			int cost) {
 		List<Tile> tiles = new LinkedList<Tile>();
 		tiles.add(current);
 		while (cameFrom.containsKey(current)) {
@@ -156,5 +157,5 @@ public class PathFinder {
 	private static int AStarCostEstimate(Tile tile, Tile goal) {
 		return tile.getDistanceFrom(goal);
 	}
-
+	
 }

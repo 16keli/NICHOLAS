@@ -114,8 +114,8 @@ public abstract class EntityPhysics extends Entity {
 	 *            The force to exert
 	 */
 	public void exertForce(Vector2 force) {
-		if (!forces.contains(force)) {
-			forces.add(force);
+		if (!this.forces.contains(force)) {
+			this.forces.add(force);
 		}
 	}
 	
@@ -126,8 +126,8 @@ public abstract class EntityPhysics extends Entity {
 	 *            The force to stop exerting
 	 */
 	public void stopExertingForce(Vector2 force) {
-		if (forces.contains(force)) {
-			forces.remove(force);
+		if (this.forces.contains(force)) {
+			this.forces.remove(force);
 		}
 	}
 	
@@ -145,7 +145,7 @@ public abstract class EntityPhysics extends Entity {
 	 */
 	public void tick1() {
 		this.netForce = Vector2.ZERO;
-		for (Vector2 force : forces) {
+		for (Vector2 force : this.forces) {
 			this.netForce = this.netForce.plus(force);
 		}
 		this.acc = this.netForce.scale(1 / this.mass);

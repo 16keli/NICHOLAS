@@ -56,7 +56,7 @@ public class Sound implements Runnable, PlayableSound {
 			this.path = Engine.getFilePath() + "/sounds/" + name;
 		}
 		try {
-			clip = Applet.newAudioClip(new File(path).toURI().toURL());
+			this.clip = Applet.newAudioClip(new File(this.path).toURI().toURL());
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -73,7 +73,7 @@ public class Sound implements Runnable, PlayableSound {
 		this.name = this.name.replace(".wav", "");
 		this.path = f.getPath();
 		try {
-			clip = Applet.newAudioClip(f.toURI().toURL());
+			this.clip = Applet.newAudioClip(f.toURI().toURL());
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
@@ -83,18 +83,20 @@ public class Sound implements Runnable, PlayableSound {
 	/**
 	 * Plays the sound
 	 */
+	@Override
 	public void run() {
-		clip.play();
+		this.clip.play();
 	}
 	
+	@Override
 	public long getLength() {// TODO make this method better
 		AudioInputStream stream = null;
 		try {
-			stream = AudioSystem.getAudioInputStream(new File(path));
+			stream = AudioSystem.getAudioInputStream(new File(this.path));
 			
 			AudioFormat format = stream.getFormat();
 			
-			return (long) (1000 * (new File(path)).length() / format.getSampleRate()
+			return (long) (1000 * (new File(this.path)).length() / format.getSampleRate()
 					/ (format.getSampleSizeInBits() / 8.0) / format.getChannels());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -102,6 +104,7 @@ public class Sound implements Runnable, PlayableSound {
 		return -1;
 	}
 	
+	@Override
 	public void play() {
 		new Thread(this, "Sound: " + this.name + " Thread").start();
 	}

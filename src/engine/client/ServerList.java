@@ -50,13 +50,13 @@ public class ServerList {
 	
 	public void readList() {
 		while (this.reader.hasNext()) {
-			connections.add(ServerConnection.read(this.reader.nextLine()));
+			this.connections.add(ServerConnection.read(this.reader.nextLine()));
 		}
 	}
 	
 	public void writeList() {
 		for (ServerConnection c : this.connections) {
-			c.write(writer);
+			c.write(this.writer);
 		}
 	}
 	
@@ -75,9 +75,10 @@ public class ServerList {
 	 * @return
 	 */
 	public MenuComponent[][] createComponentList() {
-		MenuComponent[][] comps = new MenuComponent[connections.size()][1];
-		for (int i = 0; i < connections.size(); i++) {
-			comps[i][0] = new MenuComponent(connections.get(i).name + ":\t" + connections.get(i).ip, 32, 32 + 16 * i);
+		MenuComponent[][] comps = new MenuComponent[this.connections.size()][1];
+		for (int i = 0; i < this.connections.size(); i++) {
+			comps[i][0] = new MenuComponent(this.connections.get(i).name + ":\t" + this.connections.get(i).ip,
+					32, 32 + 16 * i);
 		}
 		return comps;
 	}

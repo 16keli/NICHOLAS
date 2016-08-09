@@ -1,10 +1,10 @@
 package engine.event;
 
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-
-import static java.lang.annotation.RetentionPolicy.*;
-import static java.lang.annotation.ElementType.*;
 
 /**
  * Subscribes to a certain {@code Event}. By subscribing, each time that specific class of {@code Event} is

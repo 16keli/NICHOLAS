@@ -18,6 +18,21 @@ import engine.server.Server;
  * Thanks to the Java NIO API, (and me deciding to not be super lazy), TCP and UDP protocols are now united
  * into a single Superclass for both. The subclasses for {@link PacketTCP TCP} and {@link PacketUDP UDP} serve
  * merely as identifiers, nothing more.
+ * <p>
+ * Additionally, {@code PacketNIO} contains many useful static methods that can help with IO of certain things
+ * to {@code ByteBuffer}s.
+ * <ul>
+ * <li>String: {@link #readString(ByteBuffer) read} and {@link #writeString(ByteBuffer, String) write}</li>
+ * <li>Object: {@link #readObject(ByteBuffer) read} and {@link #writeObject(ByteBuffer, byte[]) write}. Note
+ * that writing an Object requires the serialized version, which can be obtained with
+ * {@link PacketObject#objectToBytes(Object)}</li>
+ * <li>boolean[]: {@link #readBooleans(ByteBuffer) read} and {@link #writeBooleans(ByteBuffer, boolean[])
+ * write}. This is due to the lack of inclusion of a native boolean write, for good reason. However, these
+ * methods do exist, should anyone need use of them.
+ * </ul>
+ * <p>
+ * Why use NIO? For the non-blocking feature, of course. That way, we can cut down on the number of active
+ * threads, which is always nice.
  * 
  * @author Kevin
  */
@@ -86,7 +101,9 @@ public abstract class PacketNIO {
 	 * @return Whether the {@code Packet} registration was successful
 	 */
 	public static boolean registerPacket(Class<? extends PacketNIO> c) {
-		while (!registerPacket(c, availableID++));
+		while (!registerPacket(c, availableID++)) {
+			;
+		}
 		return true;
 	}
 	
@@ -100,7 +117,7 @@ public abstract class PacketNIO {
 	 *            The class of {@code PacketNIO} to register, for example {@code PacketNIO.class}
 	 * @param id
 	 *            The integer ID to use
-	 * @return Whether the {@code Packet} registration was successful
+	 * @return Whether the {@code PacketNIO} registration was successful
 	 */
 	protected static boolean registerPacket(Class<? extends PacketNIO> c, int id) {
 		if (idtoclass.keySet().contains(id)) {
@@ -114,17 +131,17 @@ public abstract class PacketNIO {
 	}
 	
 	/**
-	 * Creates a new instance of a {@code Packet} from a given ID
+	 * Creates a new instance of a {@code PacketNIO} from a given ID
 	 * 
 	 * @param id
 	 *            The ID of the packet that it was registered with
-	 * @return A new instance of a {@code Packet}
+	 * @return A new instance of a {@code PacketNIO}
 	 */
 	public static PacketNIO getNewPacket(int id) {
 		try {
 			Class<? extends PacketNIO> c = idtoclass.get(id);
 			if (!idtoclass.containsKey(id)) {
-				System.out.println("Tried to initialize Packet with ID " + id + ", but it doesn't exist!");
+				System.err.println("Tried to initialize Packet with ID " + id + ", but it doesn't exist!");
 			}
 			return (c == null ? null : c.newInstance());
 		} catch (Exception e) {
@@ -134,7 +151,7 @@ public abstract class PacketNIO {
 	}
 	
 	/**
-	 * Processes a {@code Packet} on the client side
+	 * Processes a {@code PacketNIO} on the client side
 	 * 
 	 * @param c
 	 *            The {@code Client} instance
@@ -142,7 +159,7 @@ public abstract class PacketNIO {
 	public abstract void processClient(Client c);
 	
 	/**
-	 * Processes a {@code Packet} on the server side
+	 * Processes a {@code PacketNIO} on the server side
 	 * 
 	 * @param player
 	 *            The Connection ID the Packet was received from
@@ -159,7 +176,7 @@ public abstract class PacketNIO {
 	 * @return The String
 	 * @throws IOException
 	 */
-	protected static String readString(ByteBuffer buff) throws IOException {
+	public static String readString(ByteBuffer buff) {
 		int l = buff.getInt();
 		StringBuilder s = new StringBuilder(l);
 		for (int i = 0; i < l; i++) {
@@ -177,7 +194,7 @@ public abstract class PacketNIO {
 	 *            The String
 	 * @throws IOException
 	 */
-	protected static void writeString(ByteBuffer buff, String s) throws IOException {
+	public static void writeString(ByteBuffer buff, String s) {
 		buff.putInt(s.length());
 		for (char c : s.toCharArray()) {
 			buff.putChar(c);
@@ -191,30 +208,65 @@ public abstract class PacketNIO {
 	 *            The {@code ByteBuffer}
 	 * @return
 	 */
-	protected static Object readObject(ByteBuffer buff) {
+	public static Object readObject(ByteBuffer buff) {
 		int size = buff.getInt();
-		System.out.println("Bytes array size " + size);
 		byte[] bytes = new byte[size];
 		buff.get(bytes);
 		return PacketObject.bytesToObject(bytes);
 	}
 	
 	/**
-	 * Writes an {@code Object} to a {@code ByteBuffer}
+	 * Writes an {@code Object} to a {@code ByteBuffer}. Be sure to have serialized the object beforehand with
+	 * {@link PacketObject#objectToBytes(Object)}, otherwise the Packet ID and Data may become separated! That
+	 * causes lots of problems!
 	 * 
 	 * @param buff
 	 *            The {@code ByteBuffer}
-	 * @param bytes The Object to write, in bytes
+	 * @param bytes
+	 *            The Object to write, in bytes
 	 */
-	protected static void writeObject(ByteBuffer buff, byte[] bytes) {
+	public static void writeObject(ByteBuffer buff, byte[] bytes) {
 		buff.putInt(bytes.length);
+		buff.put(bytes);
+	}
+	
+	/**
+	 * Reads a boolean array from the given {@code ByteBuffer}
+	 * 
+	 * @param buff
+	 * @return
+	 */
+	public static boolean[] readBooleans(ByteBuffer buff) {
+		int size = buff.getInt();
+		boolean[] array = new boolean[size];
+		byte[] bytes = new byte[((array.length + 7) / 8)];
+		buff.get(bytes);
+		for (int i = 0; i < array.length; i++) {
+			array[i] = ((bytes[i / 8] >> (i % 8)) & 0b00000001) == 1;
+		}
+		return array;
+	}
+	
+	/**
+	 * Writes a boolean array to the given {@code ByteBuffer}
+	 * 
+	 * @param buff
+	 * @param array
+	 */
+	public static void writeBooleans(ByteBuffer buff, boolean[] array) {
+		buff.putInt(array.length);
+		// The number of bytes required
+		byte[] bytes = new byte[((array.length + 7) / 8)];
+		for (int i = 0; i < array.length; i++) {
+			bytes[i / 8] += ((array[i] ? 1 : 0) << (i % 8));
+		}
 		buff.put(bytes);
 	}
 	
 	public static void getPacketDataFromBuffer(ByteBuffer buffer) {
 		byte[] allData = buffer.array();
-		getPacketDataFromArrays(Arrays.copyOfRange(allData, 0, 8),
-				Arrays.copyOfRange(allData, 8, allData.length));
+		getPacketDataFromArrays(Arrays.copyOfRange(allData, 0, 4),
+				Arrays.copyOfRange(allData, 4, allData.length));
 	}
 	
 	public static void getPacketDataFromBuffer(ByteBuffer idBuff, ByteBuffer dataBuff) {

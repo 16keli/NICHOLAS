@@ -1,10 +1,6 @@
 package engine.networknio;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.StandardSocketOptions;
@@ -108,14 +104,6 @@ public class ConnectionNIO {
 	 */
 	private ProtocolWrapper udpWrapper;
 	
-	public static File outputFile;
-	
-	public static PrintStream outputStream;
-	
-	public static File inputFile;
-	
-	public static PrintStream inputStream;
-	
 	public ConnectionNIO(SocketChannel s, String source, int tcpSize, int udpSize) throws IOException {
 		this(s, source, tcpSize, udpSize, false);
 	}
@@ -144,7 +132,7 @@ public class ConnectionNIO {
 		
 		this.tcpChannel = s;
 		this.udpChannel = DatagramChannel.open();
-		this.udpChannel.bind(legacySocket.getLocalSocketAddress());
+		this.udpChannel.bind(this.legacySocket.getLocalSocketAddress());
 		this.udpChannel.connect(this.remoteAddress);
 		
 		this.tcpChannel.configureBlocking(false);
@@ -157,14 +145,14 @@ public class ConnectionNIO {
 		this.tcpIn = ByteBuffer.allocate(tcpSize);
 		this.udpIn = ByteBuffer.allocate(udpSize);
 		
-		System.out.println(source + " UDP is bound to " + udpChannel.getLocalAddress() + " and connected to "
-				+ udpChannel.getRemoteAddress());
+		System.out.println(source + " UDP is bound to " + this.udpChannel.getLocalAddress()
+				+ " and connected to " + this.udpChannel.getRemoteAddress());
 				
-		this.tcpWrapper = new TCPChannelWrapper(this.tcpChannel, tcpIn, tcpBuffer, this);
-		this.udpWrapper = new UDPChannelWrapper(this.udpChannel, udpIn, udpBuffer, this);
+		this.tcpWrapper = new TCPChannelWrapper(this.tcpChannel, this.tcpIn, this.tcpBuffer, this);
+		this.udpWrapper = new UDPChannelWrapper(this.udpChannel, this.udpIn, this.udpBuffer, this);
 		
 		this.logger = Logger.getLogger("engine.connection." + this.sourceName);
-		this.logger.info("Local Address:\t" + legacySocket.getLocalSocketAddress());
+		this.logger.info("Local Address:\t" + this.legacySocket.getLocalSocketAddress());
 		this.logger.info("Remote Address:\t" + this.remoteAddress);
 		
 		if (threads) {
@@ -174,21 +162,6 @@ public class ConnectionNIO {
 		}
 		
 		this.threadsActive = threads;
-		
-		try {
-			outputFile = new File("output.txt");
-			if (!outputFile.exists()) {
-				outputFile.createNewFile();
-			}
-			inputFile = new File("input.txt");
-			if (!inputFile.exists()) {
-				inputFile.createNewFile();
-			}
-			outputStream = new PrintStream(new BufferedOutputStream(new FileOutputStream(outputFile)));
-			inputStream = new PrintStream(new BufferedOutputStream(new FileOutputStream(inputFile)));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 	
 	/**
@@ -205,12 +178,17 @@ public class ConnectionNIO {
 	 */
 	public void sendPackets() {
 		try {
-			// End delimiters
-			this.tcpBuffer.putInt(Integer.MIN_VALUE);
-			this.udpBuffer.putInt(Integer.MIN_VALUE);
-			
-			this.tcpWrapper.sendData(this.remoteAddress);
-			this.udpWrapper.sendData(this.remoteAddress);
+			// Send only if there is actually data contained
+			if (this.tcpBuffer.position() > 0) {
+				// End delimiter
+				this.tcpBuffer.putInt(Integer.MIN_VALUE);
+				this.tcpWrapper.sendData(this.remoteAddress);
+			}
+			if (this.udpBuffer.position() > 0) {
+				// End delimiter
+				this.udpBuffer.putInt(Integer.MIN_VALUE);
+				this.udpWrapper.sendData(this.remoteAddress);
+			}
 		} catch (Exception e) {
 			// Swallow because it's gonna happen a lot
 		}
@@ -225,10 +203,7 @@ public class ConnectionNIO {
 	public void addToSendQueue(PacketNIO p) {
 		if (!this.terminating) {
 			try {
-				getAppropriateWrapper(p).writePacket(p);
-				if (this.sourceName.equals("Server-Side")) {
-					outputStream.println("Writing Packet with ID " + p.getID());
-				}
+				this.getAppropriateWrapper(p).writePacket(p);
 				if (!PacketNIO.idtoclass.containsKey(p.getID())) {
 					System.err.println("An unregistered type of PacketNIO was added to " + this.sourceName
 							+ "'s send queue! ID is " + p.getID() + ", class is " + p.getClass().getName());
@@ -270,15 +245,7 @@ public class ConnectionNIO {
 	 */
 	private boolean readPackets() {
 		try {
-			if (this.sourceName.equals("Client-Side")) {
-				if (inputStream != null) {
-					inputStream.println("Attempting read");
-				}
-			}
 			if (this.tcpWrapper.readData()) {
-				if (this.sourceName.equals("Client-Side")) {
-					PacketNIO.getPacketDataToLimit(this.tcpIn.array(), this.tcpIn.limit(), inputStream);
-				}
 				this.readPackets.addAll(this.tcpWrapper.readFully());
 				return true;
 			}

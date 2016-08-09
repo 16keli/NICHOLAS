@@ -34,34 +34,34 @@ public abstract class LevelTiled extends Level {
 	
 	@Override
 	public void render(Screen s) {
-		for (int x = 0; x < tiles.length; x++) {
-			for (int y = 0; y < tiles[x].length; y++) {
-				tiles[x][y].render(s);
+		for (int x = 0; x < this.tiles.length; x++) {
+			for (int y = 0; y < this.tiles[x].length; y++) {
+				this.tiles[x][y].render(s);
 			}
 		}
 	}
 	
 	public boolean tileExists(TileCoords t) {
-		return tileExists(t.x, t.y);
+		return this.tileExists(t.x, t.y);
 	}
 	
 	public boolean tileExists(int x, int y) {
-		if (x >= getTileWidth() || x < 0 || y >= getTileHeight() || y < 0) {
+		if (x >= this.getTileWidth() || x < 0 || y >= this.getTileHeight() || y < 0) {
 			return false;
 		}
 		return true;
 	}
 	
 	public void setTile(Tile t) {
-		tiles[t.tileCoords.x][t.tileCoords.y] = t;
+		this.tiles[t.tileCoords.x][t.tileCoords.y] = t;
 	}
 	
 	public Tile getTile(TileCoords t) {
-		return getTile(t.x, t.y);
+		return this.getTile(t.x, t.y);
 	}
 	
 	public Tile getTile(int x, int y) {
-		return tiles[x][y];
+		return this.tiles[x][y];
 	}
 	
 	public int getTileWidthPixel() {
@@ -73,11 +73,11 @@ public abstract class LevelTiled extends Level {
 	}
 	
 	public int getTileWidth() {
-		return tiles.length;
+		return this.tiles.length;
 	}
 	
 	public int getTileHeight() {
-		return tiles[0].length;
+		return this.tiles[0].length;
 	}
 	
 	/**
@@ -101,7 +101,7 @@ public abstract class LevelTiled extends Level {
 	 * @return All {@code Tile}s adjacent to the given {@code Tile} except for {@code exclude}
 	 */
 	public List<Tile> adjacentTilesExcluding(Tile t, Tile exclude) {
-		List<Tile> list = adjacentTiles(t);
+		List<Tile> list = this.adjacentTiles(t);
 		list.remove(exclude);
 		return list;
 	}
@@ -122,7 +122,7 @@ public abstract class LevelTiled extends Level {
 	 *         range
 	 */
 	public List<Tile> adjacentTilesExcluding(Tile t, Tile source, int range) {
-		List<Tile> list = adjacentTiles(t);
+		List<Tile> list = this.adjacentTiles(t);
 		Tile remove = null;
 		for (Tile tile : list) {
 			if (tile.getDistanceFrom(source) == range) {
@@ -146,11 +146,11 @@ public abstract class LevelTiled extends Level {
 	 */
 	public List<Tile> adjacentTilesInAbsoluteRange(Tile t, int range) {
 		List<Tile> tiles = new ArrayList<Tile>();
-		tiles.addAll(adjacentTiles(t));
+		tiles.addAll(this.adjacentTiles(t));
 		for (int i = 1; i < range; i++) {
 			for (Tile tile : tiles) {
 				if (tile.getDistanceFrom(t) == i) {
-					tiles.addAll(adjacentTilesExcluding(tile, t, i - 1));
+					tiles.addAll(this.adjacentTilesExcluding(tile, t, i - 1));
 				}
 			}
 		}
@@ -171,11 +171,12 @@ public abstract class LevelTiled extends Level {
 	 */
 	public List<Tile> adjacentTilesInRange(Tile t, EntityTiled ent, int range) {
 		List<Tile> tiles = new ArrayList<Tile>();
-		tiles.addAll(adjacentTiles(t));
+		tiles.addAll(this.adjacentTiles(t));
 		for (int i = 1; i < range; i++) {
 			for (Tile tile : tiles) {
 				if (tile.getDistanceFrom(t) == i) {
-					tiles.addAll(adjacentTilesExcluding(tile, t, i - tile.getMovementCost(ent.getClass())));
+					tiles.addAll(
+							this.adjacentTilesExcluding(tile, t, i - tile.getMovementCost(ent.getClass())));
 				}
 			}
 		}

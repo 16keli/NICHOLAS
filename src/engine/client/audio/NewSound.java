@@ -15,8 +15,8 @@ public class NewSound implements PlayableSound {
 		try {
 			AudioInputStream strm = AudioSystem.getAudioInputStream(f);
 			DataLine.Info info = new DataLine.Info(Clip.class, strm.getFormat());
-			clip = (Clip) AudioSystem.getLine(info);
-			clip.open(strm);
+			this.clip = (Clip) AudioSystem.getLine(info);
+			this.clip.open(strm);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -24,12 +24,12 @@ public class NewSound implements PlayableSound {
 	
 	@Override
 	public void play() {
-		clip.start();
+		this.clip.start();
 	}
 	
 	@Override
 	public long getLength() {
-		return clip.getMicrosecondLength() / 1000;
+		return this.clip.getMicrosecondLength() / 1000;
 	}
 	
 }

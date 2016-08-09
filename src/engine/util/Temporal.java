@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A collection of Time-Based utilities, such as Timers and Stopwatches.
- * TODO: Fix this entire thing
+ * A collection of Time-Based utilities, such as Timers and Stopwatches. TODO: Fix this entire thing
+ * 
  * @author Kevin
- *
  */
 public abstract class Temporal {
 	
@@ -29,13 +28,14 @@ public abstract class Temporal {
 	 * Starts the {@code Temporal} instance
 	 */
 	public void start() {
-		
+	
 	}
 	
 	/**
 	 * Gets the representation of this {@code Temporal} in terms of seconds.
 	 * <p>
 	 * The format is HH:MM:SS.MS. Hours and Minutes will only appear if necessary.
+	 * 
 	 * @return
 	 */
 	public String getTimeString() {
@@ -44,15 +44,15 @@ public abstract class Temporal {
 	
 	/**
 	 * An implementation of a Timer, which counts down to 0 from a given starting point.
+	 * 
 	 * @author Kevin
-	 *
 	 */
 	public static class Timer extends Temporal {
 		
 		protected Timer(long time) {
 			this.ticks = time;
 		}
-
+		
 		@Override
 		public void tick() {
 			// TODO Auto-generated method stub
@@ -60,5 +60,5 @@ public abstract class Temporal {
 		}
 		
 	}
-
+	
 }

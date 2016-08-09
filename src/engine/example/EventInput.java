@@ -8,11 +8,12 @@ public class EventInput extends Event {
 	
 	public byte dir;
 	
-	public EventInput(){}
+	public EventInput() {
+	}
 	
 	public EventInput(short pnum, byte dir) {
 		this.pnum = pnum;
 		this.dir = dir;
 	}
-
+	
 }

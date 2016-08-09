@@ -4,9 +4,12 @@ import java.io.IOException;
 
 import engine.Game;
 import engine.event.EventBus;
+import engine.event.SubscribeEvent;
+import engine.event.game.ConnectionEstablishedEvent;
 import engine.networknio.ConnectionList;
 import engine.networknio.ConnectionNIO;
 import engine.networknio.packet.PacketNIO;
+import engine.networknio.packet.PacketPlayer;
 
 /**
  * Represents the Server, which manages {@code Client} connections and gives them something to do
@@ -81,11 +84,11 @@ public abstract class Server {
 	 */
 	public void startListenThread(int port) {
 		try {
-			listener = new ServerNIOListenThread(this, port);
+			this.listener = new ServerNIOListenThread(this, port);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		listener.start();
+		this.listener.start();
 	}
 	
 	/**
@@ -94,14 +97,14 @@ public abstract class Server {
 	 * Automatically calls {@code Game}'s tick method, so there is no need to call it again.
 	 */
 	public void tick() {
-		game.tick(this);
-		for (short i = 0; i < connections.getList().size(); i++) {
+		this.game.tick(this);
+		for (short i = 0; i < this.connections.getList().size(); i++) {
 			PacketNIO p;
-			while ((p = connections.getList().get(i).getReadPacket()) != null) {
+			while ((p = this.connections.getList().get(i).getReadPacket()) != null) {
 				p.processServer(i, this);
 			}
 		}
-		if (minConnects > this.connections.getList().size()) {
+		if (this.minConnects > this.connections.getList().size()) {
 			// Not enough connections
 		} else {
 			this.game.start = true;
@@ -121,10 +124,10 @@ public abstract class Server {
 	 * Shuts down the server
 	 */
 	public void shutdown() {
-		for (ConnectionNIO conn : connections.getList()) {
+		for (ConnectionNIO conn : this.connections.getList()) {
 			conn.networkShutdown();
 		}
-		listener.shutdown();
+		this.listener.shutdown();
 	}
 	
 	/**
@@ -134,10 +137,10 @@ public abstract class Server {
 	 *            The number to disconnect
 	 */
 	public void disconnect(short player) {
-		ConnectionNIO conn = connections.getList().get(player);
+		ConnectionNIO conn = this.connections.getList().get(player);
 		conn.networkShutdown();
-		connections.getList().remove(player);
-		game.players.remove(player);
+		this.connections.getList().remove(player);
+		this.game.players.remove(player);
 	}
 	
 	/**
@@ -153,5 +156,10 @@ public abstract class Server {
 	 *            The {@code Player} to send necessary game data to
 	 */
 	public abstract void synchronizeClientGameData(ConnectionNIO c);
+	
+	@SubscribeEvent
+	public void onPlayerConnect(ConnectionEstablishedEvent e) {
+		this.connections.sentPacketAllExcept(new PacketPlayer(e.player), e.player.number);
+	}
 	
 }

@@ -58,7 +58,7 @@ public abstract class Hitbox implements Serializable {
 	 * @return
 	 */
 	public Vector2 getFurthestAtAngle(double angle) {
-		return getHitboxVectorAtAngle(clampAngle(angle)).plus(getCenterDisplacement());
+		return this.getHitboxVectorAtAngle(clampAngle(angle)).plus(this.getCenterDisplacement());
 	}
 	
 	/**
@@ -69,7 +69,7 @@ public abstract class Hitbox implements Serializable {
 	 * @return
 	 */
 	public double getTangentAtAngle(double angle) {
-		return getHitboxTangentAtAngle(clampAngle(angle));
+		return this.getHitboxTangentAtAngle(clampAngle(angle));
 	}
 	
 	/**
@@ -223,34 +223,34 @@ public abstract class Hitbox implements Serializable {
 			double tan = Math.tan(angle);
 			// Be dumb and check chase by case
 			if (angle == critical) {
-				return Vector2.of(radX, radY);
+				return Vector2.of(this.radX, this.radY);
 			} else if (angle == Math.PI - critical) {
-				return Vector2.of(-radX, radY);
+				return Vector2.of(-this.radX, this.radY);
 			} else if (angle == Math.PI + critical) {
-				return Vector2.of(-radX, -radY);
+				return Vector2.of(-this.radX, -this.radY);
 			} else if (angle == 2 * Math.PI - critical) {
-				return Vector2.of(radX, -radY);
+				return Vector2.of(this.radX, -this.radY);
 			}
 			if (angle > critical && angle < Math.PI - critical) {
-				return Vector2.of(radY / tan, radY);
+				return Vector2.of(this.radY / tan, this.radY);
 			} else if (angle > Math.PI - critical && angle < Math.PI + critical) {
-				return Vector2.of(-radX, -radX * tan);
+				return Vector2.of(-this.radX, -this.radX * tan);
 			} else if (angle > Math.PI + critical && angle < 2 * Math.PI - critical) {
-				return Vector2.of(-radY / tan, -radY);
+				return Vector2.of(-this.radY / tan, -this.radY);
 			} else if (angle > 2 * Math.PI - critical || angle < critical) {
-				return Vector2.of(radX, radX * tan);
+				return Vector2.of(this.radX, this.radX * tan);
 			}
 			return Vector2.of(0, 0);
 		}
 		
 		@Override
 		public Vector2 getCenterDisplacement() {
-			return Vector2.of(radX, radY);
+			return Vector2.of(this.radX, this.radY);
 		}
 		
 		@Override
 		public boolean pointLiesInsideHitbox(Vector2 point) {
-			return (point.x <= sizeX && point.x >= 0) && (point.y <= sizeY && point.y >= 0);
+			return (point.x <= this.sizeX && point.x >= 0) && (point.y <= this.sizeY && point.y >= 0);
 		}
 		
 		@Override
@@ -299,13 +299,13 @@ public abstract class Hitbox implements Serializable {
 		
 		@Override
 		public Vector2 getCenterDisplacement() {
-			return Vector2.of(rad, rad);
+			return Vector2.of(this.rad, this.rad);
 		}
 		
 		@Override
 		public boolean pointLiesInsideHitbox(Vector2 point) {
-			double dist = point.displacement(getCenterDisplacement());
-			return dist <= rad && dist >= 0;
+			double dist = point.displacement(this.getCenterDisplacement());
+			return dist <= this.rad && dist >= 0;
 		}
 		
 		@Override
@@ -334,7 +334,7 @@ public abstract class Hitbox implements Serializable {
 		
 		@Override
 		public Vector2 getHitboxVectorAtAngle(double angle) {
-			BufferedImage img = sprite.getSprite().getImage();
+			BufferedImage img = this.sprite.getSprite().getImage();
 			Vector2 base = new HitboxRectangle(img.getWidth(), img.getHeight()).getFurthestAtAngle(angle);
 			Vector2 check = base;
 			double maxDisp = base.displacement(Vector2.ZERO);
@@ -349,13 +349,13 @@ public abstract class Hitbox implements Serializable {
 		
 		@Override
 		public Vector2 getCenterDisplacement() {
-			BufferedImage img = sprite.getSprite().getImage();
+			BufferedImage img = this.sprite.getSprite().getImage();
 			return Vector2.of(img.getWidth() / 2, img.getHeight() / 2);
 		}
 		
 		@Override
 		public boolean pointLiesInsideHitbox(Vector2 point) {
-			BufferedImage img = sprite.getSprite().getImage();
+			BufferedImage img = this.sprite.getSprite().getImage();
 			if (!new HitboxRectangle(img.getWidth(), img.getHeight()).pointLiesInsideHitbox(point)) {
 				return false;
 			}

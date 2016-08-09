@@ -190,22 +190,22 @@ public abstract class Client extends Canvas {
 		this.SCALE = s;
 		Client.CLIENT_BUS.register(this);
 		this.gfxEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		this.gfxDvc = gfxEnv.getDefaultScreenDevice();
-		this.gfxCfg = gfxDvc.getDefaultConfiguration();
-		this.dm = gfxDvc.getDisplayMode();
+		this.gfxDvc = this.gfxEnv.getDefaultScreenDevice();
+		this.gfxCfg = this.gfxDvc.getDefaultConfiguration();
+		this.dm = this.gfxDvc.getDisplayMode();
 		
-		this.setMinimumSize(new Dimension(WIDTH * (int) SCALE, HEIGHT * (int) SCALE));
-		this.setMaximumSize(new Dimension(WIDTH * (int) SCALE, HEIGHT * (int) SCALE));
-		this.setPreferredSize(new Dimension(WIDTH * (int) SCALE, HEIGHT * (int) SCALE));
+		this.setMinimumSize(new Dimension(this.WIDTH * (int) this.SCALE, this.HEIGHT * (int) this.SCALE));
+		this.setMaximumSize(new Dimension(this.WIDTH * (int) this.SCALE, this.HEIGHT * (int) this.SCALE));
+		this.setPreferredSize(new Dimension(this.WIDTH * (int) this.SCALE, this.HEIGHT * (int) this.SCALE));
 		
-		frame = new JFrame(g.name);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setLayout(new BorderLayout());
-		frame.add(this, BorderLayout.CENTER);
-		frame.pack();
-		frame.setResizable(false);
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
+		this.frame = new JFrame(g.name);
+		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.frame.setLayout(new BorderLayout());
+		this.frame.add(this, BorderLayout.CENTER);
+		this.frame.pack();
+		this.frame.setResizable(false);
+		this.frame.setLocationRelativeTo(null);
+		this.frame.setVisible(true);
 		this.recreateVImg();
 	}
 	
@@ -227,24 +227,24 @@ public abstract class Client extends Canvas {
 		this.HEIGHT = h;
 		Client.CLIENT_BUS.register(this);
 		this.gfxEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		this.gfxDvc = gfxEnv.getDefaultScreenDevice();
-		this.gfxCfg = gfxDvc.getDefaultConfiguration();
+		this.gfxDvc = this.gfxEnv.getDefaultScreenDevice();
+		this.gfxCfg = this.gfxDvc.getDefaultConfiguration();
 		this.dm = this.gfxDvc.getDisplayMode();
 		
-		frame = new JFrame(g.name);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setLayout(new BorderLayout());
-		frame.add(this, BorderLayout.CENTER);
+		this.frame = new JFrame(g.name);
+		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.frame.setLayout(new BorderLayout());
+		this.frame.add(this, BorderLayout.CENTER);
 		if (this.gfxDvc.isFullScreenSupported()) {
-			frame.setUndecorated(true);
-			gfxDvc.setFullScreenWindow(frame);
+			this.frame.setUndecorated(true);
+			this.gfxDvc.setFullScreenWindow(this.frame);
 		}
-		frame.pack();
-		frame.setResizable(false);
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
+		this.frame.pack();
+		this.frame.setResizable(false);
+		this.frame.setLocationRelativeTo(null);
+		this.frame.setVisible(true);
 		
-		this.SCALE = (double) dm.getWidth() / (double) WIDTH;
+		this.SCALE = (double) this.dm.getWidth() / (double) this.WIDTH;
 		
 		this.recreateVImg();
 	}
@@ -262,7 +262,7 @@ public abstract class Client extends Canvas {
 		try {
 			this.remoteAddress = new InetSocketAddress(host, port);
 			this.socketChannel = SocketChannel.open(this.remoteAddress);
-			return connect();
+			return this.connect();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
@@ -282,7 +282,7 @@ public abstract class Client extends Canvas {
 		try {
 			this.remoteAddress = new InetSocketAddress(address, port);
 			this.socketChannel = SocketChannel.open(this.remoteAddress);
-			return connect();
+			return this.connect();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
@@ -300,7 +300,7 @@ public abstract class Client extends Canvas {
 		System.out.println("Client Attempting Connection to " + this.remoteAddress);
 		this.connection = new ConnectionNIO(this.socketChannel, "Client-Side", 4096, 1024, true);
 		this.player = this.game.getNewPlayerInstance();
-		this.player.name = desiredUsername;
+		this.player.name = this.desiredUsername;
 		this.connection.addToSendQueue(new PacketChat(this.player));
 		// TODO: Readd this
 //		Client.CLIENT_BUS.post(new ConnectionEstablishedEvent(this.game, this.connection));
@@ -325,39 +325,39 @@ public abstract class Client extends Canvas {
 	 * Renders a frame of the game or client
 	 */
 	public void render() {
-		BufferStrategy bs = getBufferStrategy();
+		BufferStrategy bs = this.getBufferStrategy();
 		if (bs == null) {
-			createBufferStrategy(2);
-			requestFocus();
+			this.createBufferStrategy(2);
+			this.requestFocus();
 			return;
 		}
 		
 		if ((this.menu != null && this.menu.rendersGame()) || this.menu == null) {
-			this.game.level.render(screen);
-			this.renderGame(screen);
+			this.game.level.render(this.screen);
+			this.renderGame(this.screen);
 			if (this.hud != null) {
-				this.hud.render(screen);
+				this.hud.render(this.screen);
 			}
 		}
 		if (this.menu != null) {
-			this.menu.render(screen);
+			this.menu.render(this.screen);
 		}
 		if (!this.hasFocus()) {
 			this.renderFocusNagger();
 		}
 		
 		Graphics g = bs.getDrawGraphics();
-		g.fillRect(0, 0, getWidth(), getHeight());
+		g.fillRect(0, 0, this.getWidth(), this.getHeight());
 		
-		renderOffScreen();
-		renderOnScreen(g);
+		this.renderOffScreen();
+		this.renderOnScreen(g);
 		
 		g.dispose();
 		bs.show();
 	}
 	
 	private void recreateVImg() {
-		this.vImg = this.gfxCfg.createCompatibleVolatileImage(WIDTH, HEIGHT);
+		this.vImg = this.gfxCfg.createCompatibleVolatileImage(this.WIDTH, this.HEIGHT);
 	}
 	
 	/**
@@ -365,14 +365,14 @@ public abstract class Client extends Canvas {
 	 */
 	private void renderOffScreen() {
 		do {
-			if (vImg.validate(getGraphicsConfiguration()) == VolatileImage.IMAGE_INCOMPATIBLE) {
+			if (this.vImg.validate(this.getGraphicsConfiguration()) == VolatileImage.IMAGE_INCOMPATIBLE) {
 				// old vImg doesn't work with new GraphicsConfig; re-create it
-				recreateVImg();
+				this.recreateVImg();
 			}
-			Graphics2D g = vImg.createGraphics();
+			Graphics2D g = this.vImg.createGraphics();
 			
 			g.dispose();
-		} while (vImg.contentsLost());
+		} while (this.vImg.contentsLost());
 	}
 	
 	/**
@@ -382,25 +382,26 @@ public abstract class Client extends Canvas {
 	 */
 	private void renderOnScreen(Graphics graphics) {
 		do {
-			int returnCode = vImg.validate(getGraphicsConfiguration());
+			int returnCode = this.vImg.validate(this.getGraphicsConfiguration());
 			if (returnCode == VolatileImage.IMAGE_RESTORED) {
 				// Contents need to be restored
-				renderOffScreen();      // restore contents
+				this.renderOffScreen();      // restore contents
 			} else if (returnCode == VolatileImage.IMAGE_INCOMPATIBLE) {
 				// old vImg doesn't work with new GraphicsConfig; re-create it
-				recreateVImg();
-				renderOffScreen();
+				this.recreateVImg();
+				this.renderOffScreen();
 			}
-			double ww = WIDTH * SCALE;
-			double hh = HEIGHT * SCALE;
-			double xo = (getWidth() - ww) / 2;
-			double yo = (getHeight() - hh) / 2;
-			graphics.drawImage(vImg, (int) xo, (int) yo, (int) ww, (int) hh, null);
-			if (cursor != null) {
-				graphics.drawImage(cursor.getImage(), (int) (input.getMouseXAbsolute() - (cursor.width / 2)),
-						(int) (input.getMouseYAbsolute() - (cursor.height / 2)), null);
+			double ww = this.WIDTH * this.SCALE;
+			double hh = this.HEIGHT * this.SCALE;
+			double xo = (this.getWidth() - ww) / 2;
+			double yo = (this.getHeight() - hh) / 2;
+			graphics.drawImage(this.vImg, (int) xo, (int) yo, (int) ww, (int) hh, null);
+			if (this.cursor != null) {
+				graphics.drawImage(this.cursor.getImage(),
+						this.input.getMouseXAbsolute() - (this.cursor.width / 2),
+						this.input.getMouseYAbsolute() - (this.cursor.height / 2), null);
 			}
-		} while (vImg.contentsLost());
+		} while (this.vImg.contentsLost());
 //		System.out.println(vImg.getClass().getName());
 	}
 	
@@ -409,10 +410,10 @@ public abstract class Client extends Canvas {
 	 * server
 	 */
 	public void tick() {
-		if (!hasFocus()) {
-			input.releaseAll();
+		if (!this.hasFocus()) {
+			this.input.releaseAll();
 		} else {
-			input.tick();
+			this.input.tick();
 			
 			if (this.menu != null) {
 				this.menu.tick();
@@ -463,7 +464,7 @@ public abstract class Client extends Canvas {
 	public void setMenu(Menu m) {
 		this.menu = m;
 		if (m != null) {
-			m.init(this, input);
+			m.init(this, this.input);
 		}
 	}
 	
@@ -476,7 +477,7 @@ public abstract class Client extends Canvas {
 	public void setHUD(HUD h) {
 		this.hud = h;
 		if (h != null) {
-			h.init(this, input);
+			h.init(this, this.input);
 		}
 	}
 	
@@ -485,9 +486,9 @@ public abstract class Client extends Canvas {
 	 */
 	private void renderFocusNagger() {
 		String msg = "Click to focus!";
-		int x = FontWrapper.getXCoord(screen, msg);
-		int y = HEIGHT / 2;
-		FontWrapper.draw(msg, screen, x, y, Color.WHITE.getRGB());
+		int x = FontWrapper.getXCoord(this.screen, msg);
+		int y = this.HEIGHT / 2;
+		FontWrapper.draw(msg, this.screen, x, y, Color.WHITE.getRGB());
 	}
 	
 	/**
@@ -510,7 +511,7 @@ public abstract class Client extends Canvas {
 	 */
 	public void init() {
 		this.input = new InputHandler(this);
-		screen = new Screen(this, WIDTH, HEIGHT);
+		this.screen = new Screen(this, this.WIDTH, this.HEIGHT);
 		this.initClient();
 		this.resetClient();
 	}

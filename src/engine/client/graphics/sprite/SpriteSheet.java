@@ -86,7 +86,7 @@ public class SpriteSheet {
 	 * @return A new {@code Sprite}
 	 */
 	public Sprite getSprite(int x, int y) {
-		return getSprite(x, y, 1, 1);
+		return this.getSprite(x, y, 1, 1);
 	}
 	
 	/**
@@ -105,7 +105,7 @@ public class SpriteSheet {
 	 * @return A new {@code Sprite}
 	 */
 	public Sprite getSprite(int x, int y, int w, int h) {
-		return Sprite.of(getImage(x, y, w, h));
+		return Sprite.of(this.getImage(x, y, w, h));
 	}
 	
 	/**
@@ -124,7 +124,8 @@ public class SpriteSheet {
 	 * @return A new {@code BufferedImage}
 	 */
 	public BufferedImage getImage(int x, int y, int w, int h) {
-		return this.src.getSubimage(x * sPixWidth, y * sPixHeight, w * sPixWidth, h * sPixHeight);
+		return this.src.getSubimage(x * this.sPixWidth, y * this.sPixHeight, w * this.sPixWidth,
+				h * this.sPixHeight);
 	}
 	
 	/**
@@ -139,7 +140,7 @@ public class SpriteSheet {
 	 * @return A new {@code SpriteAnimated} based on the {@code SpriteSheet}
 	 */
 	public SpriteAnimated getAnimated(int period) {
-		return getAnimated(period, this.sWidth, this.sHeight);
+		return this.getAnimated(period, this.sWidth, this.sHeight);
 	}
 	
 	/**
@@ -159,7 +160,7 @@ public class SpriteSheet {
 	 * @return A new {@code SpriteAnimated} with the given parameters
 	 */
 	public SpriteAnimated getAnimated(int period, int aw, int ah) {
-		return getAnimated(period, 0, 0, aw, ah);
+		return this.getAnimated(period, 0, 0, aw, ah);
 	}
 	
 	/**
@@ -183,7 +184,7 @@ public class SpriteSheet {
 	 * @return A new {@code SpriteAnimated} with the given parameters
 	 */
 	public SpriteAnimated getAnimated(int period, int x, int y, int aw, int ah) {
-		return getAnimated(period, x, y, aw, ah, 1, 1);
+		return this.getAnimated(period, x, y, aw, ah, 1, 1);
 	}
 	
 	/**
@@ -210,7 +211,7 @@ public class SpriteSheet {
 	 * @return A new {@code SpriteAnimated} with the given parameters
 	 */
 	public SpriteAnimated getAnimated(int period, int x, int y, int aw, int ah, int w, int h) {
-		return SpriteAnimated.of(period, getImageArray(x, y, aw, ah, w, h));
+		return SpriteAnimated.of(period, this.getImageArray(x, y, aw, ah, w, h));
 	}
 	
 	/**
@@ -236,8 +237,8 @@ public class SpriteSheet {
 		BufferedImage[] imgs = new BufferedImage[aw * ah];
 		for (int ax = 0; ax < aw; ax++) {
 			for (int ay = 0; ay < ah; ay++) {
-				imgs[ay * ah + ax] = this.src.getSubimage(ax * sPixWidth, ay * sPixHeight, w * sPixWidth,
-						h * sPixHeight);
+				imgs[ay * ah + ax] = this.src.getSubimage(ax * this.sPixWidth, ay * this.sPixHeight,
+						w * this.sPixWidth, h * this.sPixHeight);
 			}
 		}
 		return imgs;

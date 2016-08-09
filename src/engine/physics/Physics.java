@@ -7,8 +7,7 @@ import engine.Game;
 import engine.event.EventBus;
 import engine.event.SubscribeEvent;
 import engine.level.Vector2;
-import engine.network.packet.Packet;
-import engine.network.synchro.Rebuildable;
+import engine.networknio.Rebuildable;
 import engine.physics.entity.EntityPhysics;
 import engine.physics.entity.Hitbox;
 
@@ -73,10 +72,6 @@ public class Physics implements Rebuildable {
 	 */
 	private int prevStage = 0;
 	
-	static {
-		Packet.registerPacket(PacketPhysicsTick.class);
-	}
-	
 	public Physics() {
 		this(false);
 	}
@@ -90,7 +85,7 @@ public class Physics implements Rebuildable {
 	
 	@Override
 	public void rebuild(Game g) {
-		for (EntityPhysics e : entities) {
+		for (EntityPhysics e : this.entities) {
 			e.rebuild(g);
 		}
 	}
@@ -110,7 +105,7 @@ public class Physics implements Rebuildable {
 	 * Ticks the first stage of Physics movement
 	 */
 	public void tick1() {
-		for (EntityPhysics e : entities) {
+		for (EntityPhysics e : this.entities) {
 			e.tick1();
 		}
 	}
@@ -119,12 +114,12 @@ public class Physics implements Rebuildable {
 	 * Does any collision checking necessary
 	 */
 	public void check() {
-		for (int e1 = 0; e1 < entities.size() - 1; e1++) {
-			for (int e2 = e1 + 1; e2 < entities.size(); e2++) {
-				EntityPhysics ent1 = entities.get(e1);
-				EntityPhysics ent2 = entities.get(e2);
+		for (int e1 = 0; e1 < this.entities.size() - 1; e1++) {
+			for (int e2 = e1 + 1; e2 < this.entities.size(); e2++) {
+				EntityPhysics ent1 = this.entities.get(e1);
+				EntityPhysics ent2 = this.entities.get(e2);
 				if (suspectedCollision(ent1, ent2)) {
-					collisions.add(new Collision(ent1, ent2));
+					this.collisions.add(new Collision(ent1, ent2));
 				}
 			}
 		}
@@ -134,7 +129,7 @@ public class Physics implements Rebuildable {
 	 * Ticks the second stage of Physics movement
 	 */
 	public void tick2() {
-		for (EntityPhysics e : entities) {
+		for (EntityPhysics e : this.entities) {
 			e.tick2();
 		}
 	}
@@ -179,7 +174,7 @@ public class Physics implements Rebuildable {
 	 * Ticks the next stage in the process
 	 */
 	private void tickNextStage() {
-		switch (prevStage) {
+		switch (this.prevStage) {
 			case 0:
 				this.tick1();
 				break;
@@ -190,8 +185,8 @@ public class Physics implements Rebuildable {
 				this.tick2();
 				break;
 		}
-		if (++prevStage > 2) {
-			prevStage = 0;
+		if (++this.prevStage > 2) {
+			this.prevStage = 0;
 		}
 	}
 	

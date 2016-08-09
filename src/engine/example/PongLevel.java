@@ -33,15 +33,15 @@ public class PongLevel extends LevelPhysics {
 	@Override
 	public void tickLevel() {
 //		System.out.println("Position:\tServer:\t" + paddles[0].posX + ", " + paddles[0].posY);
-		if (ball.pos.y < 0 || ball.pos.y + ((HitboxCircle) ball.hitbox).rad > this.height) {
-			ball.vel = Vector2.of(ball.vel.x, ball.vel.y * -1);
+		if (this.ball.pos.y < 0 || this.ball.pos.y + ((HitboxCircle) this.ball.hitbox).rad > this.height) {
+			this.ball.vel = Vector2.of(this.ball.vel.x, this.ball.vel.y * -1);
 		}
-		if (ball.pos.x < 0) {
-			this.game.events.post(new EventPlayerScore((short) 1, ++score[1]));
+		if (this.ball.pos.x < 0) {
+			this.game.events.post(new EventPlayerScore((short) 1, ++this.score[1]));
 			this.reset();
 		}
-		if (ball.pos.x + ((HitboxCircle) ball.hitbox).rad > this.width) {
-			this.game.events.post(new EventPlayerScore((short) 0, ++score[0]));
+		if (this.ball.pos.x + ((HitboxCircle) this.ball.hitbox).rad > this.width) {
+			this.game.events.post(new EventPlayerScore((short) 0, ++this.score[0]));
 			this.reset();
 		}
 	}
@@ -49,13 +49,13 @@ public class PongLevel extends LevelPhysics {
 	@Override
 	public void render(Screen s) {
 		s.clear(Color.GRAY.getRGB());
-		ball.render(s);
-		paddles[0].render(s);
-		paddles[1].render(s);
+		this.ball.render(s);
+		this.paddles[0].render(s);
+		this.paddles[1].render(s);
 //		Font.draw(paddles[0].pos.x + ", " + paddles[0].pos.y, s, 16, 16, Color.get(0, 555, 555, 555));
 //		System.out.println("Position:\tClient:\t" + paddles[0].posX + ", " + paddles[0].posY);
-		FontWrapper.draw(score[0] + "", s, 128, 16, Color.WHITE.getRGB());
-		FontWrapper.draw(score[1] + "", s, 192, 16, Color.WHITE.getRGB());
+		FontWrapper.draw(this.score[0] + "", s, 128, 16, Color.WHITE.getRGB());
+		FontWrapper.draw(this.score[1] + "", s, 192, 16, Color.WHITE.getRGB());
 		FontWrapper.renderFrame(s, "", 0, 0, 320, 180, Color.WHITE.getRGB(), Color.WHITE.getRGB());
 	}
 	
@@ -67,13 +67,13 @@ public class PongLevel extends LevelPhysics {
 	
 	@SubscribeEvent
 	public void playerScore(EventPlayerScore e) {
-		score[e.pnum] = e.score;
+		this.score[e.pnum] = e.score;
 	}
 	
 	@SubscribeEvent
 	public void playerInput(EventInput e) {
 //		System.out.println("Moving the paddle");
-		paddles[e.pnum].vel = Vector2.of(0, e.dir * 5);
+		this.paddles[e.pnum].vel = Vector2.of(0, e.dir * 5);
 	}
 	
 }

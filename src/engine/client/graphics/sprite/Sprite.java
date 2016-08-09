@@ -15,8 +15,8 @@ import engine.level.Vector2;
  * <p>
  * Basically a utility wrapper around a {@code BufferedImage} that provides utility methods, as well as
  * possible animations
- * @see SpriteAnimated
  * 
+ * @see SpriteAnimated
  * @see ISpriteProvider
  * @author Kevin
  */
@@ -66,10 +66,10 @@ public class Sprite {
 	 *            The {@code BufferedImage} to create a {@code Sprite from}
 	 */
 	protected Sprite(BufferedImage image) {
-		src = ColorWrapper.checkARGB(image);
-		width = image.getWidth();
-		height = image.getHeight();
-		pixels = image.getRGB(0, 0, width, height, null, 0, width);
+		this.src = ColorWrapper.checkARGB(image);
+		this.width = image.getWidth();
+		this.height = image.getHeight();
+		this.pixels = image.getRGB(0, 0, this.width, this.height, null, 0, this.width);
 	}
 	
 	/**
@@ -92,14 +92,14 @@ public class Sprite {
 	public BufferedImage getAdjustedImage(int scale, boolean flipX, boolean flipY, int quads) {
 		if ((scale == this.scale) && (flipX == this.flipX) && (flipY == this.flipY)
 				&& (quads == this.quads)) {
-			return cache;
+			return this.cache;
 		}
-		cache = Screen.adjustImage(src, scale, flipX, flipY, quads);
+		this.cache = Screen.adjustImage(this.src, scale, flipX, flipY, quads);
 		this.scale = scale;
 		this.flipX = flipX;
 		this.flipY = flipY;
 		this.quads = quads;
-		return cache;
+		return this.cache;
 	}
 	
 	/**

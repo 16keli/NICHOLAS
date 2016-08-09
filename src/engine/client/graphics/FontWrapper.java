@@ -84,7 +84,8 @@ public class FontWrapper {
 	 * @param colText
 	 *            The RGB color code of the text
 	 */
-	public static void renderFrame(Screen screen, String title, int x, int y, int w, int h, int colFrame, int colText) {
+	public static void renderFrame(Screen screen, String title, int x, int y, int w, int h, int colFrame,
+			int colText) {
 		Graphics2D g = screen.client.vImg.createGraphics();
 		g.setColor(new Color(colFrame));
 		g.setStroke(new BasicStroke(1));
@@ -126,8 +127,11 @@ public class FontWrapper {
 	
 	/**
 	 * Gets the size of the given String in pixels
-	 * @param screen The {@code Screen} to use
-	 * @param string The Text to get the size of
+	 * 
+	 * @param screen
+	 *            The {@code Screen} to use
+	 * @param string
+	 *            The Text to get the size of
 	 * @return
 	 */
 	public static int getTextSize(Screen screen, String string) {

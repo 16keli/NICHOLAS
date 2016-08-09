@@ -12,7 +12,7 @@ public class ThreadConnectionNIORead extends Thread {
 	@Override
 	public void run() {
 		try {
-			while (connect.isRunning() && !connect.isTerminating()) {
+			while (this.connect.isRunning() && !this.connect.isTerminating()) {
 				while (true) {
 					if (!ConnectionNIO.readPackets(this.connect)) {
 						sleep(2);

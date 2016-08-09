@@ -5,8 +5,8 @@ import engine.event.Event;
 
 /**
  * An {@code Event} that corresponds to a Game event, such as initialization or resetting
+ * 
  * @author Kevin
- *
  */
 public class GameEvent extends Event {
 	
@@ -15,5 +15,5 @@ public class GameEvent extends Event {
 	public GameEvent(Game game) {
 		this.game = game;
 	}
-
+	
 }

@@ -1,6 +1,7 @@
 package engine;
 
 import java.lang.reflect.Constructor;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -9,7 +10,6 @@ import engine.client.Client;
 import engine.event.EventBus;
 import engine.level.Entity;
 import engine.level.Level;
-import engine.network.Connection;
 import engine.server.Server;
 
 /**
@@ -93,7 +93,7 @@ public abstract class Game {
 	 * Ticks the game. Be aware that the tickrate is specified in {@code Engine} as a static final int.
 	 */
 	public void tick(Server s) {
-		if (start) {
+		if (this.start) {
 			this.level.tick();
 			this.tickServer(s);
 		}
@@ -136,7 +136,7 @@ public abstract class Game {
 	 * @return A new {@code Player} instance
 	 */
 	public Player getNewPlayerInstance() {
-		Class<? extends Player> cls = getPlayerClass();
+		Class<? extends Player> cls = this.getPlayerClass();
 		try {
 			Constructor<? extends Player> cst = cls.getConstructor(Game.class, short.class);
 			Player p = cst.newInstance(this, this.nextPlayerNumber++);
@@ -155,7 +155,7 @@ public abstract class Game {
 	 * @return A new {@code Player} instance
 	 */
 	public Player getNewPlayerInstance(String name) {
-		Class<? extends Player> cls = getPlayerClass();
+		Class<? extends Player> cls = this.getPlayerClass();
 		try {
 			Constructor<? extends Player> cst = cls.getConstructor(Game.class, short.class, String.class);
 			Player p = cst.newInstance(this, this.nextPlayerNumber++, name);

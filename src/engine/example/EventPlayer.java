@@ -6,10 +6,11 @@ public class EventPlayer extends Event {
 	
 	public short pnum;
 	
-	public EventPlayer(){}
+	public EventPlayer() {
+	}
 	
 	public EventPlayer(short pnum) {
 		this.pnum = pnum;
 	}
-
+	
 }

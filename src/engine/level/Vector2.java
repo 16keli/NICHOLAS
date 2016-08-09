@@ -244,7 +244,7 @@ public class Vector2 implements Serializable {
 	
 	@Override
 	public String toString() {
-		return getCartesian();
+		return this.getCartesian();
 	}
 	
 	/**
@@ -268,6 +268,7 @@ public class Vector2 implements Serializable {
 	/**
 	 * Returns a new copy of this {@code Vector2}
 	 */
+	@Override
 	public Vector2 clone() {
 		return of(this.x, this.y);
 	}

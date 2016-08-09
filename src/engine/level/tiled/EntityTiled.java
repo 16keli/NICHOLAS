@@ -28,14 +28,14 @@ public abstract class EntityTiled extends Entity {
 		super(l, l.getTileWidthPixel() * x, l.getTileHeightPixel() * y, sprite);
 		this.currentTile = l.getTile(x, y);
 		this.actions = Properties.of(actions);
-		props.add(this.actions);
+		this.props.add(this.actions);
 	}
 	
 	/**
 	 * Resets the values for all the {@code Properties} that this {@code EntityTiled} has
 	 */
 	public void resetPropValues() {
-		for (Properties p : props) {
+		for (Properties p : this.props) {
 			p.reset();
 		}
 	}
@@ -85,7 +85,7 @@ public abstract class EntityTiled extends Entity {
 		}
 		
 		public void reset() {
-			this.current = max;
+			this.current = this.max;
 		}
 	}
 	

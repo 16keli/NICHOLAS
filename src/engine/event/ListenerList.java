@@ -31,7 +31,7 @@ public class ListenerList implements Serializable {
 	 */
 	public IEventListener[] getListeners(Class<? extends Event> eventClass) {
 		try {
-			IEventListener[] llist = lists.get(eventClass).getListeners();
+			IEventListener[] llist = this.lists.get(eventClass).getListeners();
 			return llist;
 		} catch (NullPointerException e) {
 			System.err.println("Event " + eventClass.getName()
@@ -52,10 +52,10 @@ public class ListenerList implements Serializable {
 	 *            The {@code IEventListener} to register
 	 */
 	public void register(Class<? extends Event> eventClass, IEventListener listener) {
-		ListenerListImpl list = lists.get(eventClass);
+		ListenerListImpl list = this.lists.get(eventClass);
 		if (list == null) {
 			list = new ListenerListImpl();
-			lists.put(eventClass, list);
+			this.lists.put(eventClass, list);
 		}
 		list.register(listener);
 	}
@@ -85,7 +85,7 @@ public class ListenerList implements Serializable {
 		 * @return Every {@code IEventListener} of this instance
 		 */
 		public IEventListener[] getListeners() {
-			return listeners.toArray(new IEventListener[listeners.size()]);
+			return this.listeners.toArray(new IEventListener[this.listeners.size()]);
 		}
 		
 		/**
@@ -95,7 +95,7 @@ public class ListenerList implements Serializable {
 		 *            The instance to register
 		 */
 		public void register(IEventListener listener) {
-			listeners.add(listener);
+			this.listeners.add(listener);
 		}
 		
 	}

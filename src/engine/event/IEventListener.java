@@ -6,7 +6,7 @@ package engine.event;
  * @author Kevin
  */
 public interface IEventListener {
-
+	
 	/**
 	 * Invokes the given method on this listener instance
 	 * 

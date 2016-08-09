@@ -7,7 +7,6 @@ import engine.client.Client;
 import engine.networknio.packet.PacketTCP;
 import engine.server.Server;
 
-
 public class PacketPlayerInputNIO extends PacketTCP {
 	
 	public short pnum;
@@ -15,7 +14,7 @@ public class PacketPlayerInputNIO extends PacketTCP {
 	public byte dir;
 	
 	public PacketPlayerInputNIO() {
-		
+	
 	}
 	
 	public PacketPlayerInputNIO(short pnum, int i) {

@@ -81,7 +81,7 @@ public class EventBus implements Serializable {
 	 *            The Instance to create as a listener
 	 */
 	public void register(Object listener) {
-		eventLogger.info("Trying to register " + listener + " for any Event Messages");
+		this.eventLogger.info("Trying to register " + listener + " for any Event Messages");
 		for (Method method : listener.getClass().getMethods()) {
 			try {
 				if (method.isAnnotationPresent(SubscribeEvent.class)) {
@@ -101,7 +101,7 @@ public class EventBus implements Serializable {
 								+ eventType);
 					}
 					
-					register(eventType, listener, method);
+					this.register(eventType, listener, method);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -121,7 +121,7 @@ public class EventBus implements Serializable {
 	 */
 	private void register(Class<? extends Event> eventType, Object listener, Method method) {
 		try {
-			eventLogger.info("Registering listener " + listener + " for Event Class " + eventType
+			this.eventLogger.info("Registering listener " + listener + " for Event Class " + eventType
 					+ " and method " + method + " for Event Bus with id " + this.id);
 			IEventListener impl = new EventListenerImpl(listener, method);
 			this.listeners.register(eventType, impl);

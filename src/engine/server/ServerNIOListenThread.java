@@ -7,6 +7,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 
 import engine.Player;
+import engine.event.game.ConnectionEstablishedEvent;
 import engine.networknio.ConnectionNIO;
 import engine.networknio.packet.PacketConnection;
 
@@ -60,24 +61,24 @@ public class ServerNIOListenThread extends Thread {
 		this.ssChannel.socket().setPerformancePreferences(0, 2, 1);
 		this.ssChannel.bind(new InetSocketAddress(port));
 		this.server = s;
-		this.ip = ssChannel.socket().getInetAddress();
+		this.ip = this.ssChannel.socket().getInetAddress();
 	}
 	
 	@Override
 	public void run() {
-		while (listening) {
-			try {// I don't believe we will run into concurrency issues because only a single thread will be
-					// created and accessing nextPlayerID at a time
-				SocketChannel s = ssChannel.accept();
+		while (this.listening) {
+			try {
+				// I don't believe we will run into concurrency issues because only a single thread will be
+				// created and accessing nextPlayerID at a time
+				SocketChannel s = this.ssChannel.accept();
 				ConnectionNIO c = new ConnectionNIO(s, "Server-Side", 4096, 1024);
-				//TODO: Turn this on again
-//				Server.SERVER_BUS.post(new ConnectionEstablishedEvent(server.game, c));
-				Player p = server.game.getNewPlayerInstance();
-				server.connections.addToList(c);
-				server.game.players.add(p);
+				Player p = this.server.game.getNewPlayerInstance();
+				Server.SERVER_BUS.post(new ConnectionEstablishedEvent(server.game, c, p));
+				this.server.connections.addToList(c);
+				this.server.game.players.add(p);
 				c.addToSendQueue(new PacketConnection(p.number));
-				server.synchronizeClientGameData(c);
-				server.game.logger.info("Server received connection from "
+				this.server.synchronizeClientGameData(c);
+				this.server.game.logger.info("Server received connection from "
 						+ s.socket().getInetAddress().getHostAddress() + "! Player ID is " + p.number);
 			} catch (Exception e) {
 				e.printStackTrace();

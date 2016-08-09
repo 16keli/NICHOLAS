@@ -42,6 +42,7 @@ public abstract class LevelPhysics extends Level {
 		this.physics.rebuild(g);
 	}
 	
+	@Override
 	public void tick() {
 		this.physics.tick();
 		this.tickLevel();

@@ -21,16 +21,16 @@ public class EntityPhysicsPlatformer extends EntityPhysics {
 	
 	public EntityPhysicsPlatformer(LevelPhysics l, double x, double y, Hitbox hb, double m, Sprite sprite) {
 		super(l, x, y, hb, m, sprite);
-		forceGravity = Physics.gravitationalForce(this);
-		forceNormal = Physics.gravitationalForce(this).scale(-1);
+		this.forceGravity = Physics.gravitationalForce(this);
+		this.forceNormal = Physics.gravitationalForce(this).scale(-1);
 	}
 	
 	@Override
 	public void tickEntity1() {
-		if (onGround()) {
-			this.exertForce(forceNormal);
+		if (this.onGround()) {
+			this.exertForce(this.forceNormal);
 		} else {
-			this.stopExertingForce(forceNormal);
+			this.stopExertingForce(this.forceNormal);
 		}
 	}
 	
@@ -48,9 +48,10 @@ public class EntityPhysicsPlatformer extends EntityPhysics {
 	}
 	
 	public boolean onGround() {
-		for (EntityPhysics e : ((LevelPhysics) level).physics.entities) {
+		for (EntityPhysics e : ((LevelPhysics) this.level).physics.entities) {
 			if (e instanceof Platform) {
-				if (e.hitbox.pointLiesInsideHitbox(this.hitbox.getFurthestAtAngle(3 * Math.PI / 2).plus(this.pos))) {
+				if (e.hitbox.pointLiesInsideHitbox(
+						this.hitbox.getFurthestAtAngle(3 * Math.PI / 2).plus(this.pos))) {
 					return true;
 				}
 			}

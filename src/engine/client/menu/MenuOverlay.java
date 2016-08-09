@@ -95,62 +95,63 @@ public abstract class MenuOverlay {
 //		if (input.enter.clicked) {
 //			Sound.boop.play();
 //		}
-		if (parent != null) {
-			if (input.escape.clicked) {
-				client.setMenu(this.parent);
+		if (this.parent != null) {
+			if (this.input.escape.clicked) {
+				this.client.setMenu(this.parent);
 			}
 		}
-		if (comps.length != 0) {
+		if (this.comps.length != 0) {
 			// Movement of cursor around the screen
-			if (input.up.clicked) {
-				if (componentExists(x, y - 1)) {
-					y--;
-					if (y < 0) {
-						y = comps[x].length - 1;
+			if (this.input.up.clicked) {
+				if (this.componentExists(this.x, this.y - 1)) {
+					this.y--;
+					if (this.y < 0) {
+						this.y = this.comps[this.x].length - 1;
 					}
-					selected = comps[x][y];
+					this.selected = this.comps[this.x][this.y];
 				}
-			} else if (input.down.clicked) {
-				if (componentExists(x, y + 1)) {
-					y++;
-					if (y >= comps[x].length) {
-						y = 0;
+			} else if (this.input.down.clicked) {
+				if (this.componentExists(this.x, this.y + 1)) {
+					this.y++;
+					if (this.y >= this.comps[this.x].length) {
+						this.y = 0;
 					}
-					selected = comps[x][y];
+					this.selected = this.comps[this.x][this.y];
 				}
-			} else if (input.left.clicked) {
-				if (componentExists(x - 1, y)) {
-					x--;
-					if (x < 0) {
-						x = comps.length - 1;
+			} else if (this.input.left.clicked) {
+				if (this.componentExists(this.x - 1, this.y)) {
+					this.x--;
+					if (this.x < 0) {
+						this.x = this.comps.length - 1;
 					}
-					selected = comps[x][y];
+					this.selected = this.comps[this.x][this.y];
 				}
-			} else if (input.right.clicked) {
-				if (componentExists(x + 1, y)) {
-					x++;
-					if (x >= comps.length) {
-						x = 0;
+			} else if (this.input.right.clicked) {
+				if (this.componentExists(this.x + 1, this.y)) {
+					this.x++;
+					if (this.x >= this.comps.length) {
+						this.x = 0;
 					}
-					selected = comps[x][y];
+					this.selected = this.comps[this.x][this.y];
 				}
 			}
 			// Movement of screen based on cursor position. The if statement helps!
 			if (!this.componentEntirelyVisible(this.selected)) {
-				if (selected.x + selected.textSize() - offX > this.x2 * .9) {
+				if (this.selected.x + this.selected.textSize() - this.offX > this.x2 * .9) {
 					this.offX += (this.x2 - this.x1) * .1;
 				}
-				if (selected.x - offX < this.x2 * .1) {
+				if (this.selected.x - this.offX < this.x2 * .1) {
 					this.offX -= (this.x2 - this.x1) * .1;
 				}
-				if (selected.y + 16 - offY > this.y2 * .9) {
+				if (this.selected.y + 16 - this.offY > this.y2 * .9) {
 					this.offY += (this.y2 - this.y1) * .1;
 				}
-				if (selected.y - offY < this.y2 * .1) {
+				if (this.selected.y - this.offY < this.y2 * .1) {
 					this.offY -= (this.y2 - this.y1) * .1;
 				}
 				System.out.println(this.selected.x + " " + this.selected.y);
-				System.out.println(offX + " " + offY + this.componentEntirelyVisible(this.selected));
+				System.out
+						.println(this.offX + " " + this.offY + this.componentEntirelyVisible(this.selected));
 			}
 		}
 		this.tickMenu();
@@ -168,19 +169,19 @@ public abstract class MenuOverlay {
 	public boolean componentExists(int x, int y) {
 		int ax = x;
 		int ay = y;
-		if (x >= comps.length) {
+		if (x >= this.comps.length) {
 			ax = 0;
 		}
 		if (x < 0) {
-			ax = comps.length - 1;
+			ax = this.comps.length - 1;
 		}
-		if (y >= comps[ax].length) {
+		if (y >= this.comps[ax].length) {
 			ay = 0;
 		}
 		if (y < 0) {
-			ay = comps[ax].length - 1;
+			ay = this.comps[ax].length - 1;
 		}
-		return (comps.length >= x && comps[ax].length >= y) && comps[ax][ay] != null;
+		return (this.comps.length >= x && this.comps[ax].length >= y) && this.comps[ax][ay] != null;
 	}
 	
 	/**
@@ -217,7 +218,7 @@ public abstract class MenuOverlay {
 	 */
 	public boolean componentEntirelyVisible(MenuComponent mc) {
 		// Check each part individually
-		return componentVisibleHorizontal(mc) && componentVisibleVertical(mc);
+		return this.componentVisibleHorizontal(mc) && this.componentVisibleVertical(mc);
 	}
 	
 	/**
@@ -229,8 +230,8 @@ public abstract class MenuOverlay {
 	 * @return Whether the {@code MenuComponent} is visible horizontally
 	 */
 	public boolean componentVisibleHorizontal(MenuComponent mc) {
-		boolean leftVisible = mc.x - offX >= x1;
-		boolean rightVisible = mc.x - offX + mc.textSize <= x2;
+		boolean leftVisible = mc.x - this.offX >= this.x1;
+		boolean rightVisible = mc.x - this.offX + mc.textSize <= this.x2;
 		return leftVisible && rightVisible;
 	}
 	
@@ -243,8 +244,8 @@ public abstract class MenuOverlay {
 	 * @return Whether the {@code MenuComponent is visible vertically}
 	 */
 	public boolean componentVisibleVertical(MenuComponent mc) {
-		boolean topVisible = mc.y - offY + 16 >= y1;
-		boolean bottomVisible = mc.y - offY <= y2;
+		boolean topVisible = mc.y - this.offY + 16 >= this.y1;
+		boolean bottomVisible = mc.y - this.offY <= this.y2;
 		return topVisible && bottomVisible;
 	}
 	
@@ -255,12 +256,12 @@ public abstract class MenuOverlay {
 	 *            The {@code Screen}
 	 */
 	public void render(Screen screen) {
-		screen.clearRegion(this.clearRGB, x1, y1, x2, y2);
+		screen.clearRegion(this.clearRGB, this.x1, this.y1, this.x2, this.y2);
 		this.renderMenu(screen);
-		for (int sx = 0; sx < comps.length; sx++) {
-			for (int sy = 0; sy < comps[sx].length; sy++) {
-				if (componentExists(sx, sy)) {
-					MenuComponent m = comps[sx][sy];
+		for (int sx = 0; sx < this.comps.length; sx++) {
+			for (int sy = 0; sy < this.comps[sx].length; sy++) {
+				if (this.componentExists(sx, sy)) {
+					MenuComponent m = this.comps[sx][sy];
 //					if (m.update) {
 //						if (m.center == true) {
 //							m.x = (m.centerx * 2) - 4 * m.text.length();
@@ -269,7 +270,7 @@ public abstract class MenuOverlay {
 //						}
 //						m.update = false;
 //					}
-					MenuComponent.draw(screen, m, m == selected, offX, offY);
+					MenuComponent.draw(screen, m, m == this.selected, this.offX, this.offY);
 				}
 			}
 		}

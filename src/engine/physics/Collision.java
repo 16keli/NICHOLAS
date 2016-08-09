@@ -11,33 +11,33 @@ import engine.physics.entity.EntityPhysics;
  * @author Kevin
  */
 public class Collision {
-
+	
 	/**
 	 * The X and Y positions of the collision location.
 	 */
 	Vector2 pos;
-
+	
 	/**
 	 * The fractions of a tick after this tick happens where the collision will take place
 	 */
 	double tickFractions;
-
+	
 	/**
 	 * The {@code EntityPhysics}s involved
 	 */
 	EntityPhysics ent1, ent2;
-
+	
 	CollisionType type;
-
+	
 	public static final int STEPS = 10;
-
+	
 	public Collision(EntityPhysics ent1, EntityPhysics ent2) {
 		this(CollisionType.ELASTIC, ent1, ent2);
 	}
-
+	
 	public Collision(CollisionType type, EntityPhysics ent1, EntityPhysics ent2) {
-		System.out.println(
-				"Suspected Collision Between " + ent1.getClass().getName() + " and " + ent2.getClass().getName());
+		System.out.println("Suspected Collision Between " + ent1.getClass().getName() + " and "
+				+ ent2.getClass().getName());
 		this.ent1 = ent1;
 		this.ent2 = ent2;
 		this.type = type;
@@ -45,7 +45,7 @@ public class Collision {
 			ent1.tick1(i / STEPS);
 			ent2.tick1(i / STEPS);
 			if (Physics.suspectedCollision(ent1, ent2)) {
-				tickFractions = i;
+				this.tickFractions = i;
 				this.pos = Vector2.of((ent1.newp.x + ent2.newp.x) / 2, (ent1.newp.y + ent2.newp.y) / 2);
 //				System.out.println(this.pos);
 				break;
@@ -54,14 +54,14 @@ public class Collision {
 			ent2.tick2();
 		}
 		this.calculate(ent1, ent2);
-		for (double i = tickFractions; i < STEPS; i++) {
+		for (double i = this.tickFractions; i < STEPS; i++) {
 			ent1.tick1(i / STEPS);
 			ent2.tick1(i / STEPS);
 			ent1.tick2();
 			ent2.tick2();
 		}
 	}
-
+	
 	public void calculate(EntityPhysics ent1, EntityPhysics ent2) {
 		boolean exit = false;
 		if (!ent1.collisionMoveable()) {
@@ -77,7 +77,7 @@ public class Collision {
 		}
 		double sumPX = ent1.getMomentumX() + ent2.getMomentumX();
 		double sumPY = ent1.getMomentumY() + ent2.getMomentumY();
-		switch (type) {
+		switch (this.type) {
 			case PERFECTLYINELASTIC:
 				double m = ent1.mass + ent2.mass;
 				ent1.vel = Vector2.of(sumPX / m, sumPY / m);
@@ -87,13 +87,13 @@ public class Collision {
 				// Physics is hard
 				break;
 			case ELASTIC:
-
+				
 				break;
 			default:
 				return;
 		}
 	}
-
+	
 	public enum CollisionType {
 		PERFECTLYINELASTIC, INELASTIC, ELASTIC;
 	}

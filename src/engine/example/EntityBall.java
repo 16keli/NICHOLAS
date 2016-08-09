@@ -40,7 +40,7 @@ public class EntityBall extends EntityPhysics {
 	public void render(Screen s) {
 		Graphics2D g = s.client.vImg.createGraphics();
 		g.setColor(Color.WHITE);
-		g.drawOval((int) pos.x, (int) pos.y, 10, 10);
+		g.drawOval((int) this.pos.x, (int) this.pos.y, 10, 10);
 //		this.hitbox.renderHitbox(g, pos);
 		g.dispose();
 	}
