@@ -52,7 +52,7 @@ public class SpriteAnimated extends Sprite {
 	/**
 	 * The time the last {@link #setCurrent(int)} was called.
 	 */
-	public int offset = 0;
+	public long offset = 0;
 	
 	/**
 	 * Creates a new {@code SpriteAnimated} with the given images and period
@@ -89,13 +89,13 @@ public class SpriteAnimated extends Sprite {
 	
 	@Override
 	public BufferedImage getImage() {
-		this.current = ((Engine.getGameTimeClient() - this.offset) % this.pertotal) / this.period;
+		this.current = (int) (((Engine.getGameTimeClient() - this.offset) % this.pertotal) / this.period);
 		return this.imgs[this.current];
 	}
 	
 	@Override
 	public BufferedImage getAdjustedImage(int scale, boolean flipX, boolean flipY, int quads) {
-		this.current = ((Engine.getGameTimeClient() - this.offset) % this.pertotal) / this.period;
+		this.current = (int) (((Engine.getGameTimeClient() - this.offset) % this.pertotal) / this.period);
 		if ((scale == this.scales[this.current]) && (flipX == this.flipXs[this.current])
 				&& (flipY == this.flipYs[this.current]) && (quads == this.quadss[this.current])) {
 			return this.caches[this.current];

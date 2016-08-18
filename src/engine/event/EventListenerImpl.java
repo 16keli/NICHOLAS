@@ -51,4 +51,9 @@ public class EventListenerImpl implements IEventListener, Serializable {
 		}
 	}
 	
+	@Override
+	public Object getListeningObject() {
+		return this.listener;
+	}
+	
 }

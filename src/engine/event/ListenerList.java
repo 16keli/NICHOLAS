@@ -61,6 +61,25 @@ public class ListenerList implements Serializable {
 	}
 	
 	/**
+	 * Unregisters all the given {@code IEventListener}s associated with the given Object
+	 * 
+	 * @param obj
+	 *            The object to remove from listening
+	 * @param eventClass
+	 *            The class of {@code Event}
+	 */
+	public void unregister(Object obj, Class<? extends Event> eventClass) {
+		IEventListener[] listeners = this.getListeners(eventClass);
+		if (listeners != null) {
+			for (IEventListener listener : listeners) {
+				if (listener.getListeningObject() == obj) {
+					this.lists.get(eventClass).unregister(listener);
+				}
+			}
+		}
+	}
+	
+	/**
 	 * An implementation of a ListenerList for a specific class of {@code Event}
 	 * <p>
 	 * Basically just a wrapper around a List
@@ -96,6 +115,15 @@ public class ListenerList implements Serializable {
 		 */
 		public void register(IEventListener listener) {
 			this.listeners.add(listener);
+		}
+		
+		/**
+		 * Attempts to unregister the given listener
+		 * 
+		 * @param listener
+		 */
+		public void unregister(IEventListener listener) {
+			listeners.remove(listener);
 		}
 		
 	}

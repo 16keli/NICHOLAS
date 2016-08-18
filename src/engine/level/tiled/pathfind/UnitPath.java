@@ -1,5 +1,6 @@
 package engine.level.tiled.pathfind;
 
+import java.io.Serializable;
 import java.util.List;
 
 import engine.level.tiled.EntityTiled;
@@ -11,8 +12,13 @@ import engine.level.tiled.Tile;
  * 
  * @author Kevin
  */
-public class UnitPath {
+public class UnitPath implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * The {@code EntityTiled} that is moving
 	 */

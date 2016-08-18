@@ -14,4 +14,11 @@ public interface IEventListener {
 	 *            The {@code Event} class
 	 */
 	public void invoke(Event event);
+	
+	/**
+	 * Retrieves the object that is listening for events
+	 * 
+	 * @return
+	 */
+	public Object getListeningObject();
 }

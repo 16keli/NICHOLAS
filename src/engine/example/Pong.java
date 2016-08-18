@@ -56,10 +56,6 @@ public class Pong extends Game {
 	public Pong() {
 		super("Pong");
 		this.setLevel(new PongLevel(this));
-//		p1 = (PongPlayer) this.getNewPlayerInstance("Player 1");
-//		p2 = (PongPlayer) this.getNewPlayerInstance("Player 2");
-//		this.players.add(p1);
-//		this.players.add(p2);
 	}
 	
 	@Override

@@ -1,6 +1,5 @@
 package engine.event;
 
-import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
 
@@ -21,13 +20,17 @@ import java.util.logging.Logger;
  * to this {@code EventBus}. Then, whenever an event of {@code EventClass} is {@link #post(Event) posted} to
  * this {@code EventBus}, then {@code someEventHandler} will be invoked.
  * <p>
- * Objects of the following Classes, and all subclasses of these objects, are automatically registered to the
- * following {@code EventBus} instances.
+ * If, for some reason, an event listener must be unregistered, make use of {@link #unregister(Object)}.
+ * <p>
+ * Objects/Instances of the following Classes, and all subclasses of these objects, are automatically
+ * registered to the following {@code EventBus} instances.
  * <ul>
  * <li>{@link engine.client.Client Client}: {@link engine.client.Client#CLIENT_BUS}</li>
  * <li>{@link engine.level.Entity Entity}: {@link engine.Game#events}</li>
  * <li>{@link engine.physics.entity.EntityPhysics EntityPhysics}: {@link engine.physics.Physics#PHYSICS_BUS}
  * </li>
+ * <li>{@link engine.event.ITemporaryEventListener ITemporaryEventListener}:
+ * {@link engine.Game#temporaryEvents}</li>
  * <li>{@link engine.Game Game}: {@link engine.Game#events};</li>
  * <li>{@link engine.level.Level Level}: {@link engine.Game#events}</li>
  * <li>{@link engine.Player Player}: {@link engine.Game#events}</li>
@@ -37,14 +40,9 @@ import java.util.logging.Logger;
  * 
  * @author Kevin
  */
-public class EventBus implements Serializable {
+public class EventBus {
 	
 	public Logger eventLogger;
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * The Next {@code EventBus} ID
@@ -80,6 +78,7 @@ public class EventBus implements Serializable {
 	 * @param listener
 	 *            The Instance to create as a listener
 	 */
+	@SuppressWarnings ("unchecked")
 	public void register(Object listener) {
 		this.eventLogger.info("Trying to register " + listener + " for any Event Messages");
 		for (Method method : listener.getClass().getMethods()) {
@@ -92,7 +91,6 @@ public class EventBus implements Serializable {
 								+ " arguments.  Event handler methods must require a single argument.");
 					}
 					
-					@SuppressWarnings ("unchecked")
 					Class<? extends Event> eventType = (Class<? extends Event>) parameterTypes[0];
 					
 					if (!Event.class.isAssignableFrom(eventType)) {
@@ -125,15 +123,31 @@ public class EventBus implements Serializable {
 					+ " and method " + method + " for Event Bus with id " + this.id);
 			IEventListener impl = new EventListenerImpl(listener, method);
 			this.listeners.register(eventType, impl);
-			
-//			ArrayList<IEventListener> llist = listeners.get(listener);
-//			if (llist == null) {
-//				llist = new ArrayList<IEventListener>();
-//				listeners.put(listener, llist);
-//			}
-//			llist.add(impl);
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Unregisters the given listener instance from all of the lists
+	 * 
+	 * @param listener
+	 *            The listener to unregister
+	 */
+	@SuppressWarnings ("unchecked")
+	public void unregister(Object listener) {
+		this.eventLogger.info("Trying to unregister " + listener);
+		for (Method method : listener.getClass().getMethods()) {
+			try {
+				if (method.isAnnotationPresent(SubscribeEvent.class)) {
+					// Safety checks should have been passed when registering
+					Class<?>[] parameterTypes = method.getParameterTypes();
+					Class<? extends Event> eventType = (Class<? extends Event>) parameterTypes[0];
+					this.listeners.unregister(listener, eventType);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

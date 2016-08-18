@@ -2,10 +2,12 @@ package engine.server;
 
 import java.io.IOException;
 
+import engine.Engine;
 import engine.Game;
 import engine.event.EventBus;
 import engine.event.SubscribeEvent;
 import engine.event.game.ConnectionEstablishedEvent;
+import engine.event.game.TickEvent;
 import engine.networknio.ConnectionList;
 import engine.networknio.ConnectionNIO;
 import engine.networknio.packet.PacketNIO;
@@ -97,6 +99,8 @@ public abstract class Server {
 	 * Automatically calls {@code Game}'s tick method, so there is no need to call it again.
 	 */
 	public void tick() {
+		this.game.gameTime = Engine.getGameTimeServer();
+		this.game.temporaryEvents.post(new TickEvent(this.game.gameTime));
 		this.game.tick(this);
 		for (short i = 0; i < this.connections.getList().size(); i++) {
 			PacketNIO p;

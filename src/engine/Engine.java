@@ -107,7 +107,7 @@ public class Engine {
 		/**
 		 * The game time, in ticks, that has passed since this thread has launched
 		 */
-		public int gameTime = 0;
+		public long gameTime = 0;
 		
 		public abstract void tick();
 		
@@ -344,7 +344,7 @@ public class Engine {
 	 * 
 	 * @return
 	 */
-	public static int getGameTimeClient() {
+	public static long getGameTimeClient() {
 		return instance.cThread.gameTime;
 	}
 	
@@ -353,7 +353,7 @@ public class Engine {
 	 * 
 	 * @return
 	 */
-	public static int getGameTimeServer() {
+	public static long getGameTimeServer() {
 		return instance.sThread.gameTime;
 	}
 	

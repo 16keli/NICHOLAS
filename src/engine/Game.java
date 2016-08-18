@@ -34,6 +34,11 @@ public abstract class Game {
 	public transient Logger logger;
 	
 	/**
+	 * The current game time
+	 */
+	public long gameTime;
+	
+	/**
 	 * The {@code Game}'s {@code EventBus} for posting {@code Event}s.
 	 * <p>
 	 * For {@code Event}s concerning {@code EntityPhysics}, use {@link engine.physics.Physics#PHYSICS_BUS}
@@ -41,6 +46,12 @@ public abstract class Game {
 	 * @see engine.physics.Physics.ENTITY_BUS
 	 */
 	public EventBus events = new EventBus();
+	
+	/**
+	 * The {@code Game}'s {@code EventBus} for {@code ITemporaryEventListener}s. No special handling really,
+	 * only to separate the two {@code EventBus}es to reduce stress
+	 */
+	public EventBus temporaryEvents = new EventBus();
 	
 	/**
 	 * The name of the {@code Game}, used for file and GUI purposes

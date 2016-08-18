@@ -29,6 +29,7 @@ import engine.client.graphics.Screen;
 import engine.client.graphics.sprite.Sprite;
 import engine.client.menu.Menu;
 import engine.event.EventBus;
+import engine.event.game.TickEvent;
 import engine.networknio.ConnectionNIO;
 import engine.networknio.packet.PacketChat;
 import engine.networknio.packet.PacketNIO;
@@ -410,6 +411,8 @@ public abstract class Client extends Canvas {
 	 * server
 	 */
 	public void tick() {
+		this.game.gameTime = Engine.getGameTimeClient();
+		this.game.temporaryEvents.post(new TickEvent(this.game.gameTime));
 		if (!this.hasFocus()) {
 			this.input.releaseAll();
 		} else {
