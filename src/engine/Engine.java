@@ -1,10 +1,19 @@
 package engine;
 
+import java.io.File;
+import java.util.Calendar;
 import java.util.Random;
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import engine.client.Client;
 import engine.client.InputHandler;
+import engine.config.Configuration;
+import engine.launcher.LaunchConfig;
 import engine.server.Server;
 
 /**
@@ -12,31 +21,75 @@ import engine.server.Server;
  * itself. There should be little to no modification necessary, and the only calls truly necessary are to
  * start the {@code Client} and {@code Server}
  * <p>
- * To use the {@code Engine} class, call its {@link #startClient(Client)} or {@link #startServer(Server)}
- * methods with a game instance in order to run it
+ * To use the {@code Engine} class, first {@link #createEngine(LaunchConfig) create} the instance. This will
+ * do all the initialization tasks that are required. After that, call its {@link #startClient(Client)} or
+ * {@link #startServer(Server)} methods with a game instance in order to run it
  * <p>
  * In order to run {@code Server} and {@code Client}, the {@code Engine} creates separate {@code Thread}s for
  * each, which then run independently of each other. As a result, in order to resolve concurrency issues, the
  * {@code Client} and {@code Server} should each have their own instance of a {@code Game}, with data being
  * synchronized through use of {@code Packet}s.
  * <p>
- * The {@code Engine} runs on a tick-based system, which is defined by {@link #TICK_RATE} which is
- * {@value #TICK_RATE} ticks/second. This tick rate is the rate at which {@code Client} and {@code Server} are
+ * The {@code Engine} runs on a tick-based system, which is defined by {@link #DEFAULT_TICK_RATE} which is
+ * {@value #DEFAULT_TICK_RATE} ticks/second. This tick rate is the rate at which {@code Client} and {@code Server} are
  * updated. On the {@code Client} side, there also exists rendering of the {@code Game} (obviously) which
- * depends on {@link #VSYNC} ({@value #VSYNC}) as well as {@link #FRAME_RATE} which is {@value #FRAME_RATE}
+ * depends on {@link #DEFAULT_VSYNC} ({@value #DEFAULT_VSYNC}) as well as {@link #DEFAULT_FRAME_RATE} which is {@value #DEFAULT_FRAME_RATE}
  * frames/second. If {@code VSYNC} is activated, then the {@code Client} will try to render at (as smooth as
- * possible) {@value #FRAME_RATE} frames/second, otherwise it will render whenever it can.
+ * possible) {@value #DEFAULT_FRAME_RATE} frames/second, otherwise it will render whenever it can.
  * <p>
  * Also features some utility! For a single {@code Random} instance, there exists {@link #rand}, and for
  * {@code File} usage there is {@link #getFilePath()} to get to the directory where files should be stored.
  * <p>
- * Psst Do you know the future? CLASSLOADING! REMEMBER THAT!
+ * Psst Do you know the future? I do! CLASSLOADING!
  * 
  * @author Kevin
  */
 public class Engine {
 	
+	/**
+	 * The upper-level {@code Logger} instance. Should be the parent of all loggers, at least within the
+	 * {@code Engine} ecosystem.
+	 */
 	public static final Logger ENGINE_LOGGER = Logger.getLogger("engine");
+	
+	/**
+	 * The {@code Handler} for config and above
+	 */
+	private static Handler config;
+	
+	/**
+	 * The {@code Handler} for all data
+	 */
+	private static Handler all;
+	
+	private static final Formatter engineFormatter = new EngineLogFormatter();
+	
+	static {
+		File logDirectory = new File("logs");
+		try {
+			if (!logDirectory.exists()) {
+				logDirectory.mkdir();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		ENGINE_LOGGER.setFilter(null);
+		ENGINE_LOGGER.setLevel(Level.ALL);
+		try {
+			config = new FileHandler("logs/infolog%u.%g.txt", 262144, 4);
+			all = new FileHandler("logs/alllog%u.%g.txt", 262144, 4);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		config.setLevel(Level.CONFIG);
+		config.setFilter(null);
+		all.setLevel(Level.ALL);
+		all.setFilter(null);
+		config.setFormatter(engineFormatter);
+		all.setFormatter(engineFormatter);
+		ENGINE_LOGGER.addHandler(config);
+		ENGINE_LOGGER.addHandler(all);
+	}
 	
 	/**
 	 * The {@code Client} instance
@@ -54,24 +107,41 @@ public class Engine {
 	public static final Random rand = new Random();
 	
 	/**
-	 * Whether to lock the frame rate
+	 * Whether to lock the frame rate to a certain amount
 	 */
-	public static final boolean VSYNC = false;
+	public static final boolean DEFAULT_VSYNC = false;
 	
 	/**
 	 * The amount of ticks (ideally) in one second
 	 */
-	public static final int TICK_RATE = 60;
+	public static final int DEFAULT_TICK_RATE = 60;
 	
 	/**
 	 * The maximum frame rate of the game
 	 */
-	public static final int FRAME_RATE = 60;
+	public static final int DEFAULT_FRAME_RATE = 60;
+	
+	/**
+	 * The tickRate of this {@code Engine}
+	 */
+	private int tickRate;
+	
+	/**
+	 * The frameRate of this {@code Engine}
+	 */
+	private int frameRate;
+	
+	/**
+	 * The frame lock of this {@code Engine}
+	 */
+	private boolean vSync;
 	
 	/**
 	 * The sole instance of the {@code Engine}
+	 * <p>
+	 * Not exactly sure why I'm following the Singleton pattern. Oh well
 	 */
-	public static Engine instance = new Engine();
+	public static Engine instance;
 	
 	/**
 	 * The shortcut {@code String} for the filePath where data is stored
@@ -136,8 +206,8 @@ public class Engine {
 			long lastTime = System.nanoTime();
 			double uTick = 0;
 			double uFrame = 0;
-			double nsPerTick = 1000000000.0 / TICK_RATE;
-			double nsPerFrame = 1000000000.0 / FRAME_RATE;
+			double nsPerTick = 1000000000.0 / instance.tickRate;
+			double nsPerFrame = 1000000000.0 / instance.frameRate;
 			int frames = 0;
 			int ticks = 0;
 			long lastTimer1 = System.currentTimeMillis();
@@ -149,7 +219,7 @@ public class Engine {
 				uTick += (now - lastTime) / nsPerTick;
 				uFrame += (now - lastTime) / nsPerFrame;
 				lastTime = now;
-				boolean shouldRender = !VSYNC;
+				boolean shouldRender = !instance.vSync;
 				while (uTick >= 1) {
 					ticks++;
 					this.tick();
@@ -174,7 +244,7 @@ public class Engine {
 				
 				if (System.currentTimeMillis() - lastTimer1 > 1000) {
 					lastTimer1 += 1000;
-					System.out.println("CLIENT:\t" + ticks + " ticks, " + frames + " fps");
+					ENGINE_LOGGER.log(Level.INFO, "CLIENT:\t" + ticks + " ticks, " + frames + " fps");
 					frames = 0;
 					ticks = 0;
 				}
@@ -216,7 +286,7 @@ public class Engine {
 		public void run() {
 			long lastTime = System.nanoTime();
 			double unprocessed = 0;
-			double nsPerTick = 1000000000.0 / TICK_RATE;
+			double nsPerTick = 1000000000.0 / instance.tickRate;
 			int ticks = 0;
 			long lastTimer1 = System.currentTimeMillis();
 			
@@ -240,7 +310,7 @@ public class Engine {
 				
 				if (System.currentTimeMillis() - lastTimer1 > 1000) {
 					lastTimer1 += 1000;
-					System.out.println("SERVER:\t" + ticks + " ticks");
+					ENGINE_LOGGER.log(Level.INFO, "SERVER:\t" + ticks + " ticks");
 					ticks = 0;
 				}
 			}
@@ -263,13 +333,32 @@ public class Engine {
 	}
 	
 	/**
+	 * Creates a new Engine and executes tasks such as creation of a configuration file
+	 * @param config The {@code LaunchConfig}
+	 */
+	public static void createEngine(LaunchConfig config) {
+		if (instance != null) {
+			ENGINE_LOGGER.warning("Why are you trying to create another instance of Engine?");
+			return;
+		}
+		instance = new Engine();
+		config.config = new Configuration(config);
+		config.addProperties();
+		config.config.load();
+		instance.tickRate = Integer.parseInt(config.config.tickRate.getValue());
+		instance.frameRate = Integer.parseInt(config.config.frameRate.getValue());
+		instance.vSync = Boolean.parseBoolean(config.config.vSync.getValue());
+		config.processProperties();
+	}
+	
+	/**
 	 * Starts the given client in a JFrame
 	 * 
 	 * @param c
 	 *            The Subclass of {@code Client} to run
 	 */
 	public static void startClient(Client c) {
-		instance.filePath = "res/" + c.game.name.toLowerCase() + "/";
+		instance.filePath = "res/" + c.game.getName().toLowerCase() + "/";
 		instance.client = c;
 		instance.client.input = new InputHandler(instance.client);
 		instance.startClient();
@@ -282,6 +371,7 @@ public class Engine {
 	 *            The Subclass of {@code Server} to run
 	 */
 	public static void startServer(Server s) {
+		instance.filePath = "res/" + s.game.getName().toLowerCase() + "/";
 		instance.server = s;
 		instance.startServer();
 	}
@@ -311,7 +401,7 @@ public class Engine {
 	private void startClient() {
 		this.cThread = new ClientThread(this.client);
 		this.clientThread = new Thread(this.cThread, "Engine Client Thread");
-		System.out.println("Client Thread ID:\t" + this.clientThread.getId());
+		ENGINE_LOGGER.fine("Client Thread ID:\t" + this.clientThread.getId());
 		this.clientThread.start();
 	}
 	
@@ -321,7 +411,7 @@ public class Engine {
 	private void startServer() {
 		this.sThread = new ServerThread(this.server);
 		this.serverThread = new Thread(this.sThread, "Engine Server Thread");
-		System.out.println("Server Thread ID:\t" + this.serverThread.getId());
+		ENGINE_LOGGER.fine("Server Thread ID:\t" + this.serverThread.getId());
 		this.serverThread.start();
 	}
 	
@@ -355,6 +445,39 @@ public class Engine {
 	 */
 	public static long getGameTimeServer() {
 		return instance.sThread.gameTime;
+	}
+	
+	/**
+	 * A Utility class that determines how to format data in the Log files
+	 * 
+	 * @author Kevin
+	 */
+	public static class EngineLogFormatter extends Formatter {
+		
+		@Override
+		public String format(LogRecord record) {
+			Calendar c = Calendar.getInstance();
+			c.setTimeInMillis(record.getMillis());
+			StringBuilder sb = new StringBuilder();
+			sb.append('[');
+			sb.append(String.format("%2s", c.get(Calendar.HOUR_OF_DAY)).replace(' ', '0'));
+			sb.append(':');
+			sb.append(String.format("%2s", c.get(Calendar.MINUTE)).replace(' ', '0'));
+			sb.append(':');
+			sb.append(String.format("%2s", c.get(Calendar.SECOND)).replace(' ', '0'));
+			sb.append("] [");
+			sb.append(record.getLoggerName());
+			sb.append("] [");
+			sb.append(record.getSourceClassName());
+			sb.append('/');
+			sb.append(record.getSourceMethodName());
+			sb.append('/');
+			sb.append(record.getLevel());
+			sb.append("]:\t");
+			sb.append(record.getMessage());
+			sb.append('\n');
+			return sb.toString();
+		}
 	}
 	
 }

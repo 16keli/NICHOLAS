@@ -32,7 +32,17 @@ public class ConnectionNIO {
 	/**
 	 * The Logger instance
 	 */
-	public Logger logger;
+	public static final Logger logger = Logger.getLogger("engine.connect");
+	
+	/**
+	 * The default TCP Buffer Size
+	 */
+	public static final int DEFAULT_TCP_BUFFER_SIZE = 4096;
+	
+	/**
+	 * The default UDP Buffer Size
+	 */
+	public static final int DEFAULT_UDP_BUFFER_SIZE = 1024;
 	
 	/**
 	 * The {@code Thread} that reads incoming {@code Packet} data
@@ -145,19 +155,15 @@ public class ConnectionNIO {
 		this.tcpIn = ByteBuffer.allocate(tcpSize);
 		this.udpIn = ByteBuffer.allocate(udpSize);
 		
-		System.out.println(source + " UDP is bound to " + this.udpChannel.getLocalAddress()
-				+ " and connected to " + this.udpChannel.getRemoteAddress());
-				
 		this.tcpWrapper = new TCPChannelWrapper(this.tcpChannel, this.tcpIn, this.tcpBuffer, this);
 		this.udpWrapper = new UDPChannelWrapper(this.udpChannel, this.udpIn, this.udpBuffer, this);
 		
-		this.logger = Logger.getLogger("engine.connection." + this.sourceName);
-		this.logger.info("Local Address:\t" + this.legacySocket.getLocalSocketAddress());
-		this.logger.info("Remote Address:\t" + this.remoteAddress);
+		logger.info("Local Address:\t" + this.legacySocket.getLocalSocketAddress());
+		logger.info("Remote Address:\t" + this.remoteAddress);
 		
 		if (threads) {
 			this.readThread = new ThreadConnectionNIORead(this);
-			this.logger.info("Packet Read Thread ID:\t" + this.readThread.getId());
+			logger.fine("Packet Read Thread ID:\t" + this.readThread.getId());
 			this.readThread.start();
 		}
 		
@@ -205,7 +211,7 @@ public class ConnectionNIO {
 			try {
 				this.getAppropriateWrapper(p).writePacket(p);
 				if (!PacketNIO.idtoclass.containsKey(p.getID())) {
-					System.err.println("An unregistered type of PacketNIO was added to " + this.sourceName
+					logger.warning("An unregistered type of PacketNIO was added to " + this.sourceName
 							+ "'s send queue! ID is " + p.getID() + ", class is " + p.getClass().getName());
 				}
 			} catch (Exception e) {

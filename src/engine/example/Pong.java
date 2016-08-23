@@ -54,7 +54,7 @@ public class Pong extends Game {
 	public boolean p2exists = false;
 	
 	public Pong() {
-		super("Pong");
+		super();
 		this.setLevel(new PongLevel(this));
 	}
 	

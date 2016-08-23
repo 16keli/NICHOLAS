@@ -23,6 +23,7 @@ public class ConnectionList {
 	public ConnectionList() {
 		this.readThread = new ThreadConnectionListRead(this);
 		this.readThread.start();
+		ConnectionNIO.logger.fine("ConnectionList Read Thread ID:\t" + this.readThread.getId());
 	}
 	
 	/**

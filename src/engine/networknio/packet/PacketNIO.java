@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import engine.client.Client;
 import engine.server.Server;
@@ -37,6 +38,11 @@ import engine.server.Server;
  * @author Kevin
  */
 public abstract class PacketNIO {
+	
+	/**
+	 * The {@code PacketNIO} instance of {@code Logger}
+	 */
+	public static final Logger logger = Logger.getLogger("engine.packet");
 	
 	/**
 	 * A {@code HashMap} with keys of Packet ID and values of class type
@@ -125,7 +131,7 @@ public abstract class PacketNIO {
 		} else {
 			idtoclass.put(id, c);
 			classtoid.put(c, id);
-			System.out.println("Registered Packet " + c.getName() + " with id " + id);
+			logger.info("Registered Packet " + c.getName() + " with id " + id);
 		}
 		return true;
 	}
@@ -141,7 +147,7 @@ public abstract class PacketNIO {
 		try {
 			Class<? extends PacketNIO> c = idtoclass.get(id);
 			if (!idtoclass.containsKey(id)) {
-				System.err.println("Tried to initialize Packet with ID " + id + ", but it doesn't exist!");
+				logger.warning("Tried to initialize Packet with ID " + id + ", but it doesn't exist!");
 			}
 			return (c == null ? null : c.newInstance());
 		} catch (Exception e) {

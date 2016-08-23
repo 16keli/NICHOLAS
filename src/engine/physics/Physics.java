@@ -65,7 +65,7 @@ public class Physics implements Rebuildable {
 	 * The {@code EventBus} necessary for dispatching {@code EventEntityPosition}s and other Physics related
 	 * {@code Event}s
 	 */
-	public static EventBus PHYSICS_BUS = new EventBus();
+	public static EventBus PHYSICS_BUS = new EventBus("Physics Bus");
 	
 	/**
 	 * The previous stage in debug ticking

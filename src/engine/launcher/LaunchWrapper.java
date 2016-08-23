@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Logger;
 
 import engine.Engine;
 import engine.Game;
@@ -28,7 +29,7 @@ import engine.server.Server;
  * public class GameSubclass extends Game {
  * 	
  * 	public GameSubclass() {
- * 		super("Game Name");
+ * 		super();
  * 		// Additional code...
  * 	}
  * }
@@ -60,6 +61,31 @@ import engine.server.Server;
 public class LaunchWrapper {
 	
 	/**
+	 * The {@code LaunchWrapper} instance of {@code Logger}
+	 */
+	public static final Logger logger = Logger.getLogger("engine.launcher");
+	
+	/**
+	 * The {@code LaunchConfig} instance
+	 */
+	private static LaunchConfig launchConfig;
+	
+	/**
+	 * The {@code Client} instance
+	 */
+	private static Client client;
+	
+	/**
+	 * The {@code Server} instance
+	 */
+	private static Server server;
+	
+	/**
+	 * The {@code Game} instance
+	 */
+	private static Game game;
+	
+	/**
 	 * Launches the Windowed version of the game
 	 * 
 	 * @param width
@@ -70,7 +96,17 @@ public class LaunchWrapper {
 	 *            The scale of the window
 	 */
 	public static void launchWindowed(int width, int height, int scale) {
-	
+		if (launchConfig == null) {
+			logger.warning("Attempted to launch windowed client, but LaunchConfig is null!");
+			return;
+		}
+		try {
+			client = getWindowedConstructor(launchConfig.getClientClass()).newInstance(game, width, height,
+					scale);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Engine.startClient(client);
 	}
 	
 	/**
@@ -82,7 +118,16 @@ public class LaunchWrapper {
 	 *            The height of the internal image
 	 */
 	public static void launchFullscreen(int width, int height) {
-	
+		if (launchConfig == null) {
+			logger.warning("Attempted to launch fullscreen client, but LaunchConfig is null!");
+			return;
+		}
+		try {
+			client = getFullscreenConstructor(launchConfig.getClientClass()).newInstance(game, width, height);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Engine.startClient(client);
 	}
 	
 	/**
@@ -94,7 +139,40 @@ public class LaunchWrapper {
 	 *            The minimum number of connections before the {@code Server} actually begins gameplay
 	 */
 	public static void launchServer(int port, int minConnects) {
+		if (launchConfig == null) {
+			logger.warning("Attempted to launch dedicated server, but LaunchConfig is null!");
+			return;
+		}
+		try {
+			server = getServerConstructor(launchConfig.getServerClass()).newInstance(game, port, minConnects);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		Engine.startServer(server);
+	}
 	
+	/**
+	 * Attempts to initialize the game
+	 */
+	public static void initializeGame() {
+		if (launchConfig == null) {
+			logger.warning("Attempted to initialize game, but LaunchConfig is null!");
+			return;
+		}
+		try {
+			game = getGameConstructor(launchConfig.getGameClass()).newInstance();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Sets the launch config
+	 * @param config
+	 */
+	public static void setLaunchConfig(LaunchConfig config) {
+		launchConfig = config;
+		logger.config("Launch Configuration set for game " + Game.getName(config.getGameClass()));
 	}
 	
 	/**
@@ -164,8 +242,8 @@ public class LaunchWrapper {
 		return subClasses;
 	}
 	
-	public static List<Class<? extends Game>> getAllGames(File file) {
-		return getAllAssignable(file, Game.class);
+	public static List<Class<? extends LaunchConfig>> getAllLaunchConfigs(File file) {
+		return getAllAssignable(file, LaunchConfig.class);
 	}
 	
 	/**
@@ -214,14 +292,14 @@ public class LaunchWrapper {
 		return null;
 	}
 	
-	public static Constructor<? extends Game> getGameInstance(Class<? extends Game> cls)
+	public static Constructor<? extends Game> getGameConstructor(Class<? extends Game> cls)
 			throws NoSuchMethodException, SecurityException {
 		return cls.getConstructor();
 	}
 	
 	public static Game getGame(File file) {
 		try {
-			return getGameInstance(scanJarAndLoad(file, Game.class)).newInstance();
+			return getGameConstructor(scanJarAndLoad(file, Game.class)).newInstance();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

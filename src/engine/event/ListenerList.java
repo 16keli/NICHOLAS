@@ -34,8 +34,7 @@ public class ListenerList implements Serializable {
 			IEventListener[] llist = this.lists.get(eventClass).getListeners();
 			return llist;
 		} catch (NullPointerException e) {
-			System.err.println("Event " + eventClass.getName()
-					+ " was posted, but there are no listeners! This may or may not be a big problem! I don't know because I didn't write your code!");
+			// Swallow. Other exceptions may be important
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -71,6 +71,7 @@ public class ServerNIOListenThread extends Thread {
 				// I don't believe we will run into concurrency issues because only a single thread will be
 				// created and accessing nextPlayerID at a time
 				SocketChannel s = this.ssChannel.accept();
+				Server.logger.info("Server Accepting Connection on " + s.getLocalAddress());
 				ConnectionNIO c = new ConnectionNIO(s, "Server-Side", 4096, 1024);
 				Player p = this.server.game.getNewPlayerInstance();
 				Server.SERVER_BUS.post(new ConnectionEstablishedEvent(server.game, c, p));
@@ -78,7 +79,7 @@ public class ServerNIOListenThread extends Thread {
 				this.server.game.players.add(p);
 				c.addToSendQueue(new PacketConnection(p.number));
 				this.server.synchronizeClientGameData(c);
-				this.server.game.logger.info("Server received connection from "
+				Server.logger.info("Server received connection from "
 						+ s.socket().getInetAddress().getHostAddress() + "! Player ID is " + p.number);
 			} catch (Exception e) {
 				e.printStackTrace();

@@ -42,7 +42,7 @@ import java.util.logging.Logger;
  */
 public class EventBus {
 	
-	public Logger eventLogger;
+	public static final Logger eventLogger = Logger.getLogger("engine.events");
 	
 	/**
 	 * The Next {@code EventBus} ID
@@ -62,11 +62,18 @@ public class EventBus {
 	public ListenerList listeners = new ListenerList();
 	
 	/**
-	 * Creates a new {@code EventBus}
+	 * The name of this {@code EventBus}
 	 */
-	public EventBus() {
+	public String name;
+	
+	/**
+	 * Creates a new {@code EventBus}
+	 * @param name The {@code EventBus}' name
+	 */
+	public EventBus(String name) {
+		this.name = name;
 		this.id = nextID++;
-		this.eventLogger = Logger.getLogger("engine.event.bus" + this.id);
+		eventLogger.info("Registered EventBus " + name + " with ID " + this.id);
 	}
 	
 	/**
@@ -80,7 +87,7 @@ public class EventBus {
 	 */
 	@SuppressWarnings ("unchecked")
 	public void register(Object listener) {
-		this.eventLogger.info("Trying to register " + listener + " for any Event Messages");
+		eventLogger.fine("Trying to register " + listener + " for any Event Messages");
 		for (Method method : listener.getClass().getMethods()) {
 			try {
 				if (method.isAnnotationPresent(SubscribeEvent.class)) {
@@ -119,7 +126,7 @@ public class EventBus {
 	 */
 	private void register(Class<? extends Event> eventType, Object listener, Method method) {
 		try {
-			this.eventLogger.info("Registering listener " + listener + " for Event Class " + eventType
+			eventLogger.finer("Registering listener " + listener + " for Event Class " + eventType
 					+ " and method " + method + " for Event Bus with id " + this.id);
 			IEventListener impl = new EventListenerImpl(listener, method);
 			this.listeners.register(eventType, impl);
@@ -136,7 +143,7 @@ public class EventBus {
 	 */
 	@SuppressWarnings ("unchecked")
 	public void unregister(Object listener) {
-		this.eventLogger.info("Trying to unregister " + listener);
+		eventLogger.fine("Trying to unregister " + listener);
 		for (Method method : listener.getClass().getMethods()) {
 			try {
 				if (method.isAnnotationPresent(SubscribeEvent.class)) {
@@ -158,11 +165,15 @@ public class EventBus {
 	 *            The {@code Event} instance
 	 */
 	public void post(Event event) {
+		eventLogger.finest("Posting Event " + event.getClass().getName() + " to Event Bus " + this.id);
 		IEventListener[] listeners = this.listeners.getListeners(event.getClass());
 		if (listeners != null) {
 			for (IEventListener listener : listeners) {
 				listener.invoke(event);
 			}
+		} else {
+			eventLogger.fine("Event " + event.getClass().getName()
+					+ " was posted, but there are no listeners! This may or may not be a big problem! I don't know because I didn't write your code!");
 		}
 	}
 	

@@ -1,6 +1,7 @@
 package engine.server;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import engine.Engine;
 import engine.Game;
@@ -24,9 +25,14 @@ import engine.networknio.packet.PacketPlayer;
 public abstract class Server {
 	
 	/**
+	 * The {@code Server} instance of {@code Logger}
+	 */
+	public static final Logger logger = Logger.getLogger("engine.server");
+	
+	/**
 	 * The {@code EventBus} used by the {@code Server} to process {@code GameEvent}s
 	 */
-	public static EventBus SERVER_BUS = new EventBus();
+	public static EventBus SERVER_BUS = new EventBus("Server Bus");
 	
 	/**
 	 * The connection listener thread

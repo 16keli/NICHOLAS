@@ -17,6 +17,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.SocketChannel;
+import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 
@@ -49,9 +50,14 @@ import engine.networknio.packet.PacketPing;
 public abstract class Client extends Canvas {
 	
 	/**
+	 * The {@code Client} instance of {@code Logger}
+	 */
+	public static final Logger logger = Logger.getLogger("engine.client");
+	
+	/**
 	 * The {@code EventBus} used by the {@code Client} to process {@code GameEvent}s
 	 */
-	public static EventBus CLIENT_BUS = new EventBus();
+	public static EventBus CLIENT_BUS = new EventBus("Client Bus");
 	
 	/**
 	 * The {@code Client}'s instance of the {@code Game}
@@ -199,7 +205,7 @@ public abstract class Client extends Canvas {
 		this.setMaximumSize(new Dimension(this.WIDTH * (int) this.SCALE, this.HEIGHT * (int) this.SCALE));
 		this.setPreferredSize(new Dimension(this.WIDTH * (int) this.SCALE, this.HEIGHT * (int) this.SCALE));
 		
-		this.frame = new JFrame(g.name);
+		this.frame = new JFrame(g.getName());
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.frame.setLayout(new BorderLayout());
 		this.frame.add(this, BorderLayout.CENTER);
@@ -208,6 +214,9 @@ public abstract class Client extends Canvas {
 		this.frame.setLocationRelativeTo(null);
 		this.frame.setVisible(true);
 		this.recreateVImg();
+		
+		logger.config("Starting Client in windowed mode. Parameters: Internal Window (w x h) = " + this.WIDTH
+				+ " x " + this.HEIGHT + " Scale = " + this.SCALE);
 	}
 	
 	/**
@@ -232,7 +241,7 @@ public abstract class Client extends Canvas {
 		this.gfxCfg = this.gfxDvc.getDefaultConfiguration();
 		this.dm = this.gfxDvc.getDisplayMode();
 		
-		this.frame = new JFrame(g.name);
+		this.frame = new JFrame(g.getName());
 		this.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.frame.setLayout(new BorderLayout());
 		this.frame.add(this, BorderLayout.CENTER);
@@ -248,6 +257,9 @@ public abstract class Client extends Canvas {
 		this.SCALE = (double) this.dm.getWidth() / (double) this.WIDTH;
 		
 		this.recreateVImg();
+		
+		logger.config("Starting Client in fullscreen mode. Parameters: Internal Window (w x h) = "
+				+ this.WIDTH + " x " + this.HEIGHT + " Scale = " + this.SCALE);
 	}
 	
 	/**
@@ -298,7 +310,7 @@ public abstract class Client extends Canvas {
 	 *             If an I/O Stream cannot be opened
 	 */
 	private boolean connect() throws IOException {
-		System.out.println("Client Attempting Connection to " + this.remoteAddress);
+		logger.info("Client Attempting Connection to " + this.remoteAddress);
 		this.connection = new ConnectionNIO(this.socketChannel, "Client-Side", 4096, 1024, true);
 		this.player = this.game.getNewPlayerInstance();
 		this.player.name = this.desiredUsername;

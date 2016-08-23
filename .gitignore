@@ -12,6 +12,7 @@ bin
 *.mp3
 *.png
 *.wav
+*.txt
 
 *.class
 

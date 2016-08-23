@@ -31,7 +31,7 @@ public abstract class Game {
 	/**
 	 * A debug {@code Logger} for use in debugging I guess
 	 */
-	public transient Logger logger;
+	public static final Logger logger = Logger.getLogger("engine.game");
 	
 	/**
 	 * The current game time
@@ -45,18 +45,13 @@ public abstract class Game {
 	 * 
 	 * @see engine.physics.Physics.ENTITY_BUS
 	 */
-	public EventBus events = new EventBus();
+	public EventBus events = new EventBus("Game Events");
 	
 	/**
 	 * The {@code Game}'s {@code EventBus} for {@code ITemporaryEventListener}s. No special handling really,
 	 * only to separate the two {@code EventBus}es to reduce stress
 	 */
-	public EventBus temporaryEvents = new EventBus();
-	
-	/**
-	 * The name of the {@code Game}, used for file and GUI purposes
-	 */
-	public String name;
+	public EventBus temporaryEvents = new EventBus("Game Temporary Events");
 	
 	/**
 	 * The current {@code Level} being played.
@@ -79,14 +74,9 @@ public abstract class Game {
 	public short nextPlayerNumber = 0;
 	
 	/**
-	 * Creates a new {@code Game} with the specified name
-	 * 
-	 * @param s
-	 *            The name of the {@code Game}
+	 * Creates a new {@code Game}
 	 */
-	public Game(String s) {
-		this.name = s;
-		this.logger = Logger.getLogger(s);
+	public Game() {
 		this.events.register(this);
 	}
 	
@@ -121,7 +111,8 @@ public abstract class Game {
 	protected abstract void tickServer(Server s);
 	
 	/**
-	 * Called when first initializing the game
+	 * Called when first initializing the game. This is not called from the constructor, rather from the
+	 * thread that starts either the Client or the Server.
 	 */
 	protected abstract void init();
 	
@@ -183,5 +174,22 @@ public abstract class Game {
 	 * @return
 	 */
 	public abstract Class<? extends Player> getPlayerClass();
+	
+	/**
+	 * Gets the name of this game
+	 * @return
+	 */
+	public String getName() {
+		return getName(this.getClass());
+	}
+	
+	/**
+	 * Gets the name of the game class
+	 * @param game
+	 * @return
+	 */
+	public static String getName(Class<? extends Game> game) {
+		return game.getSimpleName();
+	}
 	
 }
