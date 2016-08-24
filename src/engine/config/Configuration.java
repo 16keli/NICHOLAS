@@ -5,6 +5,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -37,11 +40,13 @@ public class Configuration {
 	private List<Property> properties = new ArrayList<Property>();
 	
 	// Default Engine Properties @formatter:off
-	public Property tickRate = new Property("TickRate", Engine.DEFAULT_TICK_RATE);
-	public Property frameRate = new Property("FrameRate", Engine.DEFAULT_FRAME_RATE);
-	public Property vSync = new Property("VSync", Engine.DEFAULT_VSYNC);
-	public Property tcpBuff = new Property("TCPBufferSize", ConnectionNIO.DEFAULT_TCP_BUFFER_SIZE);
-	public Property udpBuff = new Property("UDPBufferSize", ConnectionNIO.DEFAULT_UDP_BUFFER_SIZE);
+	public Property tickRate = new Property("TickRate", Engine.DEFAULT_TICK_RATE, Integer.class);
+	public Property frameRate = new Property("FrameRate", Engine.DEFAULT_FRAME_RATE, Integer.class);
+	public Property vSync = new Property("VSync", Engine.DEFAULT_VSYNC, Boolean.class);
+	public Property tcpBuff = new Property("TCPBufferSize", ConnectionNIO.DEFAULT_TCP_BUFFER_SIZE, Integer.class);
+	public Property udpBuff = new Property("UDPBufferSize", ConnectionNIO.DEFAULT_UDP_BUFFER_SIZE, Integer.class);
+	public Property cfgLog = new Property("LogConfig", Engine.DEFAULT_LOG_CONFIG, Boolean.class);
+	public Property allLog = new Property("LogAll", Engine.DEFAULT_LOG_ALL, Boolean.class);
 	//@formatter:on
 	
 	public Configuration(File file) {
@@ -51,6 +56,8 @@ public class Configuration {
 		addProperty(vSync);
 		addProperty(tcpBuff);
 		addProperty(udpBuff);
+		addProperty(cfgLog);
+		addProperty(allLog);
 	}
 	
 	public Configuration(LaunchConfig lcfg) {
@@ -93,6 +100,8 @@ public class Configuration {
 	 */
 	public void read() {
 		logger.fine("Attempting Read of Config file");
+		// Fatal error which will require reloading of the file
+		boolean fatal = false;
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line;
 			int lineNum = 0;
@@ -103,6 +112,7 @@ public class Configuration {
 					logger.severe("Configuration File line " + lineNum
 							+ " is errored! Expected two arguments separated by \"" + DELIMITER + "\", got "
 							+ strs.length);
+					fatal = true;
 					continue;
 				}
 				Property prop = getMatchingProperty(strs[0]);
@@ -112,7 +122,28 @@ public class Configuration {
 					continue;
 				}
 				prop.setValue(strs[1]);
+				if (!prop.checkValue()) {
+					logger.warning("Property with name " + strs[0] + " failed type check! Expected type "
+							+ prop.getCheckClass().getSimpleName() + " but failed!");
+					fatal = true;
+					prop.setValue(null);
+					continue;
+				}
 				logger.config(prop.internalName + DELIMITER + prop.getValue());
+			}
+			reader.close();
+			for (Property prop : properties) {
+				if (!prop.hasValue()) {
+					logger.warning("Property " + prop.internalName + " was not assigned a value!");
+					fatal = true;
+				}
+			}
+			if (fatal) {
+				logger.info("A fatal error was encountered while reading from " + file.getName()
+						+ ". A copy of this file has been saved, and a new file has been generated.");
+				Files.move(file.toPath(), Paths.get(file.getPath() + ".fatal"),
+						StandardCopyOption.REPLACE_EXISTING);
+				load();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

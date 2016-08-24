@@ -6,6 +6,7 @@ import java.util.List;
 import engine.client.graphics.sprite.Sprite;
 import engine.level.Entity;
 import engine.level.tiled.Tile.TileCoords;
+import engine.level.tiled.pathfind.UnitPath;
 
 public abstract class EntityTiled extends Entity {
 	
@@ -57,7 +58,18 @@ public abstract class EntityTiled extends Entity {
 	 *            The {@code Tile} to move to
 	 */
 	public void move(Tile destination) {
+		this.currentTile = destination;
+		this.level.game.events.post(new EntityTiledMoveEvent(this, destination));
+	}
 	
+	/**
+	 * Moves along the given {@code UnitPath}
+	 * @param path The {@code UnitPath} to take
+	 */
+	public void moveAlongPath(UnitPath path) {
+		for (Tile tile : path.tiles) {
+			this.move(tile);
+		}
 	}
 	
 	/**

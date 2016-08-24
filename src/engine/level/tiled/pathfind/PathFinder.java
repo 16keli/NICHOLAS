@@ -1,5 +1,6 @@
 package engine.level.tiled.pathfind;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -116,6 +117,9 @@ public class PathFinder {
 	
 	/**
 	 * Reconstructs the {@code UnitPath} from the given parameters
+	 * <p>
+	 * The reconstruction algorithm puts the tiles into the list in reverse order, thus the invocation of
+	 * {@code reverse} is necessary to ensure that the {@code Tile}s are in order
 	 * 
 	 * @param ent
 	 *            The {@code EntityTiled}
@@ -135,6 +139,7 @@ public class PathFinder {
 			current = cameFrom.get(current);
 			tiles.add(current);
 		}
+		Collections.reverse(tiles);
 		return new UnitPath(ent, ent.currentTile, tiles.get(0), tiles, cost);
 	}
 	

@@ -55,12 +55,12 @@ public class Engine {
 	/**
 	 * The {@code Handler} for config and above
 	 */
-	private static Handler config;
+	public static Handler cfgHandler;
 	
 	/**
 	 * The {@code Handler} for all data
 	 */
-	private static Handler all;
+	public static Handler allHandler;
 	
 	private static final Formatter engineFormatter = new EngineLogFormatter();
 	
@@ -76,19 +76,19 @@ public class Engine {
 		ENGINE_LOGGER.setFilter(null);
 		ENGINE_LOGGER.setLevel(Level.ALL);
 		try {
-			config = new FileHandler("logs/infolog%u.%g.txt", 262144, 4);
-			all = new FileHandler("logs/alllog%u.%g.txt", 262144, 4);
+			cfgHandler = new FileHandler("logs/infolog%u.%g.txt", 262144, 4);
+			allHandler = new FileHandler("logs/alllog%u.%g.txt", 262144, 4);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		config.setLevel(Level.CONFIG);
-		config.setFilter(null);
-		all.setLevel(Level.ALL);
-		all.setFilter(null);
-		config.setFormatter(engineFormatter);
-		all.setFormatter(engineFormatter);
-		ENGINE_LOGGER.addHandler(config);
-		ENGINE_LOGGER.addHandler(all);
+		cfgHandler.setLevel(Level.CONFIG);
+		cfgHandler.setFilter(null);
+		allHandler.setLevel(Level.ALL);
+		allHandler.setFilter(null);
+		cfgHandler.setFormatter(engineFormatter);
+		allHandler.setFormatter(engineFormatter);
+		ENGINE_LOGGER.addHandler(cfgHandler);
+		ENGINE_LOGGER.addHandler(allHandler);
 	}
 	
 	/**
@@ -120,6 +120,16 @@ public class Engine {
 	 * The maximum frame rate of the game
 	 */
 	public static final int DEFAULT_FRAME_RATE = 60;
+	
+	/**
+	 * The default logging behavior
+	 */
+	public static final boolean DEFAULT_LOG_CONFIG = true;
+	
+	/**
+	 * The default logging behavior
+	 */
+	public static final boolean DEFAULT_LOG_ALL = true;
 	
 	/**
 	 * The tickRate of this {@code Engine}
@@ -348,6 +358,12 @@ public class Engine {
 		instance.tickRate = Integer.parseInt(config.config.tickRate.getValue());
 		instance.frameRate = Integer.parseInt(config.config.frameRate.getValue());
 		instance.vSync = Boolean.parseBoolean(config.config.vSync.getValue());
+		if (!Boolean.parseBoolean(config.config.cfgLog.getValue())) {
+			cfgHandler.close();
+		}
+		if (!Boolean.parseBoolean(config.config.allLog.getValue())) {
+			allHandler.close();
+		}
 		config.processProperties();
 	}
 	

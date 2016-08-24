@@ -45,14 +45,13 @@ public class PacketObject<T> extends PacketTCP {
 	
 	@Override
 	public void writePacketData(ByteBuffer buff) throws IOException {
-		buff.put(this.objectAsBytes);
+		PacketNIO.writeObject(buff, objectAsBytes);
 	}
 	
 	@SuppressWarnings ("unchecked")
 	@Override
 	public void readPacketData(ByteBuffer buff) throws IOException {
-		this.objectAsBytes = buff.array();
-		this.object = (T) bytesToObject(this.objectAsBytes);
+		this.object = (T) PacketNIO.readObject(buff);
 	}
 	
 	@Override
