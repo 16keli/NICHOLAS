@@ -21,8 +21,8 @@ public class PacketEntityPosition extends PacketUDP {
 	
 	public PacketEntityPosition(EntityPhysics e) {
 		this.id = e.id;
-		this.x = e.pos.x;
-		this.y = e.pos.y;
+		this.x = e.pos.getX();
+		this.y = e.pos.getY();
 	}
 	
 	@Override

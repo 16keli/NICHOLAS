@@ -6,7 +6,7 @@ import java.util.List;
 import engine.Game;
 import engine.event.EventBus;
 import engine.event.SubscribeEvent;
-import engine.level.Vector2;
+import engine.geom2d.Vector2;
 import engine.networknio.Rebuildable;
 import engine.physics.entity.EntityPhysics;
 import engine.physics.entity.Hitbox;
@@ -38,7 +38,7 @@ public class Physics implements Rebuildable {
 	public static final int TICK_DELAY = 1;
 	
 	/**
-	 * The acceleration due to gravity, in distance/tick^2
+	 * The acceleration due to gravity, in pixels/tick^2
 	 */
 	public static final double GRAVITY = -9.8 / 3600;
 	

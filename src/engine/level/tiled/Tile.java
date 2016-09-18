@@ -8,7 +8,7 @@ import java.util.List;
 import engine.client.graphics.Screen;
 import engine.client.graphics.sprite.ISpriteProvider;
 import engine.client.graphics.sprite.Sprite;
-import engine.level.Vector2;
+import engine.geom2d.Vector2;
 
 public abstract class Tile implements ISpriteProvider, Serializable {
 	

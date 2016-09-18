@@ -4,6 +4,8 @@ import engine.Game;
 import engine.client.graphics.Screen;
 import engine.client.graphics.sprite.ISpriteProvider;
 import engine.client.graphics.sprite.Sprite;
+import engine.geom2d.Point2;
+import engine.geom2d.Tuple2;
 import engine.networknio.Rebuildable;
 import engine.physics.entity.EntityPhysics;
 
@@ -30,7 +32,7 @@ public abstract class Entity implements ISpriteProvider, Rebuildable {
 	/**
 	 * The upper-left Position of this {@code Entity}
 	 */
-	public Vector2 pos;
+	public Point2 pos;
 	
 	/**
 	 * The {@code Sprite}
@@ -45,7 +47,7 @@ public abstract class Entity implements ISpriteProvider, Rebuildable {
 	public Entity(Level l, double x, double y, Sprite sprite) {
 		this.level = l;
 		this.id = l.getNextAvailableID();
-		this.pos = Vector2.of(x, y);
+		this.pos = Point2.of(x, y);
 		this.sprite = sprite;
 		this.level.game.events.register(this);
 		this.level.addEntity(this);
@@ -62,7 +64,7 @@ public abstract class Entity implements ISpriteProvider, Rebuildable {
 	}
 	
 	@Override
-	public Vector2 getSpritePosition() {
+	public Tuple2 getSpritePosition() {
 		return this.pos;
 	}
 	

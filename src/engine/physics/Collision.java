@@ -1,6 +1,7 @@
 package engine.physics;
 
-import engine.level.Vector2;
+import engine.geom2d.Point2;
+import engine.geom2d.Vector2;
 import engine.physics.entity.EntityPhysics;
 
 /**
@@ -15,7 +16,7 @@ public class Collision {
 	/**
 	 * The X and Y positions of the collision location.
 	 */
-	Vector2 pos;
+	Point2 pos;
 	
 	/**
 	 * The fractions of a tick after this tick happens where the collision will take place
@@ -29,7 +30,7 @@ public class Collision {
 	
 	CollisionType type;
 	
-	public static final int STEPS = 10;
+	public static final int STEPS = 1;
 	
 	public Collision(EntityPhysics ent1, EntityPhysics ent2) {
 		this(CollisionType.ELASTIC, ent1, ent2);
@@ -46,7 +47,7 @@ public class Collision {
 			ent2.tick1(i / STEPS);
 			if (Physics.suspectedCollision(ent1, ent2)) {
 				this.tickFractions = i;
-				this.pos = Vector2.of((ent1.newp.x + ent2.newp.x) / 2, (ent1.newp.y + ent2.newp.y) / 2);
+				this.pos = Point2.of((ent1.newp.getX() + ent2.newp.getX()) / 2, (ent1.newp.getY() + ent2.newp.getY()) / 2);
 //				System.out.println(this.pos);
 				break;
 			}
@@ -65,18 +66,18 @@ public class Collision {
 	public void calculate(EntityPhysics ent1, EntityPhysics ent2) {
 		boolean exit = false;
 		if (!ent1.collisionMoveable()) {
-			ent2.vel = ent2.vel.scale(-1);
+			ent2.vel = ent2.vel.scaleVector(-1);
 			exit = true;
 		}
 		if (!ent2.collisionMoveable()) {
-			ent1.vel = ent1.vel.scale(-1);
+			ent1.vel = ent1.vel.scaleVector(-1);
 			exit = true;
 		}
 		if (exit) {
 			return;
 		}
-		double sumPX = ent1.getMomentumX() + ent2.getMomentumX();
-		double sumPY = ent1.getMomentumY() + ent2.getMomentumY();
+		double sumPX = ent1.getMomentum().getX() + ent2.getMomentum().getX();
+		double sumPY = ent1.getMomentum().getY() + ent2.getMomentum().getY();
 		switch (this.type) {
 			case PERFECTLYINELASTIC:
 				double m = ent1.mass + ent2.mass;

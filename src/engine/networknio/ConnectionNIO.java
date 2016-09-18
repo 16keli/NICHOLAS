@@ -29,6 +29,7 @@ import engine.networknio.packet.PacketUDP.UDPChannelWrapper;
  */
 public class ConnectionNIO {
 	
+	
 	/**
 	 * The Logger instance
 	 */
@@ -43,6 +44,16 @@ public class ConnectionNIO {
 	 * The default UDP Buffer Size
 	 */
 	public static final int DEFAULT_UDP_BUFFER_SIZE = 1024;
+	
+	/**
+	 * The size of the TCP Buffer as defined in the config file
+	 */
+	public static int TCP_BUFFER_SIZE;
+	
+	/**
+	 * The size of the UDP Buffer as defined in the config file
+	 */
+	public static int UDP_BUFFER_SIZE;
 	
 	/**
 	 * The {@code Thread} that reads incoming {@code Packet} data
@@ -114,12 +125,27 @@ public class ConnectionNIO {
 	 */
 	private ProtocolWrapper udpWrapper;
 	
-	public ConnectionNIO(SocketChannel s, String source, int tcpSize, int udpSize) throws IOException {
-		this(s, source, tcpSize, udpSize, false);
+	/**
+	 * Creates a new {@code Connection} ready to send and receive data (if {@code threads = true}). The sizes
+	 * of the TCP and UDP Buffers are as defined by {@link #TCP_BUFFER_SIZE} and {@link #UDP_BUFFER_SIZE}.
+	 * 
+	 * @param s
+	 *            The {@code SocketChannel} to connect to
+	 * @param source
+	 *            The name for the source
+	 * @param threads
+	 *            Whether to start the reading thread
+	 * @throws IOException
+	 *             If an I/O stream cannot be opened
+	 */
+	public ConnectionNIO(SocketChannel s, String source, boolean threads) throws IOException {
+		this(s, source, TCP_BUFFER_SIZE, UDP_BUFFER_SIZE, threads);
 	}
 	
 	/**
-	 * Creates a new {@code Connection} ready to send and receive data
+	 * Creates a new {@code Connection} ready to send data. The reading thread is not started for this
+	 * instance. The sizes of the TCP and UDP Buffers are as defined by {@link #TCP_BUFFER_SIZE} and
+	 * {@link #UDP_BUFFER_SIZE}.
 	 * 
 	 * @param s
 	 *            The {@code SocketChannel} to connect to
@@ -130,7 +156,46 @@ public class ConnectionNIO {
 	 * @param udpSize
 	 *            The size of the UDP Write buffer
 	 * @param threads
-	 *            Whether to start the own threads
+	 *            Whether to start the reading thread
+	 * @throws IOException
+	 *             If an I/O stream cannot be opened
+	 */
+	public ConnectionNIO(SocketChannel s, String source) throws IOException {
+		this(s, source, TCP_BUFFER_SIZE, UDP_BUFFER_SIZE);
+	}
+	
+	/**
+	 * Creates a new {@code Connection} ready to send data. The reading thread is not started for this
+	 * instance.
+	 * 
+	 * @param s
+	 *            The {@code SocketChannel} to connect to
+	 * @param source
+	 *            The name for the source
+	 * @param tcpSize
+	 *            The size of the TCP Write buffer
+	 * @param udpSize
+	 *            The size of the UDP Write buffer
+	 * @throws IOException
+	 *             If an I/O stream cannot be opened
+	 */
+	public ConnectionNIO(SocketChannel s, String source, int tcpSize, int udpSize) throws IOException {
+		this(s, source, tcpSize, udpSize, false);
+	}
+	
+	/**
+	 * Creates a new {@code Connection} ready to send and receive data (if {@code threads = true})
+	 * 
+	 * @param s
+	 *            The {@code SocketChannel} to connect to
+	 * @param source
+	 *            The name for the source
+	 * @param tcpSize
+	 *            The size of the TCP Write buffer
+	 * @param udpSize
+	 *            The size of the UDP Write buffer
+	 * @param threads
+	 *            Whether to start the reading thread
 	 * @throws IOException
 	 *             If an I/O stream cannot be opened
 	 */

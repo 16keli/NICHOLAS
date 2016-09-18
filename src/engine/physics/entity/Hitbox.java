@@ -6,7 +6,9 @@ import java.awt.image.BufferedImage;
 import java.io.Serializable;
 
 import engine.client.graphics.sprite.ISpriteProvider;
-import engine.level.Vector2;
+import engine.geom2d.Point2;
+import engine.geom2d.Tuple2;
+import engine.geom2d.Vector2;
 
 /**
  * The Hitbox of an {@code EntityPhysics} used in collision detection and determination
@@ -57,8 +59,8 @@ public abstract class Hitbox implements Serializable {
 	 *            The angle in Radians. Values will automatically get clamped into the range [0, 2pi)
 	 * @return
 	 */
-	public Vector2 getFurthestAtAngle(double angle) {
-		return this.getHitboxVectorAtAngle(clampAngle(angle)).plus(this.getCenterDisplacement());
+	public Tuple2 getFurthestAtAngle(double angle) {
+		return this.getHitboxVectorAtAngle(clampAngle(angle)).add(this.getCenterDisplacement());
 	}
 	
 	/**
@@ -91,7 +93,7 @@ public abstract class Hitbox implements Serializable {
 	 * 
 	 * @return The displacement between the center and upper-left corner
 	 */
-	public abstract Vector2 getCenterDisplacement();
+	public abstract Point2 getCenterDisplacement();
 	
 	/**
 	 * Retrieves the angle of the surface (tangent to the angle) at the given angle
@@ -108,12 +110,12 @@ public abstract class Hitbox implements Serializable {
 	/**
 	 * Checks whether a {@code Vector2} lies within the confines of this {@code Hitbox}.
 	 * 
-	 * @param point
+	 * @param va2
 	 *            The {@code Vector2} to check. Will be adjusted to account for position, in this case
 	 *            {@code Vector2.ZERO} is equal to the position of this {@code EntityPhysics}
 	 * @return Whether or not the given point lies within the {@code Hitbox}
 	 */
-	public abstract boolean pointLiesInsideHitbox(Vector2 point);
+	public abstract boolean pointLiesInsideHitbox(Point2 va2);
 	
 	/**
 	 * Checks whether the two {@code EntityPhysics} collide at all
@@ -125,12 +127,12 @@ public abstract class Hitbox implements Serializable {
 	 * @return Whether the two hitboxes of the {@code EntityPhysics}s collide
 	 */
 	public static boolean collides(EntityPhysics e1, EntityPhysics e2) {
-		Vector2 vda = e1.newp.plus(e1.hitbox.getCenterDisplacement())
-				.minus(e2.newp.plus(e2.hitbox.getCenterDisplacement()));
-		double aa1 = Math.atan2(vda.y, vda.x);
+		Tuple2 vda = e1.newp.add(e1.hitbox.getCenterDisplacement())
+				.subtract(e2.newp.add(e2.hitbox.getCenterDisplacement()));
+		double aa1 = Math.atan2(vda.getY(), vda.getX());
 		double aa2 = aa1 + Math.PI;
-		Vector2 va1 = e1.hitbox.getFurthestAtAngle(aa2).plus(e1.newp).minus(e2.newp);
-		Vector2 va2 = e2.hitbox.getFurthestAtAngle(aa1).plus(e2.newp).minus(e1.newp);
+		Point2 va1 = e1.hitbox.getFurthestAtAngle(aa2).add(e1.newp).subtract(e2.newp).toPoint();
+		Point2 va2 = e2.hitbox.getFurthestAtAngle(aa1).add(e2.newp).subtract(e1.newp).toPoint();
 		
 //		System.out.println(e1 + "\t" + e2);
 //		System.out.println(aa1);
@@ -156,8 +158,8 @@ public abstract class Hitbox implements Serializable {
 	 * @return Whether the {@code Vector2}s overlap
 	 */
 	public static boolean overlaps(Vector2 before, Vector2 after) {
-		boolean crossX = Math.signum(before.x) != Math.signum(after.x);
-		boolean crossY = Math.signum(before.y) != Math.signum(before.y);
+		boolean crossX = Math.signum(before.getX()) != Math.signum(after.getX());
+		boolean crossY = Math.signum(before.getY()) != Math.signum(before.getY());
 		return crossX && crossY;
 	}
 	
@@ -169,13 +171,13 @@ public abstract class Hitbox implements Serializable {
 	 * @param pos
 	 *            The Position of the {@code EntityPhysics}
 	 */
-	public void renderHitbox(Graphics2D g, Vector2 pos) {
+	public void renderHitbox(Graphics2D g, Point2 pos) {
 		for (int i = 0; i < 360; i++) {
-			Vector2 p = this.getFurthestAtAngle(Math.toRadians(i)).plus(pos);
-			g.drawRect((int) p.x, (int) p.y, 1, 1);
+			Tuple2 p = this.getFurthestAtAngle(Math.toRadians(i)).add(pos);
+			g.drawRect((int) p.getX(), (int) p.getY(), 1, 1);
 		}
 		g.setColor(Color.RED);
-		g.drawRect((int) pos.x, (int) pos.y, 2, 2);
+		g.drawRect((int) pos.getX(), (int) pos.getY(), 2, 2);
 	}
 	
 	/**
@@ -244,13 +246,13 @@ public abstract class Hitbox implements Serializable {
 		}
 		
 		@Override
-		public Vector2 getCenterDisplacement() {
-			return Vector2.of(this.radX, this.radY);
+		public Point2 getCenterDisplacement() {
+			return Point2.of(this.radX, this.radY);
 		}
 		
 		@Override
-		public boolean pointLiesInsideHitbox(Vector2 point) {
-			return (point.x <= this.sizeX && point.x >= 0) && (point.y <= this.sizeY && point.y >= 0);
+		public boolean pointLiesInsideHitbox(Point2 point) {
+			return (point.getX() <= this.sizeX && point.getX() >= 0) && (point.getY() <= this.sizeY && point.getY() >= 0);
 		}
 		
 		@Override
@@ -268,7 +270,6 @@ public abstract class Hitbox implements Serializable {
 			}
 			return 0;
 		}
-		
 	}
 	
 	/**
@@ -298,12 +299,12 @@ public abstract class Hitbox implements Serializable {
 		}
 		
 		@Override
-		public Vector2 getCenterDisplacement() {
-			return Vector2.of(this.rad, this.rad);
+		public Point2 getCenterDisplacement() {
+			return Point2.of(this.rad, this.rad);
 		}
 		
 		@Override
-		public boolean pointLiesInsideHitbox(Vector2 point) {
+		public boolean pointLiesInsideHitbox(Point2 point) {
 			double dist = point.displacement(this.getCenterDisplacement());
 			return dist <= this.rad && dist >= 0;
 		}
@@ -335,31 +336,31 @@ public abstract class Hitbox implements Serializable {
 		@Override
 		public Vector2 getHitboxVectorAtAngle(double angle) {
 			BufferedImage img = this.sprite.getSprite().getImage();
-			Vector2 base = new HitboxRectangle(img.getWidth(), img.getHeight()).getFurthestAtAngle(angle);
-			Vector2 check = base;
-			double maxDisp = base.displacement(Vector2.ZERO);
+			Tuple2 base = new HitboxRectangle(img.getWidth(), img.getHeight()).getFurthestAtAngle(angle);
+			Point2 check = base.toPoint();
+			double maxDisp = check.displacement(Point2.ORIGIN);
 			for (double d = maxDisp; d >= -maxDisp; d--) {
-				check = Vector2.ofPolar(angle, d);
+				check = Point2.ofPolar(angle, d);
 				if (this.pointLiesInsideHitbox(check)) {
-					return check;
+					return check.toVector();
 				}
 			}
-			return check;
+			return check.toVector();
 		}
 		
 		@Override
-		public Vector2 getCenterDisplacement() {
+		public Point2 getCenterDisplacement() {
 			BufferedImage img = this.sprite.getSprite().getImage();
-			return Vector2.of(img.getWidth() / 2, img.getHeight() / 2);
+			return Point2.of(img.getWidth() / 2, img.getHeight() / 2);
 		}
 		
 		@Override
-		public boolean pointLiesInsideHitbox(Vector2 point) {
+		public boolean pointLiesInsideHitbox(Point2 point) {
 			BufferedImage img = this.sprite.getSprite().getImage();
 			if (!new HitboxRectangle(img.getWidth(), img.getHeight()).pointLiesInsideHitbox(point)) {
 				return false;
 			}
-			return img.getRGB((int) point.x, (int) point.y) != 0;
+			return img.getRGB((int) point.getX(), (int) point.getY()) != 0;
 		}
 		
 		@Override

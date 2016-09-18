@@ -6,7 +6,8 @@ import engine.Game;
 import engine.client.graphics.FontWrapper;
 import engine.client.graphics.Screen;
 import engine.event.SubscribeEvent;
-import engine.level.Vector2;
+import engine.geom2d.Point2;
+import engine.geom2d.Vector2;
 import engine.physics.entity.Hitbox.HitboxCircle;
 import engine.physics.level.LevelPhysics;
 
@@ -33,14 +34,14 @@ public class PongLevel extends LevelPhysics {
 	@Override
 	public void tickLevel() {
 //		System.out.println("Position:\tServer:\t" + paddles[0].posX + ", " + paddles[0].posY);
-		if (this.ball.pos.y < 0 || this.ball.pos.y + ((HitboxCircle) this.ball.hitbox).rad > this.height) {
-			this.ball.vel = Vector2.of(this.ball.vel.x, this.ball.vel.y * -1);
+		if (this.ball.pos.getY() < 0 || this.ball.pos.getY() + ((HitboxCircle) this.ball.hitbox).rad > this.height) {
+			this.ball.vel = Vector2.of(this.ball.vel.getX(), this.ball.vel.getY() * -1);
 		}
-		if (this.ball.pos.x < 0) {
+		if (this.ball.pos.getX() < 0) {
 			this.game.events.post(new EventPlayerScore((short) 1, ++this.score[1]));
 			this.reset();
 		}
-		if (this.ball.pos.x + ((HitboxCircle) this.ball.hitbox).rad > this.width) {
+		if (this.ball.pos.getX() + ((HitboxCircle) this.ball.hitbox).rad > this.width) {
 			this.game.events.post(new EventPlayerScore((short) 0, ++this.score[0]));
 			this.reset();
 		}
@@ -61,7 +62,7 @@ public class PongLevel extends LevelPhysics {
 	
 	@Override
 	public void reset() {
-		this.ball.pos = Vector2.of(this.width / 2, this.height / 2);
+		this.ball.pos = Point2.of(this.width / 2, this.height / 2);
 		this.ball.reset();
 	}
 	

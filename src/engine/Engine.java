@@ -2,6 +2,7 @@ package engine;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
@@ -14,6 +15,7 @@ import engine.client.Client;
 import engine.client.InputHandler;
 import engine.config.Configuration;
 import engine.launcher.LaunchConfig;
+import engine.networknio.ConnectionNIO;
 import engine.server.Server;
 
 /**
@@ -364,7 +366,15 @@ public class Engine {
 		if (!Boolean.parseBoolean(config.config.allLog.getValue())) {
 			allHandler.close();
 		}
+		ConnectionNIO.TCP_BUFFER_SIZE = Integer.parseInt(config.config.tcpBuff.getValue());
+		ConnectionNIO.UDP_BUFFER_SIZE = Integer.parseInt(config.config.udpBuff.getValue());
 		config.processProperties();
+		
+//		for (Entry<Object, Object> e :System.getProperties().entrySet()) {
+//			System.out.println("Key " + e.getKey() + " =  " + e.getValue());
+//		}
+		
+//		System.setProperty("sun.java2d.opengl", "true");
 	}
 	
 	/**

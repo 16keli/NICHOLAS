@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import engine.Engine;
-import engine.level.Vector2;
+import engine.geom2d.Vector2;
 
 /**
  * Provides the framework for Keyboard and Mouse input on the Client side

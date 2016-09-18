@@ -8,7 +8,8 @@ import java.awt.image.BufferedImage;
 import engine.client.Client;
 import engine.client.graphics.sprite.ISpriteProvider;
 import engine.client.graphics.sprite.Sprite;
-import engine.level.Vector2;
+import engine.geom2d.Point2;
+import engine.geom2d.Tuple2;
 
 /**
  * Represents the {@code Screen} where all the drawing happens
@@ -26,12 +27,13 @@ import engine.level.Vector2;
  */
 public class Screen {
 	
+	
 	/**
 	 * The offset of the screen
 	 * <p>
-	 * Should be the {@code Vector2} of the upper-left corner of the area visible to the client
+	 * Should be the {@code Tuple2} of the upper-left corner of the area visible to the client
 	 */
-	public Vector2 offset = Vector2.ZERO;
+	public Tuple2 offset = Point2.ORIGIN;
 	
 	/**
 	 * The width of the {@code Screen}
@@ -112,6 +114,21 @@ public class Screen {
 	}
 	
 	/**
+	 * A convenience method equivalent to calling
+	 * 
+	 * <pre>
+	 * this.client.vImg.createGraphics();
+	 * </pre>
+	 * 
+	 * This method simply exists to cut down on the amount of code
+	 * 
+	 * @return A {@code Graphics2D} instance created by the {@code Client}'s {@code VolatileImage}
+	 */
+	public Graphics2D getGraphics() {
+		return this.client.vImg.createGraphics();
+	}
+	
+	/**
 	 * Renders the give {@code ISpriteProvider}
 	 * 
 	 * @param sp
@@ -143,9 +160,9 @@ public class Screen {
 	 * @param src
 	 *            The {@code Sprite} to render
 	 * @param pos
-	 *            The {@code Vector2} of this image's relative upper-left position
+	 *            The {@code Tuple2} of this image's relative upper-left position
 	 */
-	public void render(Sprite src, Vector2 pos) {
+	public void render(Sprite src, Tuple2 pos) {
 		this.render(src, pos, false, false, 0);
 	}
 	
@@ -155,7 +172,7 @@ public class Screen {
 	 * @param src
 	 *            The {@code Sprite} to render
 	 * @param pos
-	 *            The {@code Vector2} of this image's relative upper-left position
+	 *            The {@code Tuple2} of this image's relative upper-left position
 	 * @param mirrorX
 	 *            Whether to flip the image in the x
 	 * @param mirrorY
@@ -163,8 +180,8 @@ public class Screen {
 	 * @param quads
 	 *            How many quadrants to rotate the image clockwise
 	 */
-	public void render(Sprite src, Vector2 pos, boolean mirrorX, boolean mirrorY, int quads) {
-		this.renderAbsolute(src, pos.minus(this.offset), mirrorX, mirrorY, quads);
+	public void render(Sprite src, Tuple2 pos, boolean mirrorX, boolean mirrorY, int quads) {
+		this.renderAbsolute(src, pos.subtract(this.offset), mirrorX, mirrorY, quads);
 	}
 	
 	/**
@@ -173,9 +190,9 @@ public class Screen {
 	 * @param src
 	 *            The {@code Sprite} to render
 	 * @param pos
-	 *            The {@code Vector2} of this image's absolute upper-left position
+	 *            The {@code Tuple2} of this image's absolute upper-left position
 	 */
-	public void renderAbsolute(Sprite src, Vector2 pos) {
+	public void renderAbsolute(Sprite src, Tuple2 pos) {
 		this.renderAbsolute(src, pos, false, false, 0);
 	}
 	
@@ -185,7 +202,7 @@ public class Screen {
 	 * @param src
 	 *            The {@code Sprite} to render
 	 * @param pos
-	 *            The {@code Vector2} of this image's absolute upper-left position
+	 *            The {@code Tuple2} of this image's absolute upper-left position
 	 * @param mirrorX
 	 *            Whether to flip the image in the x
 	 * @param mirrorY
@@ -193,10 +210,11 @@ public class Screen {
 	 * @param quads
 	 *            How many quadrants to rotate the image clockwise
 	 */
-	public void renderAbsolute(Sprite src, Vector2 pos, boolean mirrorX, boolean mirrorY, int quads) {
+	public void renderAbsolute(Sprite src, Tuple2 pos, boolean mirrorX, boolean mirrorY, int quads) {
 //		src = adjustImage(src, 1, mirrorX, mirrorY);
 		Graphics2D g = this.client.vImg.createGraphics();
-		g.drawImage(src.getAdjustedImage(1, mirrorX, mirrorY, quads), (int) pos.x, (int) pos.y, null);
+		g.drawImage(src.getAdjustedImage(1, mirrorX, mirrorY, quads), (int) pos.getX(), (int) pos.getY(),
+				null);
 		g.dispose();
 	}
 	
@@ -209,16 +227,16 @@ public class Screen {
 	 *            The y component of the offset
 	 */
 	public void setOffset(double x, double y) {
-		this.setOffset(Vector2.of(x, y));
+		this.setOffset(Point2.of(x, y));
 	}
 	
 	/**
 	 * Sets the offset of the screen
 	 * 
 	 * @param off
-	 *            The {@code Vector2} representing the offset
+	 *            The {@code Tuple2} representing the offset
 	 */
-	public void setOffset(Vector2 off) {
+	public void setOffset(Tuple2 off) {
 		this.offset = off;
 	}
 	

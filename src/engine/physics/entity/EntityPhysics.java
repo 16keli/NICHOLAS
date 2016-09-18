@@ -6,8 +6,10 @@ import java.util.List;
 import engine.Game;
 import engine.client.graphics.sprite.Sprite;
 import engine.event.SubscribeEvent;
+import engine.geom2d.Point2;
+import engine.geom2d.Tuple2Mutable;
+import engine.geom2d.Vector2;
 import engine.level.Entity;
-import engine.level.Vector2;
 import engine.physics.Physics;
 import engine.physics.level.LevelPhysics;
 
@@ -36,7 +38,7 @@ public abstract class EntityPhysics extends Entity {
 	/**
 	 * The new position of the entity
 	 */
-	public Vector2 newp;
+	public Point2 newp;
 	
 	/**
 	 * Velocity
@@ -70,7 +72,7 @@ public abstract class EntityPhysics extends Entity {
 	
 	public EntityPhysics(LevelPhysics l, double x, double y, Hitbox hb, double m, Sprite sprite) {
 		super(l, x, y, sprite);
-		this.newp = Vector2.of(x, y);
+		this.newp = Point2.of(x, y);
 		this.vel = Vector2.ZERO;
 		this.acc = Vector2.ZERO;
 		this.mass = m;
@@ -87,24 +89,16 @@ public abstract class EntityPhysics extends Entity {
 	@SubscribeEvent
 	public void entPos(EventEntityPosition e) {
 		if (e.id == this.id) {
-			this.pos = Vector2.of(e.x, e.y);
+			this.pos = Point2.of(e.x, e.y);
 		}
 	}
 	
-	public double getMomentumX() {
-		return this.mass * this.vel.x;
+	public Vector2 getMomentum() {
+		return Vector2.of(this.mass * this.vel.getX(), this.mass * this.vel.getY());
 	}
 	
-	public double getMomentumY() {
-		return this.mass * this.vel.y;
-	}
-	
-	public double getKineticX() {
-		return .5 * this.mass * this.vel.x * this.vel.x;
-	}
-	
-	public double getKineticY() {
-		return .5 * this.mass * this.vel.y * this.vel.y;
+	public Vector2 getKineticEnergy() {
+		return Vector2.of(.5 * this.mass * Math.pow(this.vel.getX(), 2), .5 * this.mass * Math.pow(this.vel.getY(), 2));
 	}
 	
 	/**
@@ -144,12 +138,14 @@ public abstract class EntityPhysics extends Entity {
 	 * Called in phase 1 of movement
 	 */
 	public void tick1() {
-		this.netForce = Vector2.ZERO;
+		Tuple2Mutable mutable = Tuple2Mutable.ZERO;
 		for (Vector2 force : this.forces) {
-			this.netForce = this.netForce.plus(force);
+			mutable.add(force);
 		}
-		this.acc = this.netForce.scale(1 / this.mass);
-		this.newp = this.pos.plus(this.vel).plus(this.acc.scale(.5));
+		this.netForce = mutable.toVector();
+		this.acc = this.netForce.scaleVector(1 / this.mass);
+		mutable = Tuple2Mutable.getMutable(this.pos);
+		this.newp = mutable.add(this.vel).add(this.acc.scale(.5)).toPoint();
 		this.vel = this.vel.plus(this.acc);
 		this.tickEntity1();
 	}
@@ -160,9 +156,9 @@ public abstract class EntityPhysics extends Entity {
 	 * @param tickFractions
 	 */
 	public void tick1(double tickFractions) {
-		this.newp = this.pos.plus(this.vel.scale(tickFractions))
-				.plus(this.acc.scale(.5 * tickFractions * tickFractions));
-		this.vel = this.vel.plus(this.acc.scale(tickFractions));
+		this.newp = this.pos.add(this.vel.scale(tickFractions))
+				.add(this.acc.scale(.5 * tickFractions * tickFractions)).toPoint();
+		this.vel = this.vel.plus(this.acc.scaleVector(tickFractions));
 	}
 	
 	/**

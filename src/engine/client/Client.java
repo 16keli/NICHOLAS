@@ -311,7 +311,7 @@ public abstract class Client extends Canvas {
 	 */
 	private boolean connect() throws IOException {
 		logger.info("Client Attempting Connection to " + this.remoteAddress);
-		this.connection = new ConnectionNIO(this.socketChannel, "Client-Side", 4096, 1024, true);
+		this.connection = new ConnectionNIO(this.socketChannel, "Client-Side", true);
 		this.player = this.game.getNewPlayerInstance();
 		this.player.name = this.desiredUsername;
 		this.connection.addToSendQueue(new PacketChat(this.player));

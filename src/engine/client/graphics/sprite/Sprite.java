@@ -8,7 +8,7 @@ import javax.imageio.ImageIO;
 import engine.Engine;
 import engine.client.graphics.ColorWrapper;
 import engine.client.graphics.Screen;
-import engine.level.Vector2;
+import engine.geom2d.Vector2;
 
 /**
  * Represents a sprite on the client side, that gets rendered on the {@code Screen}

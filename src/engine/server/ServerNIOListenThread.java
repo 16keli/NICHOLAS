@@ -72,7 +72,7 @@ public class ServerNIOListenThread extends Thread {
 				// created and accessing nextPlayerID at a time
 				SocketChannel s = this.ssChannel.accept();
 				Server.logger.info("Server Accepting Connection on " + s.getLocalAddress());
-				ConnectionNIO c = new ConnectionNIO(s, "Server-Side", 4096, 1024);
+				ConnectionNIO c = new ConnectionNIO(s, "Server-Side");
 				Player p = this.server.game.getNewPlayerInstance();
 				Server.SERVER_BUS.post(new ConnectionEstablishedEvent(server.game, c, p));
 				this.server.connections.addToList(c);

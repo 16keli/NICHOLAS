@@ -6,6 +6,7 @@ import java.util.List;
 import engine.Engine;
 import engine.Game;
 import engine.client.graphics.Screen;
+import engine.geom2d.Vector2;
 import engine.networknio.Rebuildable;
 
 /**

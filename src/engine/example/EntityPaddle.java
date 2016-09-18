@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 import engine.client.graphics.Screen;
-import engine.level.Vector2;
+import engine.geom2d.Point2;
 import engine.physics.entity.EntityPhysics;
 import engine.physics.entity.Hitbox.HitboxRectangle;
 import engine.physics.level.LevelPhysics;
@@ -26,7 +26,7 @@ public class EntityPaddle extends EntityPhysics {
 	public void render(Screen s) {
 		Graphics2D g = s.client.vImg.createGraphics();
 		g.setColor(Color.WHITE);
-		g.fillRect((int) this.pos.x, (int) this.pos.y, (int) ((HitboxRectangle) this.hitbox).sizeX,
+		g.fillRect((int) this.pos.getX(), (int) this.pos.getY(), (int) ((HitboxRectangle) this.hitbox).sizeX,
 				(int) ((HitboxRectangle) this.hitbox).sizeY);
 //		this.hitbox.renderHitbox(g, this.pos);
 		g.dispose();
@@ -35,11 +35,11 @@ public class EntityPaddle extends EntityPhysics {
 	
 	@Override
 	public void tickEntity1() {
-		if (this.newp.y < 0) {
-			this.newp = Vector2.of(this.newp.x, 0);
+		if (this.newp.getY() < 0) {
+			this.newp = Point2.of(this.newp.getX(), 0);
 		}
-		if (this.newp.y > this.level.height - ((HitboxRectangle) this.hitbox).sizeY) {
-			this.newp = Vector2.of(this.newp.x, this.level.height - ((HitboxRectangle) this.hitbox).sizeY);
+		if (this.newp.getY() > this.level.height - ((HitboxRectangle) this.hitbox).sizeY) {
+			this.newp = Point2.of(this.newp.getX(), this.level.height - ((HitboxRectangle) this.hitbox).sizeY);
 		}
 	}
 	

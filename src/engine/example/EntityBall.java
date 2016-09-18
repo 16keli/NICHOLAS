@@ -5,7 +5,7 @@ import java.awt.Graphics2D;
 
 import engine.Engine;
 import engine.client.graphics.Screen;
-import engine.level.Vector2;
+import engine.geom2d.Vector2;
 import engine.physics.entity.EntityPhysics;
 import engine.physics.entity.Hitbox.HitboxCircle;
 import engine.physics.level.LevelPhysics;
@@ -38,9 +38,9 @@ public class EntityBall extends EntityPhysics {
 	
 	@Override
 	public void render(Screen s) {
-		Graphics2D g = s.client.vImg.createGraphics();
+		Graphics2D g = s.getGraphics();
 		g.setColor(Color.WHITE);
-		g.drawOval((int) this.pos.x, (int) this.pos.y, 10, 10);
+		g.drawOval((int) this.pos.getX(), (int) this.pos.getY(), 10, 10);
 //		this.hitbox.renderHitbox(g, pos);
 		g.dispose();
 	}
@@ -63,7 +63,7 @@ public class EntityBall extends EntityPhysics {
 	
 	@Override
 	public void onCollision(EntityPhysics collided) {
-		this.vel = Vector2.of(this.vel.x * 1.05, this.vel.y * -1.05);
+		this.vel = Vector2.of(this.vel.getX() * 1.05, this.vel.getY() * -1.05);
 	}
 	
 }
