@@ -1,4 +1,7 @@
-# memegine-heaven
+# NICHOLAS
+What does this stand for?
+Not Infringing on Copyrights Hopefully, Or Legal Action Sanctioned
+
 Why use an existing game engine when you can waste time making your own that probably isn't even that good?
 
 Welp. This is basically a personal project of mine. It's been in existence since early 2015, but it's only now going to the internets because I'm lazy.
