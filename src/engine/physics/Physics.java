@@ -1,11 +1,14 @@
 package engine.physics;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
+import engine.Engine;
 import engine.Game;
 import engine.event.EventBus;
 import engine.event.SubscribeEvent;
+import engine.geom2d.Point2;
 import engine.geom2d.Vector2;
 import engine.networknio.Rebuildable;
 import engine.physics.entity.EntityPhysics;
@@ -21,6 +24,7 @@ import engine.physics.entity.Hitbox;
  * @author Kevin
  */
 public class Physics implements Rebuildable {
+	
 	
 	/**
 	 * 
@@ -52,14 +56,27 @@ public class Physics implements Rebuildable {
 	public boolean debug;
 	
 	/**
+	 * The default amount of subticks
+	 * 
+	 * @see subticks
+	 */
+	public static final int DEFAULT_SUBTICKS = 1;
+	
+	/**
+	 * The amount of "subticks", or physics evaluations within a single tick, to perform.
+	 */
+	public static int subticks;
+	
+	/**
 	 * The list of {@code EntityPhysics} that currently exist in this {@code Physics} instance
 	 */
 	public List<EntityPhysics> entities = new ArrayList<EntityPhysics>();
 	
 	/**
-	 * The list of {@code Collision}s that have happened
+	 * List of {@code CollisionHandler}s that this instance of {@code Physics} should use when evaluating
+	 * collisions
 	 */
-	public List<Collision> collisions = new ArrayList<Collision>();
+	public List<CollisionHandler> collisionHandlers = new ArrayList<CollisionHandler>();
 	
 	/**
 	 * The {@code EventBus} necessary for dispatching {@code EventEntityPosition}s and other Physics related
@@ -81,6 +98,7 @@ public class Physics implements Rebuildable {
 		if (debug) {
 			PHYSICS_BUS.register(this);
 		}
+		this.collisionHandlers.add(CollisionHandler.getStandard(1, Integer.MIN_VALUE));
 	}
 	
 	@Override
@@ -112,15 +130,29 @@ public class Physics implements Rebuildable {
 	
 	/**
 	 * Does any collision checking necessary
+	 * <p>
+	 * Unfortunately, this method is O(n^2). <strike>I'm not quite sure how to cut down on that,</strike>
+	 * Every {@code Hitbox} now has the field {@link engine.physics.entity.Hitbox#circleRadius circleRadius}
+	 * which specifies a radius outside which it would be impossible to collide with it. A simple check is all
+	 * it takes to drastically reduce the number of comparisons required each tick.
+	 * <p>
+	 * but I highly doubt there will be enough active entities in order cause enough lag...
 	 */
 	public void check() {
 		for (int e1 = 0; e1 < this.entities.size() - 1; e1++) {
 			for (int e2 = e1 + 1; e2 < this.entities.size(); e2++) {
 				EntityPhysics ent1 = this.entities.get(e1);
 				EntityPhysics ent2 = this.entities.get(e2);
-				if (suspectedCollision(ent1, ent2)) {
-					this.collisions.add(new Collision(ent1, ent2));
+				if (!ent1.dead && !ent2.dead) {
+					if (Point2.displacement(ent1.newp.add(ent1.hitbox.getCenterDisplacement()).toPoint(),
+							ent2.newp.add(ent2.hitbox.getCenterDisplacement())
+									.toPoint()) <= (ent1.hitbox.circleRadius + ent2.hitbox.circleRadius)) {
+						if (suspectedCollision(ent1, ent2) && EntityPhysics.approaching(ent1, ent2)) {
+							this.handleCollision(ent1, ent2);
+						}
+					}
 				}
+				
 			}
 		}
 	}
@@ -150,6 +182,38 @@ public class Physics implements Rebuildable {
 		return Hitbox.collides(e1, e2);
 	}
 	
+	/**
+	 * Handles the collision between the two {@code EntityPhysics}
+	 * 
+	 * @param ent1
+	 * @param ent2
+	 */
+	private void handleCollision(EntityPhysics ent1, EntityPhysics ent2) {
+		this.collisionHandlers.sort(new Comparator<CollisionHandler>() {
+			
+			
+			@Override
+			public int compare(CollisionHandler o1, CollisionHandler o2) {
+				if (!o1.shouldHandle(ent1, ent2) && !o2.shouldHandle(ent1, ent2)) {
+					return 0;
+				}
+				if (!o2.shouldHandle(ent1, ent2)
+						|| o1.handlePriority(ent1, ent2) > o2.handlePriority(ent1, ent2)) {
+					return -1;
+				} else if (!o1.shouldHandle(ent1, ent2)
+						|| o2.handlePriority(ent1, ent2) > o1.handlePriority(ent1, ent2)) {
+					return 1;
+				}
+				return 0;
+			}
+		});
+		if (this.collisionHandlers.get(0).handlePriority(ent1, ent2) == 0) {
+			throw new RuntimeException(
+					"Expected collision handler to handle this collision, but none available!");
+		}
+		this.collisionHandlers.get(0).handleCollision(ent1, ent2);
+	}
+	
 	@SubscribeEvent
 	public void debugTick(EventPhysicsTick e) {
 		switch (e.stage) {
@@ -168,6 +232,15 @@ public class Physics implements Rebuildable {
 //				this.tick();
 //				break;
 		}
+	}
+	
+	/**
+	 * Returns the number of physics evaluations performed in a single game tick
+	 * 
+	 * @return
+	 */
+	public int physicsTicks() {
+		return subticks * Engine.getTickRate();
 	}
 	
 	/**

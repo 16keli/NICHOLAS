@@ -4,7 +4,6 @@ import java.io.File;
 
 import engine.Game;
 import engine.client.Client;
-import engine.client.audio.NewSound;
 import engine.client.graphics.Screen;
 import engine.client.graphics.sprite.SpriteSheet;
 
@@ -42,7 +41,8 @@ public class PongClient extends Client {
 				.of(new File("C:/Users/Kevin/Desktop/Java/CATWGame/res/catw/cursor.png"), 32, 32);
 //		cursor = cursorSheet.getSprite(0, 0);
 		this.cursor = this.cursorSheet.getAnimated(5, 0, 0, 14, 1).scale(2);
-		new NewSound(new File("res/engine/sound/boop.wav")).play();
+//		new NewSound(new File("res/engine/sound/boop.wav")).play();
+//		new SampledSound("res/engine/sound/mp3test.mp3").play();
 	}
 	
 	@Override

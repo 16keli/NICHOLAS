@@ -30,6 +30,7 @@ import engine.physics.level.LevelPhysics;
  */
 public abstract class EntityPhysics extends Entity {
 	
+	
 	/**
 	 * 
 	 */
@@ -98,7 +99,8 @@ public abstract class EntityPhysics extends Entity {
 	}
 	
 	public Vector2 getKineticEnergy() {
-		return Vector2.of(.5 * this.mass * Math.pow(this.vel.getX(), 2), .5 * this.mass * Math.pow(this.vel.getY(), 2));
+		return Vector2.of(.5 * this.mass * Math.pow(this.vel.getX(), 2),
+				.5 * this.mass * Math.pow(this.vel.getY(), 2));
 	}
 	
 	/**
@@ -179,19 +181,26 @@ public abstract class EntityPhysics extends Entity {
 	 */
 	public abstract void tickEntity2();
 	
-	/**
-	 * Called as soon as this {@code EntityPhysics} collides with another
-	 * 
-	 * @param collided
-	 *            The {@code EntityPhysics} that this one collided with
-	 */
-	public abstract void onCollision(EntityPhysics collided);
-	
 	@Override
 	/**
 	 * Does nothing for {@code EntityPhysics}!
 	 */
 	public void tick() {
+	}
+	
+	/**
+	 * Determines whether the two {@code EntityPhysics} are approaching each other
+	 * 
+	 * @param ent1
+	 * @param ent2
+	 * @return
+	 */
+	public static boolean approaching(EntityPhysics ent1, EntityPhysics ent2) {
+		Vector2 posDiff = ent2.pos.add(ent2.hitbox.getCenterDisplacement())
+				.subtract(ent1.pos.add(ent1.hitbox.getCenterDisplacement())).toVector();
+		Vector2 vcm = ent1.getMomentum().plus(ent2.getMomentum()).scaleVector(1.0 / (ent1.mass + ent2.mass));
+		Vector2 v1cm = ent1.vel.minus(vcm);
+		return v1cm.dot(posDiff) > 0;
 	}
 	
 	public String getPhysicsInformation() {

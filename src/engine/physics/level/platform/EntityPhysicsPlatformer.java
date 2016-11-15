@@ -40,13 +40,6 @@ public class EntityPhysicsPlatformer extends EntityPhysics {
 		
 	}
 	
-	@Override
-	public void onCollision(EntityPhysics collided) {
-		if (!(collided instanceof Platform)) {
-			// Do stuff here
-		}
-	}
-	
 	public boolean onGround() {
 		for (EntityPhysics e : ((LevelPhysics) this.level).physics.entities) {
 			if (e instanceof Platform) {

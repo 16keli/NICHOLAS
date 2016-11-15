@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import engine.level.tiled.EntityTiled;
-import engine.level.tiled.Tile;
 
 /**
  * Essentially a wrapper class that represents a valid path that an {@code EntityTiled} can take on its way to
@@ -25,30 +24,30 @@ public class UnitPath implements Serializable {
 	public EntityTiled traveler;
 	
 	/**
-	 * The {@code Tile} that the {@code EntityTiled} starts on
+	 * The {@code PathfindNode} that the {@code EntityTiled} starts on
 	 */
-	public Tile start;
+	public PathfindNode start;
 	
 	/**
-	 * The {@code Tile} that the {@code EntityTiled} ends on
+	 * The {@code PathfindNode} that the {@code EntityTiled} ends on
 	 */
-	public Tile end;
+	public PathfindNode end;
 	
 	/**
-	 * A List of {@code Tile}s between the start and end points
+	 * A List of {@code PathfindNode}s between the start and end points
 	 */
-	public List<Tile> tiles;
+	public List<PathfindNode> nodes;
 	
 	/**
 	 * The total cost of moving
 	 */
 	public int cost;
 	
-	protected UnitPath(EntityTiled traveler, Tile start, Tile end, List<Tile> tiles, int cost) {
+	protected UnitPath(EntityTiled traveler, PathfindNode start, PathfindNode end, List<PathfindNode> nodes, int cost) {
 		this.traveler = traveler;
 		this.start = start;
 		this.end = end;
-		this.tiles = tiles;
+		this.nodes = nodes;
 		this.cost = cost;
 	}
 	
@@ -67,10 +66,10 @@ public class UnitPath implements Serializable {
 	 * @param traveler
 	 *            The {@code EntityTiled}
 	 * @param goal
-	 *            The {@code Tile} destination
+	 *            The {@code PathfindNode} destination
 	 * @return
 	 */
-	boolean isPathWith(EntityTiled traveler, Tile goal) {
+	boolean isPathWith(EntityTiled traveler, PathfindNode goal) {
 		return traveler.equals(this.traveler) && goal.equals(this.end);
 	}
 }

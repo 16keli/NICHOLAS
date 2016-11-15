@@ -112,6 +112,7 @@ public abstract class Server {
 			PacketNIO p;
 			while ((p = this.connections.getList().get(i).getReadPacket()) != null) {
 				p.processServer(i, this);
+//				System.out.println("Connection " + i + " sends packet " + PacketNIO.idtoclass.get(p.getID()).getName());
 			}
 		}
 		if (this.minConnects > this.connections.getList().size()) {

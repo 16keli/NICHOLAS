@@ -79,6 +79,7 @@ public abstract class ProtocolWrapper {
 	 */
 	public PacketNIO readPacket() throws IOException {
 		int id = this.inputBuffer.getInt();
+//		System.out.println(id);
 		if (id == Integer.MIN_VALUE) {// This signifies the end of the stream
 			return null;
 		}

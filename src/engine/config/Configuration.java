@@ -16,6 +16,7 @@ import engine.Engine;
 import engine.Game;
 import engine.launcher.LaunchConfig;
 import engine.networknio.ConnectionNIO;
+import engine.physics.Physics;
 
 /**
  * A wrapper around a {@code File} used to store configuration data for the {@code Engine} and any subsequent
@@ -47,6 +48,7 @@ public class Configuration {
 	public Property udpBuff = new Property("UDPBufferSize", ConnectionNIO.DEFAULT_UDP_BUFFER_SIZE, Integer.class);
 	public Property cfgLog = new Property("LogConfig", Engine.DEFAULT_LOG_CONFIG, Boolean.class);
 	public Property allLog = new Property("LogAll", Engine.DEFAULT_LOG_ALL, Boolean.class);
+	public Property physTicks = new Property("PhysicsTicks", Physics.DEFAULT_SUBTICKS, Integer.class);
 	//@formatter:on
 	
 	public Configuration(File file) {

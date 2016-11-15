@@ -134,6 +134,14 @@ public abstract class Level implements Rebuildable {
 	}
 	
 	/**
+	 * Removes this {@code Entity} from the {@code Level}
+	 * @param e
+	 */
+	public void removeEntity(Entity e) {
+		this.entList.remove(e);
+	}
+	
+	/**
 	 * Retrieves the given {@code Entity} based on its ID
 	 * 
 	 * @param id

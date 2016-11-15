@@ -87,7 +87,9 @@ public abstract class LevelTiled extends Level {
 	 *            The {@code Tile} to gets {@code Tile}s adjacent to
 	 * @return All {@code Tile}s adjacent to that tile
 	 */
-	public abstract List<Tile> adjacentTiles(Tile t);
+	public List<Tile> adjacentTiles(Tile t) {
+		return t.getAdjacentTiles();
+	}
 	
 	/**
 	 * Gets all {@code Tile}s adjacent to the given {@code Tile} except for {@code exclude}

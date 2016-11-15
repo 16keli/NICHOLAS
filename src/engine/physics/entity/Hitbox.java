@@ -17,10 +17,28 @@ import engine.geom2d.Vector2;
  */
 public abstract class Hitbox implements Serializable {
 	
+	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * The radius of a circle that surrounds this {@code Hitbox}. If the distance between two {@code Hitbox}es
+	 * are less than the sum of these circles, then we should evaluate the two {@code EntityPhysics} for
+	 * collisions. This should take a lot of burden off the CPU by not evaluating collisions that would never
+	 * happen.
+	 */
+	public double circleRadius;
+	
+	/**
+	 * Creates a new {@code Hitbox} with the given circle radius parameter
+	 * 
+	 * @param circleRadius
+	 */
+	public Hitbox(double circleRadius) {
+		this.circleRadius = circleRadius;
+	}
 	
 	/**
 	 * Clamps the given angle into the range of [0, 2pi)
@@ -75,6 +93,17 @@ public abstract class Hitbox implements Serializable {
 	}
 	
 	/**
+	 * Gets the gradient of the {@code Hitbox} surface at the given angle
+	 * 
+	 * @param angle
+	 *            The angle in Radians. Values will automatically get clamped into the range [0, 2pi)
+	 * @return
+	 */
+	public double getGradientAtAngle(double angle) {
+		return this.getHitboxGradientAtAngle(clampAngle(angle));
+	}
+	
+	/**
 	 * Should get the {@code Vector2} representing the furthest reach of the {@code Hitbox} at a given angle
 	 * <p>
 	 * This should be in relation to the center of the {@code Hitbox}, i.e. A circle will simply return the
@@ -85,6 +114,18 @@ public abstract class Hitbox implements Serializable {
 	 * @return The {@code Vector2} that is the furthest that this {@code Hitbox} reaches
 	 */
 	public abstract Vector2 getHitboxVectorAtAngle(double angle);
+	
+	/**
+	 * Should get the angle of the Gradient vector to the surface of the {@code Hitbox} at the given angle
+	 * <p>
+	 * This should be in relation to the center of the {@code Hitbox}, i.e. A circle will simply return the
+	 * angle itself.
+	 * 
+	 * @param angle
+	 *            The angle in Radians. The angle will be in the range of [0, 2pi)
+	 * @return The angle of the Gradient vector to the surface of the {@code Hitbox}
+	 */
+	public abstract double getHitboxGradientAtAngle(double angle);
 	
 	/**
 	 * Gets the displacement of the center of the {@code Hitbox} relative to its upper-left corner
@@ -139,12 +180,6 @@ public abstract class Hitbox implements Serializable {
 
 //		boolean collides = overlaps(vb1.minus(vb2), va1.minus(va2));
 		boolean collides = e1.hitbox.pointLiesInsideHitbox(va2) && e2.hitbox.pointLiesInsideHitbox(va1);
-		if (collides) {
-			e1.onCollision(e2);
-			e2.onCollision(e1);
-			
-//			System.out.println(va1.minus(va2));
-		}
 		return collides;
 	}
 	
@@ -187,6 +222,7 @@ public abstract class Hitbox implements Serializable {
 	 */
 	public static class HitboxRectangle extends Hitbox {
 		
+		
 		/**
 		 * 
 		 */
@@ -213,6 +249,7 @@ public abstract class Hitbox implements Serializable {
 		}
 		
 		public HitboxRectangle(double sizeX, double sizeY) {
+			super(Math.sqrt(sizeX * sizeX + sizeY * sizeY) / 2);
 			this.sizeX = sizeX;
 			this.sizeY = sizeY;
 			this.radX = sizeX / 2;
@@ -252,7 +289,8 @@ public abstract class Hitbox implements Serializable {
 		
 		@Override
 		public boolean pointLiesInsideHitbox(Point2 point) {
-			return (point.getX() <= this.sizeX && point.getX() >= 0) && (point.getY() <= this.sizeY && point.getY() >= 0);
+			return (point.getX() <= this.sizeX && point.getX() >= 0)
+					&& (point.getY() <= this.sizeY && point.getY() >= 0);
 		}
 		
 		@Override
@@ -270,6 +308,22 @@ public abstract class Hitbox implements Serializable {
 			}
 			return 0;
 		}
+		
+		@Override
+		public double getHitboxGradientAtAngle(double angle) {
+			double critical = Math.atan(this.radY / this.radX);
+			// Be dumb and check chase by case
+			if (angle >= critical && angle < Math.PI - critical) {
+				return Math.PI / 2;
+			} else if (angle >= Math.PI - critical && angle < Math.PI + critical) {
+				return Math.PI;
+			} else if (angle >= Math.PI + critical && angle < 2 * Math.PI - critical) {
+				return 3 * Math.PI / 2;
+			} else if (angle >= 2 * Math.PI - critical || angle < critical) {
+				return 0;
+			}
+			return 0;
+		}
 	}
 	
 	/**
@@ -279,39 +333,41 @@ public abstract class Hitbox implements Serializable {
 	 */
 	public static class HitboxCircle extends Hitbox {
 		
+		
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
 		
-		/**
-		 * The radius of the circle
-		 */
-		public double rad;
-		
 		public HitboxCircle(double rad) {
-			this.rad = rad;
+			super(rad);
+			this.circleRadius = rad;
 		}
 		
 		@Override
 		public Vector2 getHitboxVectorAtAngle(double angle) {
-			return Vector2.ofPolar(angle, this.rad);
+			return Vector2.ofPolar(angle, this.circleRadius);
 		}
 		
 		@Override
 		public Point2 getCenterDisplacement() {
-			return Point2.of(this.rad, this.rad);
+			return Point2.of(this.circleRadius, this.circleRadius);
 		}
 		
 		@Override
 		public boolean pointLiesInsideHitbox(Point2 point) {
 			double dist = point.displacement(this.getCenterDisplacement());
-			return dist <= this.rad && dist >= 0;
+			return dist <= this.circleRadius && dist >= 0;
 		}
 		
 		@Override
 		public double getHitboxTangentAtAngle(double angle) {
 			return clampAngle2(angle + Math.PI / 2);
+		}
+		
+		@Override
+		public double getHitboxGradientAtAngle(double angle) {
+			return angle;
 		}
 	}
 	
@@ -322,6 +378,7 @@ public abstract class Hitbox implements Serializable {
 	 */
 	public static class HitboxSprite extends Hitbox {
 		
+		
 		/**
 		 * 
 		 */
@@ -330,6 +387,8 @@ public abstract class Hitbox implements Serializable {
 		public ISpriteProvider sprite;
 		
 		public HitboxSprite(ISpriteProvider sprite) {
+			super(Math.sqrt(sprite.getSprite().height * sprite.getSprite().height
+					+ sprite.getSprite().width * sprite.getSprite().width) / 2);
 			this.sprite = sprite;
 		}
 		
@@ -365,6 +424,11 @@ public abstract class Hitbox implements Serializable {
 		
 		@Override
 		public double getHitboxTangentAtAngle(double angle) {
+			return 0;
+		}
+		
+		@Override
+		public double getHitboxGradientAtAngle(double angle) {
 			return 0;
 		}
 		

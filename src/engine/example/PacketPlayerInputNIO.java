@@ -41,6 +41,7 @@ public class PacketPlayerInputNIO extends PacketTCP {
 	@Override
 	public void processServer(short player, Server s) {
 		s.game.events.post(new EventInput(this.pnum, this.dir));
+//		System.out.println("Player " + this.pnum + " picks direction " + this.dir);
 	}
 	
 }

@@ -52,10 +52,4 @@ public class EntityPaddle extends EntityPhysics {
 		return false;
 	}
 	
-	@Override
-	public void onCollision(EntityPhysics collided) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 }

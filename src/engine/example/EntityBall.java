@@ -61,9 +61,4 @@ public class EntityBall extends EntityPhysics {
 		this.vel = Vector2.of(x, y);
 	}
 	
-	@Override
-	public void onCollision(EntityPhysics collided) {
-		this.vel = Vector2.of(this.vel.getX() * 1.05, this.vel.getY() * -1.05);
-	}
-	
 }

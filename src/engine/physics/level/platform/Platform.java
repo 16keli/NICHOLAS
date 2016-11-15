@@ -36,12 +36,6 @@ public class Platform extends EntityPhysics {
 	}
 	
 	@Override
-	public void onCollision(EntityPhysics collided) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	@Override
 	public void render(Screen s) {
 		s.render(this);
 	}

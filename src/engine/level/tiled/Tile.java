@@ -9,8 +9,9 @@ import engine.client.graphics.Screen;
 import engine.client.graphics.sprite.ISpriteProvider;
 import engine.client.graphics.sprite.Sprite;
 import engine.geom2d.Vector2;
+import engine.level.tiled.pathfind.PathfindNode;
 
-public abstract class Tile implements ISpriteProvider, Serializable {
+public abstract class Tile implements ISpriteProvider, Serializable, PathfindNode {
 	
 	/**
 	 * 
@@ -115,13 +116,20 @@ public abstract class Tile implements ISpriteProvider, Serializable {
 //	}
 	
 	/**
+	 * Gets all {@code Tile}s adjacent to {@code this}
+	 * 
+	 * @return All {@code Tile}s adjacent to {@code this}
+	 */
+	public abstract List<Tile> getAdjacentTiles();
+	
+	/**
 	 * Checks whether the given {@code Tile} is adjacent to this one
 	 * 
 	 * @param tile
 	 * @return
 	 */
 	public boolean isAdjacentTo(Tile tile) {
-		return this.level.adjacentTiles(this).contains(tile);
+		return this.getAdjacentTiles().contains(tile);
 	}
 	
 	/**

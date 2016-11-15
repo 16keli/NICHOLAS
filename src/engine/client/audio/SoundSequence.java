@@ -13,22 +13,39 @@ import engine.Game;
  */
 public class SoundSequence implements Runnable, PlayableSound {
 	
+	
 	/**
 	 * The delay between audio clips being played
 	 */
-	public static final int DELAY = -600;
+	public static final int DELAY = 0;
+	
+	private int delay;
 	
 	public List<PlayableSound> sounds = new ArrayList<PlayableSound>();
 	
 	public Game g;
 	
 	/**
-	 * Creates a new SoundSequence from the given {@code PlayableSound}s
+	 * Creates a new SoundSequence from the given {@code PlayableSound}s with the default delay
 	 * 
 	 * @param s
 	 *            The necessary {@code PlayableSound}s
 	 */
 	public SoundSequence(PlayableSound... s) {
+		this(DELAY, s);
+		
+	}
+	
+	/**
+	 * Creates a new SoundSequence from the given {@code PlayableSound}s and delay
+	 * 
+	 * @param delay
+	 *            The delay between each sound sequence playing
+	 * @param s
+	 *            The necessary {@code {PlayableSound}s
+	 */
+	public SoundSequence(int delay, PlayableSound... s) {
+		this.delay = delay;
 		this.add(s);
 	}
 	
@@ -46,7 +63,7 @@ public class SoundSequence implements Runnable, PlayableSound {
 		for (PlayableSound s : this.sounds) {
 			s.play();
 			try {
-				Thread.sleep(s.getLength() + DELAY);
+				Thread.sleep(s.getLength() + delay);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -55,9 +72,9 @@ public class SoundSequence implements Runnable, PlayableSound {
 	
 	@Override
 	public long getLength() {
-		int l = -DELAY;
+		int l = -delay;
 		for (PlayableSound s : this.sounds) {
-			l += s.getLength() + DELAY;
+			l += s.getLength() + delay;
 		}
 		return l;
 	}

@@ -328,11 +328,13 @@ public class Vector2 extends Tuple2 {
 	 * @return The angle between the two {@code Vector2}s
 	 */
 	public static double angleBetween(Vector2 vector1, Vector2 vector2) {
-		return Math.acos(Vector2.dot(vector1, vector2) / vector1.magnitude * vector2.magnitude);
+		return Math.acos(Vector2.dot(vector1, vector2) / (vector1.magnitude * vector2.magnitude));
 	}
 	
 	/**
 	 * Computes the component of {@code of} on {@code on}, also known as the scalar projection
+	 * <p>
+	 * If the component of {@code of} would be larger than {@code on}, the component is still returned.
 	 * 
 	 * @param of
 	 *            The {@code Vector2} to compute the component of
@@ -341,7 +343,7 @@ public class Vector2 extends Tuple2 {
 	 * @return The component of {@code of} on {@code on}
 	 */
 	public static double component(Vector2 of, Vector2 on) {
-		return Math.min(on.magnitude, Math.cos(angleBetween(of, on)) * of.magnitude);
+		return Vector2.dot(of, on) / on.magnitude;
 	}
 	
 	/**
@@ -358,7 +360,7 @@ public class Vector2 extends Tuple2 {
 	}
 	
 	// Static constructor methods because seeing new Vector2() everywhere is tedious, and the boolean in the
-	// constructor is annoying
+	// constructor is annoying so it is prime for facading it away
 	
 	/**
 	 * Creates a new {@code Vector2} based on the given Cartesian coordinates

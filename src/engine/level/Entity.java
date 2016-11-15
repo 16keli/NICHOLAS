@@ -19,6 +19,7 @@ import engine.physics.entity.EntityPhysics;
  */
 public abstract class Entity implements ISpriteProvider, Rebuildable {
 	
+	
 	/**
 	 * 
 	 */
@@ -38,6 +39,12 @@ public abstract class Entity implements ISpriteProvider, Rebuildable {
 	 * The {@code Sprite}
 	 */
 	public Sprite sprite;
+	
+	/**
+	 * Whether or not this {@code Entity} is "dead" in the sense that all references to it are removed for
+	 * good. Once dead, it cannot be resurrected.
+	 */
+	public boolean dead;
 	
 	/**
 	 * The {@code Entity} ID
@@ -81,8 +88,25 @@ public abstract class Entity implements ISpriteProvider, Rebuildable {
 	 */
 	public abstract void render(Screen s);
 	
+	/**
+	 * Checks whether this {@code Entity} is equal to another {@code Entity} by comparing the IDs
+	 * 
+	 * @param e
+	 * @return
+	 */
 	public boolean equals(Entity e) {
 		return this.id == e.id;
+	}
+	
+	/**
+	 * Removes any list-based references to this {@code Entity} and sets itself to dead. GC will handle it
+	 * eventually.
+	 * 
+	 * @return
+	 */
+	public void setDead() {
+		this.level.removeEntity(this);
+		this.dead = true;
 	}
 	
 //	@Override

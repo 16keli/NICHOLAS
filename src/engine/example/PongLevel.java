@@ -29,19 +29,20 @@ public class PongLevel extends LevelPhysics {
 		this.ball = new EntityBall(this);
 		this.paddles[0] = new EntityPaddle(this, 0);
 		this.paddles[1] = new EntityPaddle(this, 1);
+		this.physics.collisionHandlers.add(new PongCollisionHandler());
 	}
 	
 	@Override
 	public void tickLevel() {
 //		System.out.println("Position:\tServer:\t" + paddles[0].posX + ", " + paddles[0].posY);
-		if (this.ball.pos.getY() < 0 || this.ball.pos.getY() + ((HitboxCircle) this.ball.hitbox).rad > this.height) {
+		if (this.ball.pos.getY() < 0 || this.ball.pos.getY() + ((HitboxCircle) this.ball.hitbox).circleRadius > this.height) {
 			this.ball.vel = Vector2.of(this.ball.vel.getX(), this.ball.vel.getY() * -1);
 		}
 		if (this.ball.pos.getX() < 0) {
 			this.game.events.post(new EventPlayerScore((short) 1, ++this.score[1]));
 			this.reset();
 		}
-		if (this.ball.pos.getX() + ((HitboxCircle) this.ball.hitbox).rad > this.width) {
+		if (this.ball.pos.getX() + ((HitboxCircle) this.ball.hitbox).circleRadius > this.width) {
 			this.game.events.post(new EventPlayerScore((short) 0, ++this.score[0]));
 			this.reset();
 		}

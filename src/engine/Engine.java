@@ -2,7 +2,6 @@ package engine;
 
 import java.io.File;
 import java.util.Calendar;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.logging.FileHandler;
 import java.util.logging.Formatter;
@@ -16,6 +15,7 @@ import engine.client.InputHandler;
 import engine.config.Configuration;
 import engine.launcher.LaunchConfig;
 import engine.networknio.ConnectionNIO;
+import engine.physics.Physics;
 import engine.server.Server;
 
 /**
@@ -33,11 +33,12 @@ import engine.server.Server;
  * synchronized through use of {@code Packet}s.
  * <p>
  * The {@code Engine} runs on a tick-based system, which is defined by {@link #DEFAULT_TICK_RATE} which is
- * {@value #DEFAULT_TICK_RATE} ticks/second. This tick rate is the rate at which {@code Client} and {@code Server} are
- * updated. On the {@code Client} side, there also exists rendering of the {@code Game} (obviously) which
- * depends on {@link #DEFAULT_VSYNC} ({@value #DEFAULT_VSYNC}) as well as {@link #DEFAULT_FRAME_RATE} which is {@value #DEFAULT_FRAME_RATE}
- * frames/second. If {@code VSYNC} is activated, then the {@code Client} will try to render at (as smooth as
- * possible) {@value #DEFAULT_FRAME_RATE} frames/second, otherwise it will render whenever it can.
+ * {@value #DEFAULT_TICK_RATE} ticks/second. This tick rate is the rate at which {@code Client} and
+ * {@code Server} are updated. On the {@code Client} side, there also exists rendering of the {@code Game}
+ * (obviously) which depends on {@link #DEFAULT_VSYNC} ({@value #DEFAULT_VSYNC}) as well as
+ * {@link #DEFAULT_FRAME_RATE} which is {@value #DEFAULT_FRAME_RATE} frames/second. If {@code VSYNC} is
+ * activated, then the {@code Client} will try to render at (as smooth as possible)
+ * {@value #DEFAULT_FRAME_RATE} frames/second, otherwise it will render whenever it can.
  * <p>
  * Also features some utility! For a single {@code Random} instance, there exists {@link #rand}, and for
  * {@code File} usage there is {@link #getFilePath()} to get to the directory where files should be stored.
@@ -47,6 +48,7 @@ import engine.server.Server;
  * @author Kevin
  */
 public class Engine {
+	
 	
 	/**
 	 * The upper-level {@code Logger} instance. Should be the parent of all loggers, at least within the
@@ -181,6 +183,7 @@ public class Engine {
 	 */
 	protected static abstract class EngineThread implements Runnable {
 		
+		
 		/**
 		 * Whether the {@code Engine} should be running
 		 */
@@ -206,6 +209,7 @@ public class Engine {
 	 * @author Kevin
 	 */
 	protected static class ClientThread extends EngineThread {
+		
 		
 		private Client c;
 		
@@ -288,6 +292,7 @@ public class Engine {
 	 */
 	protected static class ServerThread extends EngineThread {
 		
+		
 		private Server s;
 		
 		public ServerThread(Server s) {
@@ -346,7 +351,9 @@ public class Engine {
 	
 	/**
 	 * Creates a new Engine and executes tasks such as creation of a configuration file
-	 * @param config The {@code LaunchConfig}
+	 * 
+	 * @param config
+	 *            The {@code LaunchConfig}
 	 */
 	public static void createEngine(LaunchConfig config) {
 		if (instance != null) {
@@ -368,12 +375,14 @@ public class Engine {
 		}
 		ConnectionNIO.TCP_BUFFER_SIZE = Integer.parseInt(config.config.tcpBuff.getValue());
 		ConnectionNIO.UDP_BUFFER_SIZE = Integer.parseInt(config.config.udpBuff.getValue());
+		Physics.subticks = Integer.parseInt(config.config.physTicks.getValue());
+		
 		config.processProperties();
 		
 //		for (Entry<Object, Object> e :System.getProperties().entrySet()) {
 //			System.out.println("Key " + e.getKey() + " =  " + e.getValue());
 //		}
-		
+
 //		System.setProperty("sun.java2d.opengl", "true");
 	}
 	
@@ -456,6 +465,15 @@ public class Engine {
 	}
 	
 	/**
+	 * Returns the tick rate of the Engine instance.
+	 * 
+	 * @return
+	 */
+	public static int getTickRate() {
+		return instance.tickRate;
+	}
+	
+	/**
 	 * Retrieves the game time, in ticks, that have passed since the {@code ClientThread} was started
 	 * 
 	 * @return
@@ -479,6 +497,7 @@ public class Engine {
 	 * @author Kevin
 	 */
 	public static class EngineLogFormatter extends Formatter {
+		
 		
 		@Override
 		public String format(LogRecord record) {

@@ -58,6 +58,11 @@ public abstract class LevelPhysics extends Level {
 	}
 	
 	@Override
+	public void removeEntity(Entity e) {
+		this.physics.entities.remove(e);
+	}
+	
+	@Override
 	public Entity getEntity(int i) {
 		return this.physics.entities.get(i);
 	}
