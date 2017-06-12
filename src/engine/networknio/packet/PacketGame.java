@@ -10,7 +10,7 @@ import engine.client.Client;
 import engine.level.Level;
 import engine.server.Server;
 
-public class PacketGame extends PacketTCP {
+public class PacketGame extends PacketNIO {
 	
 	public Level level;
 	

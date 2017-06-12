@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import engine.client.Client;
-import engine.networknio.packet.PacketTCP;
+import engine.networknio.packet.PacketNIO;
 import engine.server.Server;
 
-public class PacketPlayerScoreNIO extends PacketTCP {
+public class PacketPlayerScoreNIO extends PacketNIO{
 	
 	public short pnum;
 	

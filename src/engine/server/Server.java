@@ -170,7 +170,7 @@ public abstract class Server {
 	
 	@SubscribeEvent
 	public void onPlayerConnect(ConnectionEstablishedEvent e) {
-		this.connections.sentPacketAllExcept(new PacketPlayer(e.player), e.player.number);
+		this.connections.sentTCPPacketAllExcept(new PacketPlayer(e.player), e.player.number);
 	}
 	
 }

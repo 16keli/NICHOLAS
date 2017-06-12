@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import engine.client.Client;
 import engine.server.Server;
 
-public class PacketPing extends PacketTCP {
+public class PacketPing extends PacketNIO {
 	
 	/**
 	 * The Period in ticks between ping evaluations
@@ -32,7 +32,7 @@ public class PacketPing extends PacketTCP {
 	
 	@Override
 	public void processServer(short player, Server s) {
-		s.connections.sendPacket(new PacketPing(System.currentTimeMillis()), player);
+		s.connections.sendUDPPacket(new PacketPing(System.currentTimeMillis()), player);
 	}
 	
 	@Override

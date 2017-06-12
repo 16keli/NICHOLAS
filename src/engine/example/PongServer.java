@@ -17,7 +17,7 @@ public class PongServer extends Server {
 	
 	@Override
 	public void synchronizeClientGameData(ConnectionNIO c) {
-		c.addToSendQueue(new PacketGame(this.game));
+		c.addToTCPSendQueue(new PacketGame(this.game));
 	}
 	
 }

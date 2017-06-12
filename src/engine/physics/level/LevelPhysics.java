@@ -47,7 +47,7 @@ public abstract class LevelPhysics extends Level {
 		this.physics.tick();
 		this.tickLevel();
 		for (EntityPhysics e : this.physics.entities) {
-			Engine.getServer().connections.sendPacketAll(new PacketEntityPosition(e));
+			Engine.getServer().connections.sendUDPPacketAll(new PacketEntityPosition(e));
 		}
 	}
 	

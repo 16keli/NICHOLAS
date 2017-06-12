@@ -8,7 +8,7 @@ import engine.client.Client;
 import engine.event.game.ChatEvent;
 import engine.server.Server;
 
-public class PacketChat extends PacketTCP {
+public class PacketChat extends PacketNIO {
 	
 	public short pnum;
 	
@@ -58,7 +58,7 @@ public class PacketChat extends PacketTCP {
 		if (!this.chat && !s.game.players.get(this.pnum).hasName()) {
 			s.game.players.get(this.pnum).setName(this.msg);
 			System.out.println("Player " + this.pnum + "'s desired name is " + this.msg);
-			s.connections.sendPacketAll(new PacketChat(s.game.players.get(this.pnum)));
+			s.connections.sendTCPPacketAll(new PacketChat(s.game.players.get(this.pnum)));
 		} else {
 			s.game.events.post(new ChatEvent(this.pnum, this.msg));
 		}

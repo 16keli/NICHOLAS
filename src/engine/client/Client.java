@@ -314,7 +314,7 @@ public abstract class Client extends Canvas {
 		this.connection = new ConnectionNIO(this.socketChannel, "Client-Side", true);
 		this.player = this.game.getNewPlayerInstance();
 		this.player.name = this.desiredUsername;
-		this.connection.addToSendQueue(new PacketChat(this.player));
+		this.connection.addToTCPSendQueue(new PacketChat(this.player));
 		// TODO: Readd this
 //		Client.CLIENT_BUS.post(new ConnectionEstablishedEvent(this.game, this.connection));
 		return true;
@@ -436,7 +436,7 @@ public abstract class Client extends Canvas {
 			if (this.connection != null) {
 				this.processReceivedPackets();
 				if (Engine.getGameTimeClient() % PacketPing.PING_PERIOD == 0) {
-					this.connection.addToSendQueue(new PacketPing(System.currentTimeMillis()));
+					this.connection.addToUDPSendQueue(new PacketPing(System.currentTimeMillis()));
 					System.out.println("Ping: " + this.connection.ping + " ms");
 				}
 			}

@@ -77,7 +77,7 @@ public class ServerNIOListenThread extends Thread {
 				Server.SERVER_BUS.post(new ConnectionEstablishedEvent(server.game, c, p));
 				this.server.connections.addToList(c);
 				this.server.game.players.add(p);
-				c.addToSendQueue(new PacketConnection(p.number));
+				c.addToTCPSendQueue(new PacketConnection(p.number));
 				this.server.synchronizeClientGameData(c);
 				Server.logger.info("Server received connection from "
 						+ s.socket().getInetAddress().getHostAddress() + "! Player ID is " + p.number);

@@ -28,7 +28,7 @@ import engine.server.Server;
  * @author Kevin
  * @param <T>
  */
-public class PacketObject<T> extends PacketTCP {
+public class PacketObject<T> extends PacketNIO {
 	
 	public T object;
 	

@@ -55,53 +55,105 @@ public class ConnectionList {
 	}
 	
 	/**
-	 * Sends the given {@code PacketNIO} to the {@code ConnectionNIO} destination
+	 * Sends the given {@code PacketNIO} to the {@code ConnectionNIO} destination via TCP
 	 * 
 	 * @param p
 	 *            The {@code PacketNIO} to send
 	 * @param dest
 	 *            The {@code ConnectionNIO} destination
 	 */
-	public void sendPacket(PacketNIO p, ConnectionNIO dest) {
-		dest.addToSendQueue(p);
+	public void sendTCPPacket(PacketNIO p, ConnectionNIO dest) {
+		dest.addToTCPSendQueue(p);
 	}
 	
 	/**
-	 * Sends the given {@code PacketNIO} to the given player
+	 * Sends the given {@code PacketNIO} to the given player via TCP
 	 * 
 	 * @param p
 	 *            The {@code PacketNIO} to send
 	 * @param ind
 	 *            The player number to send the {@code PacketNIO} to
 	 */
-	public void sendPacket(PacketNIO p, int ind) {
-		this.sendPacket(p, this.connections.get(ind));
+	public void sendTCPPacket(PacketNIO p, int ind) {
+		this.sendTCPPacket(p, this.connections.get(ind));
 	}
 	
 	/**
-	 * Sends the given {@code PacketNIO} to every player
+	 * Sends the given {@code PacketNIO} to every player via TCP
 	 * 
 	 * @param p
 	 *            The {@code PacketNIO} to send
 	 */
-	public void sendPacketAll(PacketNIO p) {
+	public void sendTCPPacketAll(PacketNIO p) {
 		for (ConnectionNIO conn : this.connections) {
-			conn.addToSendQueue(p);
+			conn.addToTCPSendQueue(p);
 		}
 	}
 	
 	/**
-	 * Sends the given {@code PacketNIO} to every player except the one noted
+	 * Sends the given {@code PacketNIO} to every player except the one noted via TCP
 	 * 
 	 * @param p
 	 *            The {@code PacketNIO} to send
 	 * @param id
 	 *            The player number to NOT send the {@code PacketNIO} to
 	 */
-	public void sentPacketAllExcept(PacketNIO p, int id) {
+	public void sentTCPPacketAllExcept(PacketNIO p, int id) {
 		for (int i = 0; i < this.connections.size(); i++) {
 			if (i != id) {
-				this.connections.get(i).addToSendQueue(p);
+				this.connections.get(i).addToTCPSendQueue(p);
+			}
+		}
+	}
+	
+	/**
+	 * Sends the given {@code PacketNIO} to the {@code ConnectionNIO} destination via UDP
+	 * 
+	 * @param p
+	 *            The {@code PacketNIO} to send
+	 * @param dest
+	 *            The {@code ConnectionNIO} destination
+	 */
+	public void sendUDPPacket(PacketNIO p, ConnectionNIO dest) {
+		dest.addToUDPSendQueue(p);
+	}
+	
+	/**
+	 * Sends the given {@code PacketNIO} to the given player via UDP
+	 * 
+	 * @param p
+	 *            The {@code PacketNIO} to send
+	 * @param ind
+	 *            The player number to send the {@code PacketNIO} to
+	 */
+	public void sendUDPPacket(PacketNIO p, int ind) {
+		this.sendUDPPacket(p, this.connections.get(ind));
+	}
+	
+	/**
+	 * Sends the given {@code PacketNIO} to every player via UDP
+	 * 
+	 * @param p
+	 *            The {@code PacketNIO} to send
+	 */
+	public void sendUDPPacketAll(PacketNIO p) {
+		for (ConnectionNIO conn : this.connections) {
+			conn.addToUDPSendQueue(p);
+		}
+	}
+	
+	/**
+	 * Sends the given {@code PacketNIO} to every player except the one noted via UDP
+	 * 
+	 * @param p
+	 *            The {@code PacketNIO} to send
+	 * @param id
+	 *            The player number to NOT send the {@code PacketNIO} to
+	 */
+	public void sentUDPPacketAllExcept(PacketNIO p, int id) {
+		for (int i = 0; i < this.connections.size(); i++) {
+			if (i != id) {
+				this.connections.get(i).addToUDPSendQueue(p);
 			}
 		}
 	}

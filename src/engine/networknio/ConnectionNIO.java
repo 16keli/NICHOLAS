@@ -12,11 +12,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import engine.networknio.ProtocolWrapper.TCPChannelWrapper;
+import engine.networknio.ProtocolWrapper.UDPChannelWrapper;
 import engine.networknio.packet.PacketNIO;
-import engine.networknio.packet.PacketTCP;
-import engine.networknio.packet.PacketTCP.TCPChannelWrapper;
-import engine.networknio.packet.PacketUDP;
-import engine.networknio.packet.PacketUDP.UDPChannelWrapper;
 
 /**
  * The Connection between the Client and Server sides
@@ -266,18 +264,42 @@ public class ConnectionNIO {
 	}
 	
 	/**
-	 * Adds a {@code Packet} to the send queue of the connection
+	 * Adds a {@code Packet} to the TCP send queue of the connection. The connection will then send the
+	 * contents of the packet at the end of the tick.
 	 * 
 	 * @param p
 	 *            The {@code Packet} to send in the future
 	 */
-	public void addToSendQueue(PacketNIO p) {
+	public void addToTCPSendQueue(PacketNIO p) {
 		if (!this.terminating) {
 			try {
-				this.getAppropriateWrapper(p).writePacket(p);
+				this.tcpWrapper.writePacket(p);
 				if (!PacketNIO.idtoclass.containsKey(p.getID())) {
 					logger.warning("An unregistered type of PacketNIO was added to " + this.sourceName
-							+ "'s send queue! ID is " + p.getID() + ", class is " + p.getClass().getName());
+							+ "'s TCP send queue! ID is " + p.getID() + ", class is "
+							+ p.getClass().getName());
+				}
+			} catch (Exception e) {
+				// Swallow the exception because it's gonna happen a lot
+			}
+		}
+	}
+	
+	/**
+	 * Adds a {@code Packet} to the UDP send queue of the connection. The connection will then send the
+	 * contents of the packet at the end of the tick.
+	 * 
+	 * @param p
+	 *            The {@code Packet} to send in the future
+	 */
+	public void addToUDPSendQueue(PacketNIO p) {
+		if (!this.terminating) {
+			try {
+				this.udpWrapper.writePacket(p);
+				if (!PacketNIO.idtoclass.containsKey(p.getID())) {
+					logger.warning("An unregistered type of PacketNIO was added to " + this.sourceName
+							+ "'s UDP send queue! ID is " + p.getID() + ", class is "
+							+ p.getClass().getName());
 				}
 			} catch (Exception e) {
 				// Swallow the exception because it's gonna happen a lot
@@ -378,22 +400,6 @@ public class ConnectionNIO {
 	 */
 	public boolean isTerminating() {
 		return this.terminating;
-	}
-	
-	/**
-	 * Gets the appropriate {@code ChannelWrapper} for the given {@code PacketNIO}
-	 * 
-	 * @param p
-	 * @return
-	 */
-	public ProtocolWrapper getAppropriateWrapper(PacketNIO p) {
-		if (p instanceof PacketTCP) {
-			return this.tcpWrapper;
-		} else if (p instanceof PacketUDP) {
-			return this.udpWrapper;
-		} else {
-			return null;
-		}
 	}
 	
 	/**

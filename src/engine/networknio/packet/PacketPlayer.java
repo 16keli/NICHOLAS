@@ -13,7 +13,7 @@ import engine.server.Server;
  * 
  * @author Kevin
  */
-public class PacketPlayer extends PacketTCP {
+public class PacketPlayer extends PacketNIO {
 	
 	public Player player;
 	
