@@ -8,13 +8,13 @@ import engine.server.Server;
 
 public class PacketConnection extends PacketNIO {
 	
-	public short pnum;
+	public int pnum;
 	
 	public PacketConnection() {
 	
 	}
 	
-	public PacketConnection(short pnum) {
+	public PacketConnection(int pnum) {
 		this.pnum = pnum;
 	}
 	
@@ -24,18 +24,18 @@ public class PacketConnection extends PacketNIO {
 	}
 	
 	@Override
-	public void processServer(short player, Server s) {
+	public void processServer(int player, Server s) {
 		// TODO Auto-generated method stub
 		
 	}
 	
 	@Override
 	public void writePacketData(ByteBuffer buff) throws IOException {
-		buff.putShort(this.pnum);
+		buff.putInt(this.pnum);
 	}
 	
 	@Override
 	public void readPacketData(ByteBuffer buff) throws IOException {
-		this.pnum = buff.getShort();
+		this.pnum = buff.getInt();
 	}
 }

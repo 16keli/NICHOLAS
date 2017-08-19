@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 import engine.client.graphics.Screen;
-import engine.geom2d.Point2;
+import engine.geom2d.Vector2;
 import engine.physics.entity.EntityPhysics;
 import engine.physics.entity.Hitbox.HitboxRectangle;
 import engine.physics.level.LevelPhysics;
@@ -36,10 +36,10 @@ public class EntityPaddle extends EntityPhysics {
 	@Override
 	public void tickEntity1() {
 		if (this.newp.getY() < 0) {
-			this.newp = Point2.of(this.newp.getX(), 0);
+			this.newp = Vector2.of(this.newp.getX(), 0);
 		}
 		if (this.newp.getY() > this.level.height - ((HitboxRectangle) this.hitbox).sizeY) {
-			this.newp = Point2.of(this.newp.getX(), this.level.height - ((HitboxRectangle) this.hitbox).sizeY);
+			this.newp = Vector2.of(this.newp.getX(), this.level.height - ((HitboxRectangle) this.hitbox).sizeY);
 		}
 	}
 	

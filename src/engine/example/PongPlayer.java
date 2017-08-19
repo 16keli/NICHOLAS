@@ -6,17 +6,18 @@ import engine.event.SubscribeEvent;
 
 public class PongPlayer extends Player {
 	
+	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	public PongPlayer(Game g, short number, String name) {
+	public PongPlayer(Game g, int number, String name) {
 		super(g, number, name);
 		// TODO Auto-generated constructor stub
 	}
 	
-	public PongPlayer(Game g, short number) {
+	public PongPlayer(Game g, int number) {
 		super(g, number);
 		// TODO Auto-generated constructor stub
 	}

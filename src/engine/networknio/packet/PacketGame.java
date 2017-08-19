@@ -12,6 +12,7 @@ import engine.server.Server;
 
 public class PacketGame extends PacketNIO {
 	
+	
 	public Level level;
 	
 	public List<Player> players;
@@ -21,7 +22,7 @@ public class PacketGame extends PacketNIO {
 	public byte[] playerBytes;
 	
 	public PacketGame() {
-	
+		
 	}
 	
 	public PacketGame(Game g) {
@@ -55,7 +56,7 @@ public class PacketGame extends PacketNIO {
 	}
 	
 	@Override
-	public void processServer(short player, Server s) {
+	public void processServer(int player, Server s) {
 		// TODO Auto-generated method stub
 		
 	}

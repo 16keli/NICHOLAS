@@ -22,6 +22,7 @@ import engine.level.tiled.EntityTiled;
  */
 public class PathFinder {
 	
+	
 	/**
 	 * Cache the previously calculated {@code UnitPath} so as to not have to do a bunch of calculations over
 	 * again
@@ -127,8 +128,8 @@ public class PathFinder {
 	 *            The cost of moving along this path
 	 * @return A fresh UnitPath reconstructed for your health
 	 */
-	private static UnitPath AStarReconstructPath(EntityTiled ent, Map<PathfindNode, PathfindNode> cameFrom, PathfindNode current,
-			int cost) {
+	private static UnitPath AStarReconstructPath(EntityTiled ent, Map<PathfindNode, PathfindNode> cameFrom,
+			PathfindNode current, int cost) {
 		List<PathfindNode> tiles = new LinkedList<PathfindNode>();
 		tiles.add(current);
 		while (cameFrom.containsKey(current)) {

@@ -61,7 +61,7 @@ public class PacketObject<T> extends PacketNIO {
 	}
 	
 	@Override
-	public void processServer(short player, Server s) {
+	public void processServer(int player, Server s) {
 		// TODO Auto-generated method stub
 		
 	}

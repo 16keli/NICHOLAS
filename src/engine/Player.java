@@ -1,5 +1,6 @@
 package engine;
 
+import engine.input.ActionQueue;
 import engine.networknio.Rebuildable;
 
 /**
@@ -45,6 +46,7 @@ import engine.networknio.Rebuildable;
  */
 public abstract class Player implements Rebuildable {
 	
+	
 	/**
 	 * 
 	 */
@@ -55,7 +57,7 @@ public abstract class Player implements Rebuildable {
 	 * <p>
 	 * -1 means that this object probably should not exist
 	 */
-	public short number = -1;
+	public int number = -1;
 	
 	/**
 	 * The {@code Game} instance
@@ -78,6 +80,11 @@ public abstract class Player implements Rebuildable {
 	public Team team;
 	
 	/**
+	 * The {@code ActionQueue} for this {@code Player}
+	 */
+	public transient ActionQueue actionQueue = new ActionQueue();
+	
+	/**
 	 * Creates a new Player based on the {@code Game}
 	 * 
 	 * @param g
@@ -87,10 +94,8 @@ public abstract class Player implements Rebuildable {
 	 * @param name
 	 *            The player's username
 	 */
-	protected Player(Game g, short number, String name) {
-		this.game = g;
-		this.game.events.register(this);
-		this.number = number;
+	protected Player(Game g, int number, String name) {
+		this(g, number);
 		this.name = name;
 		this.hasName = true;
 	}
@@ -103,7 +108,7 @@ public abstract class Player implements Rebuildable {
 	 * @param number
 	 *            The Player's number
 	 */
-	protected Player(Game g, short number) {
+	protected Player(Game g, int number) {
 		this.game = g;
 		this.game.events.register(this);
 		this.number = number;
@@ -115,7 +120,7 @@ public abstract class Player implements Rebuildable {
 		this.game.events.register(this);
 	}
 	
-	public void setPlayerNumber(short num) {
+	public void setPlayerNumber(int num) {
 		this.number = num;
 	}
 	

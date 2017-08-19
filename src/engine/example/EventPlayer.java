@@ -4,12 +4,13 @@ import engine.event.Event;
 
 public class EventPlayer extends Event {
 	
-	public short pnum;
+	
+	public int pnum;
 	
 	public EventPlayer() {
 	}
 	
-	public EventPlayer(short pnum) {
+	public EventPlayer(int pnum) {
 		this.pnum = pnum;
 	}
 	

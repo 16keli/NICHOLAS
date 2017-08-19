@@ -3,8 +3,10 @@ package engine.client.menu;
 import java.awt.Color;
 
 import engine.client.Client;
-import engine.client.InputHandler;
+import engine.client.KeyInputProcessor;
+import engine.client.MouseInputProcessor;
 import engine.client.graphics.Screen;
+import engine.input.ActionMenuInput;
 
 /**
  * An Overlay-style {@code Menu} that only occupies a selected region of the {@code Screen}, while allowing
@@ -14,15 +16,26 @@ import engine.client.graphics.Screen;
  */
 public abstract class MenuOverlay {
 	
+	
 	/**
 	 * The {@code Client} this menu is from
 	 */
 	protected Client client;
 	
 	/**
-	 * The InputHander
+	 * The KeyInputProcessor
 	 */
-	protected InputHandler input;
+	protected KeyInputProcessor keyInput;
+	
+	/**
+	 * The Menu input processor
+	 */
+	protected KeyInputProcessor menuInput;
+	
+	/**
+	 * The MouseInputProcessor
+	 */
+	protected MouseInputProcessor mouseInput;
 	
 	/**
 	 * The parent menu
@@ -78,11 +91,18 @@ public abstract class MenuOverlay {
 	 * 
 	 * @param client
 	 *            The {@code Client}
-	 * @param input
-	 *            The {@code InputHandler}
+	 * @param keyInput
+	 *            The {@code KeyInputProcessor}
+	 * @param menuInput
+	 *            The Menu input processor
+	 * @param mouseInput
+	 *            The {@code MouseInputProcessor}
 	 */
-	public void init(Client client, InputHandler input) {
-		this.input = input;
+	public void init(Client client, KeyInputProcessor keyInput, KeyInputProcessor menuInput,
+			MouseInputProcessor mouseInput) {
+		this.keyInput = keyInput;
+		this.menuInput = menuInput;
+		this.mouseInput = mouseInput;
 		this.client = client;
 	}
 	
@@ -96,13 +116,13 @@ public abstract class MenuOverlay {
 //			Sound.boop.play();
 //		}
 		if (this.parent != null) {
-			if (this.input.escape.clicked) {
+			if (this.menuInput.getInputFromAction(ActionMenuInput.ESCAPE).isClicked()) {
 				this.client.setMenu(this.parent);
 			}
 		}
 		if (this.comps.length != 0) {
 			// Movement of cursor around the screen
-			if (this.input.up.clicked) {
+			if (this.menuInput.getInputFromAction(ActionMenuInput.UP).isClicked()) {
 				if (this.componentExists(this.x, this.y - 1)) {
 					this.y--;
 					if (this.y < 0) {
@@ -110,7 +130,7 @@ public abstract class MenuOverlay {
 					}
 					this.selected = this.comps[this.x][this.y];
 				}
-			} else if (this.input.down.clicked) {
+			} else if (this.menuInput.getInputFromAction(ActionMenuInput.DOWN).isClicked()) {
 				if (this.componentExists(this.x, this.y + 1)) {
 					this.y++;
 					if (this.y >= this.comps[this.x].length) {
@@ -118,7 +138,7 @@ public abstract class MenuOverlay {
 					}
 					this.selected = this.comps[this.x][this.y];
 				}
-			} else if (this.input.left.clicked) {
+			} else if (this.menuInput.getInputFromAction(ActionMenuInput.LEFT).isClicked()) {
 				if (this.componentExists(this.x - 1, this.y)) {
 					this.x--;
 					if (this.x < 0) {
@@ -126,7 +146,7 @@ public abstract class MenuOverlay {
 					}
 					this.selected = this.comps[this.x][this.y];
 				}
-			} else if (this.input.right.clicked) {
+			} else if (this.menuInput.getInputFromAction(ActionMenuInput.RIGHT).isClicked()) {
 				if (this.componentExists(this.x + 1, this.y)) {
 					this.x++;
 					if (this.x >= this.comps.length) {

@@ -9,6 +9,7 @@ import engine.client.graphics.FontWrapper;
 import engine.client.graphics.Screen;
 import engine.client.menu.Menu;
 import engine.client.menu.MenuComponent;
+import engine.input.ActionMenuInput;
 
 public class PongMenu extends Menu {
 	
@@ -28,7 +29,7 @@ public class PongMenu extends Menu {
 	
 	@Override
 	public void tickMenu() {
-		if (this.input.enter.clicked) {
+		if (this.menuInput.getInputFromAction(ActionMenuInput.SELECT).isClicked()) {
 			InetAddress inet = InetAddress.getLoopbackAddress(); // Default
 			int port = 25565;// Default
 			if (this.selected == solo) {

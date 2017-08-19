@@ -25,7 +25,7 @@ public class PacketPhysicsTick extends PacketNIO {
 	}
 	
 	@Override
-	public void processServer(short player, Server s) {
+	public void processServer(int player, Server s) {
 		Physics.PHYSICS_BUS.post(new EventPhysicsTick(this.stage));
 	}
 	

@@ -68,6 +68,7 @@ public abstract class ProtocolWrapper {
 	 */
 	public void writePacket(PacketNIO p) throws IOException {
 		this.outputBuffer.putInt(p.getID());
+//		System.out.println("Writing packet with id " + p.getID());
 		p.writePacketData(this.outputBuffer);
 		
 //		System.out.println("Write packet " + p.getClass().getSimpleName());
@@ -82,7 +83,7 @@ public abstract class ProtocolWrapper {
 	 */
 	public PacketNIO readPacket() throws IOException {
 		int id = this.inputBuffer.getInt();
-//		System.out.println(id);
+//		System.out.println("Reading packet with id " + id);
 		if (id == Integer.MIN_VALUE) {// This signifies the end of the stream
 			return null;
 		}

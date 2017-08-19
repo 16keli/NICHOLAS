@@ -1,5 +1,7 @@
 package engine.geom2d;
 
+import java.io.Serializable;
+
 /**
  * An Immutable implementation class of {@code Tuple2} representing a 2 dimensional vector
  * <p>
@@ -16,7 +18,7 @@ package engine.geom2d;
  * 
  * @author Kevin
  */
-public class Vector2 extends Tuple2 {
+public class Vector2 implements Serializable {
 	
 	
 	/**
@@ -39,8 +41,19 @@ public class Vector2 extends Tuple2 {
 	 */
 	protected final double magnitude;
 	
+	/**
+	 * The X element
+	 */
+	protected double x;
+	
+	/**
+	 * The Y element
+	 */
+	protected double y;
+	
 	private Vector2() {
-		super();
+		this.x = 0;
+		this.y = 0;
 		this.magnitude = 0;
 		this.angle = 0;
 	}
@@ -71,38 +84,6 @@ public class Vector2 extends Tuple2 {
 			this.x = Math.cos(a1) * a2;
 			this.y = Math.sin(a1) * a2;
 		}
-	}
-	
-	// Overridden Tuple2 operations
-	
-	@Override
-	public Tuple2 add(Tuple2 addend) {
-		return addImmutable(addend);
-	}
-	
-	@Override
-	public Tuple2 subtract(Tuple2 subtrahend) {
-		return subtractImmutable(subtrahend);
-	}
-	
-	@Override
-	public Tuple2 scale(double scale) {
-		return scaleImmutable(scale);
-	}
-	
-	@Override
-	public Tuple2 addImmutable(Tuple2 addend) {
-		return of(this.x + addend.x, this.y + addend.y);
-	}
-	
-	@Override
-	public Tuple2 subtractImmutable(Tuple2 subtrahend) {
-		return of(this.x - subtrahend.x, this.y - subtrahend.y);
-	}
-	
-	@Override
-	public Tuple2 scaleImmutable(double scale) {
-		return of(this.x * scale, this.y * scale);
 	}
 	
 	// Vector-specific (Kinda) Transformation methods (Kinda because Vector2 is immutable)
@@ -154,8 +135,8 @@ public class Vector2 extends Tuple2 {
 	 *            The factor to scale {@code this} by
 	 * @return A scaled {@code Vector2}
 	 */
-	public Vector2 scaleVector(double factor) {
-		return Vector2.scaleVector(this, factor);
+	public Vector2 scale(double factor) {
+		return Vector2.scale(this, factor);
 	}
 	
 	/**
@@ -287,7 +268,7 @@ public class Vector2 extends Tuple2 {
 	 *            The factor to scale the source by
 	 * @return A scaled {@code Vector2}
 	 */
-	public static Vector2 scaleVector(Vector2 source, double factor) {
+	public static Vector2 scale(Vector2 source, double factor) {
 		return of(source.x * factor, source.y * factor);
 	}
 	
@@ -356,7 +337,70 @@ public class Vector2 extends Tuple2 {
 	 * @return The projection of {@code of} on {@code code}
 	 */
 	public static Vector2 projection(Vector2 of, Vector2 on) {
-		return Vector2.scaleVector(on.unit(), component(of, on));
+		return Vector2.scale(on.unit(), component(of, on));
+	}
+	
+	/**
+	 * Calculates the displacement between {@code this} and {@code other}
+	 * <p>
+	 * This method is a convenience method and is functionally equivalent to calling
+	 * 
+	 * <pre>
+	 * Vector2.displacement(this, other);
+	 * </pre>
+	 * 
+	 * @param other
+	 *            The {@code Vector2} to calculate displacement from
+	 * @return The displacement between {@code this} and {@code other}
+	 */
+	public double displacement(Vector2 other) {
+		return Vector2.displacement(this, other);
+	}
+	
+	/**
+	 * Calculates the {@code Vector2} with {@code this} as the tail and {@code other} as the head, and returns
+	 * it
+	 * <p>
+	 * This method is a convenience method and is functionally equivalent to calling
+	 * 
+	 * <pre>
+	 * Vector2.vectorBetween(this, other);
+	 * </pre>
+	 * 
+	 * @param other
+	 *            The Head of the {@code Vector2}
+	 * @return The {@code Vector2} between the two points
+	 */
+	public Vector2 vectorBetween(Vector2 other) {
+		return Vector2.vectorBetween(this, other);
+	}
+	
+	/**
+	 * Calculates the displacement between the two {@code Vector2}s
+	 * 
+	 * @param point1
+	 *            The first {@code Vector2}
+	 * @param point2
+	 *            The second {@code Vector2}
+	 * @return The displacement between the two
+	 */
+	public static double displacement(Vector2 point1, Vector2 point2) {
+		Vector2 diff = point1.minus(point2);
+		return Math.sqrt(Math.pow(diff.x, 2) + Math.pow(diff.y, 2));
+	}
+	
+	/**
+	 * Calculates the {@code Vector2} with {@code origin} as the tail and {@code point} as the head, and
+	 * returns it
+	 * 
+	 * @param origin
+	 *            The Tail of the {@code Vector2}
+	 * @param point
+	 *            The Head of the {@code Vector2}
+	 * @return The {@code Vector2} between the two points
+	 */
+	public static Vector2 vectorBetween(Vector2 origin, Vector2 point) {
+		return Vector2.of(point.x - origin.x, point.y - origin.y);
 	}
 	
 	// Static constructor methods because seeing new Vector2() everywhere is tedious, and the boolean in the
@@ -441,6 +485,24 @@ public class Vector2 extends Tuple2 {
 	@Override
 	public Vector2 clone() {
 		return of(this.x, this.y);
+	}
+	
+	/**
+	 * Retrieves this {@code Tuple2}'s X element
+	 * 
+	 * @return The X
+	 */
+	public double getX() {
+		return this.x;
+	}
+	
+	/**
+	 * Retrieves this {@code Tuple2}'s Y element
+	 * 
+	 * @return
+	 */
+	public double getY() {
+		return this.y;
 	}
 	
 }

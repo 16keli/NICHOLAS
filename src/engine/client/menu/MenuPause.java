@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import engine.client.graphics.FontWrapper;
 import engine.client.graphics.Screen;
+import engine.input.ActionMenuInput;
 
 /**
  * A simple Menu for when the game is paused
@@ -14,7 +15,7 @@ public class MenuPause extends Menu {
 	
 	@Override
 	public void tickMenu() {
-		if (this.input.escape.clicked) {
+		if (this.menuInput.getInputFromAction(ActionMenuInput.ESCAPE).isClicked()) {
 			this.client.setMenu(null);
 		}
 	}

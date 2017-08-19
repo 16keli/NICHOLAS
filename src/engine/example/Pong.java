@@ -5,6 +5,7 @@ import engine.Game;
 import engine.Player;
 import engine.client.Client;
 import engine.event.SubscribeEvent;
+import engine.input.Action;
 import engine.networknio.packet.PacketNIO;
 import engine.server.Server;
 
@@ -18,6 +19,7 @@ import engine.server.Server;
  * @author Kevin
  */
 public class Pong extends Game {
+	
 	
 	public static Pong cInst;
 	
@@ -43,8 +45,8 @@ public class Pong extends Game {
 	}
 	
 	static {
-		PacketNIO.registerPacket(PacketPlayerInputNIO.class);
 		PacketNIO.registerPacket(PacketPlayerScoreNIO.class);
+		Action.registerAction(ActionPongMove.class);
 	}
 	
 	public PongPlayer p1;
@@ -61,36 +63,40 @@ public class Pong extends Game {
 	@Override
 	public void tickClient(Client c) {
 		if (!c.menuOpen()) {
-			if (c.input.up.down && !c.input.down.down) {
+			if (c.keyInput.getInputFromAction(ActionPongMove.UP).isDown()
+					&& !c.keyInput.getInputFromAction(ActionPongMove.DOWN).isDown()) {
 				if (this.prev1 != -1) {
-					c.connection.addToTCPSendQueue(new PacketPlayerInputNIO(c.player.number, -1));
+					c.player.actionQueue.addActionToQueue(new ActionPongMove(-1, c.player.number));
 					this.prev1 = -1;
 				}
-			} else if (c.input.down.down && !c.input.up.down) {
+			} else if (c.keyInput.getInputFromAction(ActionPongMove.DOWN).isDown()
+					&& !c.keyInput.getInputFromAction(ActionPongMove.UP).isDown()) {
 				if (this.prev1 != 1) {
-					c.connection.addToTCPSendQueue(new PacketPlayerInputNIO(c.player.number, 1));
+					c.player.actionQueue.addActionToQueue(new ActionPongMove(1, c.player.number));
 					this.prev1 = 1;
 				}
 			} else {
 				if (this.prev1 != 0) {
-					c.connection.addToTCPSendQueue(new PacketPlayerInputNIO(c.player.number, 0));
+					c.player.actionQueue.addActionToQueue(new ActionPongMove(0, c.player.number));
 					this.prev1 = 0;
 				}
 			}
 			if (this.p2exists) {
-				if (c.input.up2.down && !c.input.down2.down) {
+				if (c.keyInput.getInputFromAction(ActionPongMove.UP2).isDown()
+						&& !c.keyInput.getInputFromAction(ActionPongMove.DOWN2).isDown()) {
 					if (this.prev2 != -1) {
-						c.connection.addToTCPSendQueue(new PacketPlayerInputNIO((short) 1, -1));
+						c.player.actionQueue.addActionToQueue(ActionPongMove.UP2);
 						this.prev2 = -1;
 					}
-				} else if (c.input.down2.down && !c.input.up2.down) {
+				} else if (c.keyInput.getInputFromAction(ActionPongMove.DOWN2).isDown()
+						&& !c.keyInput.getInputFromAction(ActionPongMove.UP2).isDown()) {
 					if (this.prev2 != 1) {
-						c.connection.addToTCPSendQueue(new PacketPlayerInputNIO((short) 1, 1));
+						c.player.actionQueue.addActionToQueue(ActionPongMove.DOWN2);
 						this.prev2 = 1;
 					}
 				} else {
 					if (this.prev2 != 0) {
-						c.connection.addToTCPSendQueue(new PacketPlayerInputNIO((short) 1, 0));
+						c.player.actionQueue.addActionToQueue(ActionPongMove.STOP2);
 						this.prev2 = 0;
 					}
 				}

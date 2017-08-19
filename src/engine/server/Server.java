@@ -9,6 +9,7 @@ import engine.event.EventBus;
 import engine.event.SubscribeEvent;
 import engine.event.game.ConnectionEstablishedEvent;
 import engine.event.game.TickEvent;
+import engine.input.Action;
 import engine.networknio.ConnectionList;
 import engine.networknio.ConnectionNIO;
 import engine.networknio.packet.PacketNIO;
@@ -23,6 +24,7 @@ import engine.networknio.packet.PacketPlayer;
  * @author Kevin
  */
 public abstract class Server {
+	
 	
 	/**
 	 * The {@code Server} instance of {@code Logger}
@@ -108,11 +110,15 @@ public abstract class Server {
 		this.game.gameTime = Engine.getGameTimeServer();
 		this.game.temporaryEvents.post(new TickEvent(this.game.gameTime));
 		this.game.tick(this);
-		for (short i = 0; i < this.connections.getList().size(); i++) {
+		for (int i = 0; i < this.connections.getList().size(); i++) {
 			PacketNIO p;
 			while ((p = this.connections.getList().get(i).getReadPacket()) != null) {
 				p.processServer(i, this);
 //				System.out.println("Connection " + i + " sends packet " + PacketNIO.idtoclass.get(p.getID()).getName());
+			}
+			Action a;
+			while ((a = this.game.players.get(i).actionQueue.getAction()) != null) {
+				a.processActionOnServer(i, this);
 			}
 		}
 		if (this.minConnects > this.connections.getList().size()) {
@@ -147,7 +153,7 @@ public abstract class Server {
 	 * @param player
 	 *            The number to disconnect
 	 */
-	public void disconnect(short player) {
+	public void disconnect(int player) {
 		ConnectionNIO conn = this.connections.getList().get(player);
 		conn.networkShutdown();
 		this.connections.getList().remove(player);

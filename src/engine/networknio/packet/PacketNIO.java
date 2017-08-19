@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 import engine.client.Client;
+import engine.input.PacketActionQueue;
 import engine.server.Server;
 
 /**
@@ -16,9 +17,11 @@ import engine.server.Server;
  * It is CRITICAL to provide a BLANK CONSTRUCTOR for any subclasses of {@code Packet} so that reflection
  * works! For example, {@link engine.example.PacketPlayerInput#PacketPlayerInput()}
  * <p>
- * Thanks to the Java NIO API, (and me deciding to not be super lazy), TCP and UDP protocols are now united
- * into a single Superclass for both. The subclasses for {@link PacketTCP TCP} and {@link PacketUDP UDP} serve
- * merely as identifiers, nothing more.
+ * Thanks to the Java NIO API, (and me deciding to not be super lazy), <strike>TCP and UDP protocols are now
+ * united into a single Superclass for both. The subclasses for {@link PacketTCP TCP} and {@link PacketUDP
+ * UDP} serve merely as identifiers, nothing more.</strike> These have been <b>REPLACED</b> by the new
+ * {@code ConnectionNIO} methods that allow sending of packets through either protocol, depending on the need
+ * or situation
  * <p>
  * Additionally, {@code PacketNIO} contains many useful static methods that can help with IO of certain things
  * to {@code ByteBuffer}s.
@@ -28,9 +31,11 @@ import engine.server.Server;
  * that writing an Object requires the serialized version, which can be obtained with
  * {@link PacketObject#objectToBytes(Object)}</li>
  * <li>boolean[]: {@link #readBooleans(ByteBuffer) read} and {@link #writeBooleans(ByteBuffer, boolean[])
- * write}. This is due to the lack of inclusion of a native boolean write, for good reason. However, these
- * methods do exist, should anyone need use of them.
+ * write}. This is due to the lack of inclusion of a native boolean write, for good reason. (Probably because
+ * writing booleans one by one to a {@code ByteBuffer} would take up lots of space and cause quite a bit of
+ * uncertainty)
  * </ul>
+ * However, these methods do exist, should anyone need use of them.
  * <p>
  * Why use NIO? For the non-blocking feature, of course. That way, we can cut down on the number of active
  * threads, which is always nice.
@@ -38,6 +43,7 @@ import engine.server.Server;
  * @author Kevin
  */
 public abstract class PacketNIO {
+	
 	
 	/**
 	 * The {@code PacketNIO} instance of {@code Logger}
@@ -57,10 +63,14 @@ public abstract class PacketNIO {
 	public PacketNIO() {
 	}
 	
+	// The next available packet ID
 	private static int availableID = 0;
 	
-	// Registers the default game engine packets
+	/**
+	 * Registers the default game engine packets
+	 */
 	static {
+		// lol these comments are so old tbh
 		// Static-sized packets
 		registerPacket(PacketPing.class);
 		registerPacket(PacketConnection.class);
@@ -70,6 +80,7 @@ public abstract class PacketNIO {
 		registerPacket(PacketChat.class);
 		registerPacket(PacketGame.class);
 		registerPacket(PacketObject.class);
+		registerPacket(PacketActionQueue.class);
 	}
 	
 	/**
@@ -167,12 +178,12 @@ public abstract class PacketNIO {
 	/**
 	 * Processes a {@code PacketNIO} on the server side
 	 * 
-	 * @param player
+	 * @param i
 	 *            The Connection ID the Packet was received from
 	 * @param s
 	 *            The {@code Server} instance
 	 */
-	public abstract void processServer(short player, Server s);
+	public abstract void processServer(int i, Server s);
 	
 	/**
 	 * Reads a {@code String} from a {@code ByteBuffer}
@@ -269,42 +280,52 @@ public abstract class PacketNIO {
 		buff.put(bytes);
 	}
 	
-	public static void getPacketDataFromBuffer(ByteBuffer buffer) {
+	public static void printPacketDataFromBuffer(ByteBuffer buffer) {
 		byte[] allData = buffer.array();
-		getPacketDataFromArrays(Arrays.copyOfRange(allData, 0, 4),
+		printPacketDataFromArrays(Arrays.copyOfRange(allData, 0, 4),
 				Arrays.copyOfRange(allData, 4, allData.length));
 	}
 	
-	public static void getPacketDataFromBuffer(ByteBuffer idBuff, ByteBuffer dataBuff) {
+	public static void printPacketDataFromBuffer(ByteBuffer idBuff, ByteBuffer dataBuff) {
 		byte[] isd = idBuff.array();
 		byte[] data = dataBuff.array();
-		getPacketDataFromArrays(isd, data);
+		printPacketDataFromArrays(isd, data);
 	}
 	
-	public static void getPacketDataFromArrays(byte[] isd, byte[] data) {
+	public static void printPacketDataFromArrays(byte[] isd, byte[] data) {
 		System.out.println("Packet Data from Buffer:");
-		getIDData(isd);
-		getPacketData(data);
+		printIDData(isd);
+		printPacketData(data);
 	}
 	
-	public static void getIDData(byte[] isd) {
+	public static void printIDData(byte[] isd) {
 		int id = ((isd[0] << 24) + (isd[1] << 16) + (isd[2] << 8) + (isd[3] << 0));
 		System.out.println("ID:\t" + id);
 	}
 	
-	public static void getPacketData(byte[] data) {
-		getPacketDataToLimit(data, data.length);
+	public static void printPacketData(byte[] data) {
+		printPacketDataToLimit(data, data.length);
 	}
 	
-	public static void getPacketDataToLimit(ByteBuffer buffer) {
-		getPacketDataToLimit(buffer.array(), buffer.limit());
+	public static void printPacketDataToLimit(ByteBuffer buffer) {
+		printPacketDataToLimit(buffer.array(), buffer.limit());
 	}
 	
-	public static void getPacketDataToLimit(byte[] data, int limit) {
-		getPacketDataToLimit(data, limit, System.out);
+	public static void printPacketDataToLimit(byte[] data, int limit) {
+		printPacketDataToLimit(data, limit, System.out);
 	}
 	
-	public static void getPacketDataToLimit(byte[] data, int limit, PrintStream p) {
+	/**
+	 * Prints data to a certain limit to the given {@code PrintStream}
+	 * 
+	 * @param data
+	 *            The data extracted from the {@code Packet}
+	 * @param limit
+	 *            The limit to print data to
+	 * @param p
+	 *            The {@code PrintStream} to output to
+	 */
+	public static void printPacketDataToLimit(byte[] data, int limit, PrintStream p) {
 		p.print("Limit:\t" + limit + "\tData:\t");
 		for (int i = 0; i < limit; i++) {
 			p.print(String.format("%2s", Integer.toHexString(data[i] & 0xFF)).replace(' ', '0') + " ");

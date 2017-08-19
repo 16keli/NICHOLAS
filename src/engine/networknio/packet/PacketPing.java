@@ -31,7 +31,7 @@ public class PacketPing extends PacketNIO {
 	}
 	
 	@Override
-	public void processServer(short player, Server s) {
+	public void processServer(int player, Server s) {
 		s.connections.sendUDPPacket(new PacketPing(System.currentTimeMillis()), player);
 	}
 	

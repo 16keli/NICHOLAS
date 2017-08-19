@@ -1,5 +1,6 @@
 package engine.example;
 
+import java.awt.event.KeyEvent;
 import java.io.File;
 
 import engine.Game;
@@ -53,5 +54,18 @@ public class PongClient extends Client {
 	@Override
 	public boolean hasPlayerNumber() {
 		return this.player.number != -1;
+	}
+
+	@Override
+	public void registerDefaultKeyInputs() {
+		this.keyInput.bindAction(KeyEvent.VK_W, ActionPongMove.UP);
+		this.keyInput.bindAction(KeyEvent.VK_S, ActionPongMove.DOWN);
+		this.keyInput.bindAction(KeyEvent.VK_I, ActionPongMove.UP2);
+		this.keyInput.bindAction(KeyEvent.VK_J, ActionPongMove.DOWN2);
+	}
+
+	@Override
+	public void registerDefaultMouseInputs() {
+		// lol do you use mouse to play pong xd
 	}
 }

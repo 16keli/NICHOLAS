@@ -1,6 +1,6 @@
 package engine.client.graphics.sprite;
 
-import engine.geom2d.Tuple2;
+import engine.geom2d.Vector2;
 
 /**
  * An Object that has a {@code Sprite} and must also have a {@code Vector2} position as well.
@@ -8,6 +8,7 @@ import engine.geom2d.Tuple2;
  * @author Kevin
  */
 public interface ISpriteProvider {
+	
 	
 	/**
 	 * Gets the {@code Sprite} to render
@@ -17,10 +18,10 @@ public interface ISpriteProvider {
 	public Sprite getSprite();
 	
 	/**
-	 * Gets the {@code Tuple2} position to render the {@code Sprite} at
+	 * Gets the {@code Vector2} position to render the {@code Sprite} at
 	 * 
-	 * @return The {@code Tuple2} position to render at
+	 * @return The {@code Vector2} position to render at
 	 */
-	public Tuple2 getSpritePosition();
+	public Vector2 getSpritePosition();
 	
 }

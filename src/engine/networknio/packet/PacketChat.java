@@ -10,7 +10,7 @@ import engine.server.Server;
 
 public class PacketChat extends PacketNIO {
 	
-	public short pnum;
+	public int pnum;
 	
 	public String msg;
 	
@@ -24,7 +24,7 @@ public class PacketChat extends PacketNIO {
 		this.chat = false;
 	}
 	
-	public PacketChat(short number, String msg) {
+	public PacketChat(int number, String msg) {
 		this.pnum = number;
 		this.msg = msg;
 	}
@@ -35,14 +35,14 @@ public class PacketChat extends PacketNIO {
 	@Override
 	public void writePacketData(ByteBuffer buff) throws IOException {
 		buff.put((this.chat ? Byte.MAX_VALUE : Byte.MIN_VALUE));
-		buff.putShort(this.pnum);
+		buff.putInt(this.pnum);
 		PacketNIO.writeString(buff, this.msg);
 	}
 	
 	@Override
 	public void readPacketData(ByteBuffer buff) throws IOException {
 		this.chat = buff.get() == Byte.MAX_VALUE;
-		this.pnum = buff.getShort();
+		this.pnum = buff.getInt();
 		this.msg = PacketNIO.readString(buff);
 	}
 	
@@ -54,7 +54,7 @@ public class PacketChat extends PacketNIO {
 	}
 	
 	@Override
-	public void processServer(short player, Server s) {
+	public void processServer(int player, Server s) {
 		if (!this.chat && !s.game.players.get(this.pnum).hasName()) {
 			s.game.players.get(this.pnum).setName(this.msg);
 			System.out.println("Player " + this.pnum + "'s desired name is " + this.msg);

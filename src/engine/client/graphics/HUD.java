@@ -1,7 +1,8 @@
 package engine.client.graphics;
 
 import engine.client.Client;
-import engine.client.InputHandler;
+import engine.client.KeyInputProcessor;
+import engine.client.MouseInputProcessor;
 
 /**
  * An implementation of a Heads-up Display. Any information that might need to be rendered direct to the
@@ -14,15 +15,26 @@ import engine.client.InputHandler;
  */
 public abstract class HUD {
 	
+	
 	/**
 	 * The {@code Client} this hud is on
 	 */
 	protected Client client;
 	
 	/**
-	 * The InputHander
+	 * The KeyInputProcessor
 	 */
-	protected InputHandler input;
+	protected KeyInputProcessor keyInput;
+	
+	/**
+	 * The Menu input processor
+	 */
+	protected KeyInputProcessor menuInput;
+	
+	/**
+	 * The MouseInputProcessor
+	 */
+	protected MouseInputProcessor mouseInput;
 	
 	/**
 	 * Renders the HUD
@@ -38,11 +50,18 @@ public abstract class HUD {
 	 * 
 	 * @param client
 	 *            The {@code Client}
-	 * @param input
-	 *            The {@code InputHandler}
+	 * @param keyInput
+	 *            The {@code KeyInputProcessor}
+	 * @param menuInput
+	 *            The Menu input processor
+	 * @param mouseInput
+	 *            The {@code MouseInputProcessor}
 	 */
-	public void init(Client client, InputHandler input) {
-		this.input = input;
+	public void init(Client client, KeyInputProcessor keyInput, KeyInputProcessor menuInput,
+			MouseInputProcessor mouseInput) {
+		this.keyInput = keyInput;
+		this.mouseInput = mouseInput;
+		this.menuInput = menuInput;
 		this.client = client;
 	}
 	

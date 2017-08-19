@@ -1,7 +1,8 @@
 package engine.client.menu;
 
 import engine.client.Client;
-import engine.client.InputHandler;
+import engine.client.KeyInputProcessor;
+import engine.client.MouseInputProcessor;
 
 /**
  * A Menu that the Client can navigate through, whether through keyboard or mouse inputs.
@@ -14,7 +15,7 @@ import engine.client.InputHandler;
  * Sometimes, {@code Menu}s are simply overlays, which is important in online play so that a {@code Client}
  * does not miss out on anything simply because an interactive {@code Menu} is open.
  * <p>
- * {@code Menu}s typically have {@link #parent parent Menus}, which they will go back to if {@link #input}'s
+ * {@code Menu}s typically have {@link #parent parent Menus}, which they will go back to if {@link #keyInput}'s
  * escape key is pressed.
  * <p>
  * {@code Menu} is built upon {@link engine.client.menu.MenuOverlay}, but should be more commonly used as it
@@ -37,8 +38,8 @@ public abstract class Menu extends MenuOverlay {
 	}
 	
 	@Override
-	public void init(Client client, InputHandler input) {
-		super.init(client, input);
+	public void init(Client client, KeyInputProcessor keyInput, KeyInputProcessor menuInput, MouseInputProcessor mouseInput) {
+		super.init(client, keyInput, menuInput, mouseInput);
 		this.setRegion(0, 0, client.WIDTH, client.HEIGHT);
 	}
 	

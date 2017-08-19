@@ -4,14 +4,14 @@ import engine.event.Event;
 
 public class EventInput extends Event {
 	
-	public short pnum;
+	public int pnum;
 	
-	public byte dir;
+	public int dir;
 	
 	public EventInput() {
 	}
 	
-	public EventInput(short pnum, byte dir) {
+	public EventInput(int pnum, int dir) {
 		this.pnum = pnum;
 		this.dir = dir;
 	}

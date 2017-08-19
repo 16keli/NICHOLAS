@@ -71,7 +71,7 @@ public abstract class Game {
 	/**
 	 * The next available Player Number
 	 */
-	public short nextPlayerNumber = 0;
+	public int nextPlayerNumber = 0;
 	
 	/**
 	 * Creates a new {@code Game}
@@ -140,7 +140,7 @@ public abstract class Game {
 	public Player getNewPlayerInstance() {
 		Class<? extends Player> cls = this.getPlayerClass();
 		try {
-			Constructor<? extends Player> cst = cls.getConstructor(Game.class, short.class);
+			Constructor<? extends Player> cst = cls.getConstructor(Game.class, int.class);
 			Player p = cst.newInstance(this, this.nextPlayerNumber++);
 			return p;
 		} catch (Exception e) {
@@ -159,7 +159,7 @@ public abstract class Game {
 	public Player getNewPlayerInstance(String name) {
 		Class<? extends Player> cls = this.getPlayerClass();
 		try {
-			Constructor<? extends Player> cst = cls.getConstructor(Game.class, short.class, String.class);
+			Constructor<? extends Player> cst = cls.getConstructor(Game.class, int.class, String.class);
 			Player p = cst.newInstance(this, this.nextPlayerNumber++, name);
 			return p;
 		} catch (Exception e) {

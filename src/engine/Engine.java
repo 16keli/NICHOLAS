@@ -11,7 +11,6 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import engine.client.Client;
-import engine.client.InputHandler;
 import engine.config.Configuration;
 import engine.launcher.LaunchConfig;
 import engine.networknio.ConnectionNIO;
@@ -395,7 +394,6 @@ public class Engine {
 	public static void startClient(Client c) {
 		instance.filePath = "res/" + c.game.getName().toLowerCase() + "/";
 		instance.client = c;
-		instance.client.input = new InputHandler(instance.client);
 		instance.startClient();
 	}
 	

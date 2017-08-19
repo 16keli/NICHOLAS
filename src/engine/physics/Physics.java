@@ -8,7 +8,6 @@ import engine.Engine;
 import engine.Game;
 import engine.event.EventBus;
 import engine.event.SubscribeEvent;
-import engine.geom2d.Point2;
 import engine.geom2d.Vector2;
 import engine.networknio.Rebuildable;
 import engine.physics.entity.EntityPhysics;
@@ -144,9 +143,9 @@ public class Physics implements Rebuildable {
 				EntityPhysics ent1 = this.entities.get(e1);
 				EntityPhysics ent2 = this.entities.get(e2);
 				if (!ent1.dead && !ent2.dead) {
-					if (Point2.displacement(ent1.newp.add(ent1.hitbox.getCenterDisplacement()).toPoint(),
-							ent2.newp.add(ent2.hitbox.getCenterDisplacement())
-									.toPoint()) <= (ent1.hitbox.circleRadius + ent2.hitbox.circleRadius)) {
+					if (Vector2.displacement(ent1.newp.plus(ent1.hitbox.getCenterDisplacement()),
+							ent2.newp.plus(ent2.hitbox.getCenterDisplacement())) <= (ent1.hitbox.circleRadius
+									+ ent2.hitbox.circleRadius)) {
 						if (suspectedCollision(ent1, ent2) && EntityPhysics.approaching(ent1, ent2)) {
 							this.handleCollision(ent1, ent2);
 						}

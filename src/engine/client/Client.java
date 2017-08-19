@@ -10,6 +10,7 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferStrategy;
 import java.awt.image.VolatileImage;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import engine.client.graphics.sprite.Sprite;
 import engine.client.menu.Menu;
 import engine.event.EventBus;
 import engine.event.game.TickEvent;
+import engine.input.ActionMenuInput;
 import engine.networknio.ConnectionNIO;
 import engine.networknio.packet.PacketChat;
 import engine.networknio.packet.PacketNIO;
@@ -48,6 +50,7 @@ import engine.networknio.packet.PacketPing;
  * @author Kevin
  */
 public abstract class Client extends Canvas {
+	
 	
 	/**
 	 * The {@code Client} instance of {@code Logger}
@@ -107,9 +110,19 @@ public abstract class Client extends Canvas {
 	protected Screen screen;
 	
 	/**
-	 * The {@code InputHander} to handle interactions with the player
+	 * The {@code InputProcessor} to handle key interactions with the player
 	 */
-	public InputHandler input;
+	public KeyInputProcessor keyInput;
+	
+	/**
+	 * The {@code InputProcessor} used to handle menu interactions
+	 */
+	public KeyInputProcessor menuInput;
+	
+	/**
+	 * The {@code InputProcessor} to handle mouse interactions with the player
+	 */
+	public MouseInputProcessor mouseInput;
 	
 	/**
 	 * The current {@code Menu} that the {@code Client} is on
@@ -411,8 +424,8 @@ public abstract class Client extends Canvas {
 			graphics.drawImage(this.vImg, (int) xo, (int) yo, (int) ww, (int) hh, null);
 			if (this.cursor != null) {
 				graphics.drawImage(this.cursor.getImage(),
-						this.input.getMouseXAbsolute() - (this.cursor.width / 2),
-						this.input.getMouseYAbsolute() - (this.cursor.height / 2), null);
+						this.mouseInput.getMouseXAbsolute() - (this.cursor.width / 2),
+						this.mouseInput.getMouseYAbsolute() - (this.cursor.height / 2), null);
 			}
 		} while (this.vImg.contentsLost());
 //		System.out.println(vImg.getClass().getName());
@@ -426,15 +439,19 @@ public abstract class Client extends Canvas {
 		this.game.gameTime = Engine.getGameTimeClient();
 		this.game.temporaryEvents.post(new TickEvent(this.game.gameTime));
 		if (!this.hasFocus()) {
-			this.input.releaseAll();
+			this.keyInput.releaseAll();
+			this.mouseInput.releaseAll();
+			this.menuInput.releaseAll();
 		} else {
-			this.input.tick();
+			this.keyInput.tick();
+			this.menuInput.tick();
 			
 			if (this.menu != null) {
 				this.menu.tick();
 			}
 			if (this.connection != null) {
 				this.processReceivedPackets();
+				this.connection.addToUDPSendQueue(this.player.actionQueue.getPacket());
 				if (Engine.getGameTimeClient() % PacketPing.PING_PERIOD == 0) {
 					this.connection.addToUDPSendQueue(new PacketPing(System.currentTimeMillis()));
 					System.out.println("Ping: " + this.connection.ping + " ms");
@@ -479,7 +496,7 @@ public abstract class Client extends Canvas {
 	public void setMenu(Menu m) {
 		this.menu = m;
 		if (m != null) {
-			m.init(this, this.input);
+			m.init(this, this.keyInput, this.menuInput, this.mouseInput);
 		}
 	}
 	
@@ -492,7 +509,7 @@ public abstract class Client extends Canvas {
 	public void setHUD(HUD h) {
 		this.hud = h;
 		if (h != null) {
-			h.init(this, this.input);
+			h.init(this, this.keyInput, this.menuInput, this.mouseInput);
 		}
 	}
 	
@@ -522,11 +539,55 @@ public abstract class Client extends Canvas {
 	public abstract void resetClient();
 	
 	/**
+	 * Registers the default inputs for the given {@code InputProcessor}, depending on whether it is the key
+	 * or mouse processor
+	 * 
+	 * @param input
+	 */
+	public void registerDefaultInputs(InputProcessor input) {
+		if (input == this.keyInput) {
+			this.registerDefaultKeyInputs();
+		} else if (input == this.mouseInput) {
+			this.registerDefaultMouseInputs();
+		} else if (input == this.menuInput) {
+			// Initializes the menu inputs
+			this.registerDefaultMenuInputs();
+		}
+	}
+	
+	/**
+	 * Registers the default inputs for the {@code KeyInputProcessor}
+	 */
+	public abstract void registerDefaultKeyInputs();
+	
+	/**
+	 * Registers the default inputs for the {@code MouseInputProcessor}
+	 */
+	public abstract void registerDefaultMouseInputs();
+	
+	/**
+	 * Registers the default inputs for the menu processor
+	 */
+	public void registerDefaultMenuInputs() {
+		this.menuInput.bindAction(KeyEvent.VK_UP, ActionMenuInput.UP);
+		this.menuInput.bindAction(KeyEvent.VK_DOWN, ActionMenuInput.DOWN);
+		this.menuInput.bindAction(KeyEvent.VK_LEFT, ActionMenuInput.LEFT);
+		this.menuInput.bindAction(KeyEvent.VK_RIGHT, ActionMenuInput.RIGHT);
+		this.menuInput.bindAction(KeyEvent.VK_ESCAPE, ActionMenuInput.ESCAPE);
+		this.menuInput.bindAction(KeyEvent.VK_ENTER, ActionMenuInput.SELECT);
+	}
+	
+	/**
 	 * Starts the game, initializing any resources required
 	 */
 	public void init() {
-		this.input = new InputHandler(this);
+		this.keyInput = new KeyInputProcessor(this, "Key");
+		this.menuInput = new KeyInputProcessor(this, "Menu");
+		this.mouseInput = new MouseInputProcessor(this);
 		this.screen = new Screen(this, this.WIDTH, this.HEIGHT);
+		this.keyInput.init();
+		this.menuInput.init();
+		this.mouseInput.init();
 		this.initClient();
 		this.resetClient();
 	}
@@ -537,7 +598,7 @@ public abstract class Client extends Canvas {
 	 * @param p
 	 *            The player number
 	 */
-	public void setPlayerNumber(short p) {
+	public void setPlayerNumber(int p) {
 		this.player.setPlayerNumber(p);
 	}
 	

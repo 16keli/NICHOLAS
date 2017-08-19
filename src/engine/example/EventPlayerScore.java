@@ -4,14 +4,15 @@ import engine.event.Event;
 
 public class EventPlayerScore extends Event {
 	
-	public short pnum;
+	
+	public int pnum;
 	
 	public int score;
 	
 	public EventPlayerScore() {
 	}
 	
-	public EventPlayerScore(short pnum, int score) {
+	public EventPlayerScore(int pnum, int score) {
 		this.pnum = pnum;
 		this.score = score;
 	}
